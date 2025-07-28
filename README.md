@@ -1,1 +1,1 @@
-# xrpl-mastra-ai
+# XRPL Mastra AI
