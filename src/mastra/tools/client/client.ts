@@ -1,6 +1,6 @@
 import { createTool } from '@mastra/core/tools'
 import z from 'zod'
-import { getXrplClient } from '../../../helpers'
+import { disconnectXrplClient, getXrplClient } from '../../../helpers'
 
 export const isClientConnectedTool = createTool({
   id: 'is-client-connected',
@@ -13,6 +13,11 @@ export const isClientConnectedTool = createTool({
 
     const client = await getXrplClient(network)
 
-    return client.isConnected()
+    const response = client.isConnected()
+
+    // Disconnect the client
+    await disconnectXrplClient(network)
+
+    return response
   },
 })

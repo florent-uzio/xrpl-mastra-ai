@@ -1,12 +1,23 @@
 import { createTool } from '@mastra/core/tools'
-import { AccountInfoRequest } from 'xrpl'
+import { AccountInfoRequest, AccountInfoResponse } from 'xrpl'
 import { z } from 'zod'
 import { mastra } from '../../..'
-import { getXrplClient } from '../../../../helpers'
+import { disconnectXrplClient, getXrplClient } from '../../../../helpers'
 
 export const getAccountInfoTool = createTool({
   id: 'get-account-info',
-  description: 'Get an XRP Ledger account info',
+  description: `Get an XRP Ledger account info including balance, sequence, and account flags. 
+  
+IMPORTANT: The balance is returned in drops, not XRP. 1 XRP = 1,000,000 drops. 
+To convert drops to XRP, divide by 1,000,000. For example, 1000000 drops = 1 XRP.
+
+The response includes:
+- account_data.balance: Account balance in drops (string)
+- account_data.sequence: Current sequence number for this account (number)
+- account_data.OwnerCount: Number of objects this account owns in the ledger (number)
+- account_data.Flags: Flags set on this account (number)
+- ledger_current_index: The ledger index of the current in-progress ledger (number)
+- validated: Whether this data is from a validated ledger (boolean)`,
   inputSchema: z.object({
     network: z.string(),
     opts: z.custom<AccountInfoRequest>(),
@@ -26,7 +37,7 @@ export const getAccountInfoTool = createTool({
  * @param opts - The request options to use
  * @returns The account info
  */
-const getAccountInfo = async (network: string, opts: AccountInfoRequest) => {
+const getAccountInfo = async (network: string, opts: AccountInfoRequest): Promise<AccountInfoResponse> => {
   const client = await getXrplClient(network)
 
   const logger = mastra.getLogger()
@@ -39,7 +50,7 @@ const getAccountInfo = async (network: string, opts: AccountInfoRequest) => {
   })
 
   // Disconnect the client
-  // await client.disconnect()
+  await disconnectXrplClient(network)
 
   return accountInfo
 }
