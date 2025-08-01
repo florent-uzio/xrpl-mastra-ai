@@ -7,6 +7,7 @@ import {
   getAccountInfoTool,
   getAccountLinesTool,
   getAccountNFTsTool,
+  getAccountObjectsTool,
   isClientConnectedTool,
   xrpToDropsTool,
 } from '../tools'
@@ -21,6 +22,8 @@ export const xrplAgent = new Agent({
     Public methods:
     - getAccountInfo to retrieve information about an XRP Ledger account.
     - getAccountLines to retrieve information about an XRP Ledger account lines.
+    - getAccountNFTs to retrieve information about an XRP Ledger account NFTs.
+    - getAccountObjects to retrieve information about an XRP Ledger account objects.
 
     Client helpers:
     - isClientConnected to check if the client is connected to the XRP Ledger.
@@ -51,6 +54,7 @@ export const xrplAgent = new Agent({
     getAccountInfoTool,
     getAccountLinesTool,
     getAccountNFTsTool,
+    getAccountObjectsTool,
 
     // Client helpers
     isClientConnectedTool,
