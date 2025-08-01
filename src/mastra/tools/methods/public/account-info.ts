@@ -39,7 +39,7 @@ const getAccountInfo = async (network: string, opts: AccountInfoRequest) => {
   })
 
   // Disconnect the client
-  await client.disconnect()
+  // await client.disconnect()
 
   return accountInfo
 }

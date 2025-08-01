@@ -2,7 +2,7 @@ import { openai } from '@ai-sdk/openai'
 import { Agent } from '@mastra/core/agent'
 import { LibSQLStore } from '@mastra/libsql'
 import { Memory } from '@mastra/memory'
-import { getAccountInfoTool, getAccountLinesTool } from '../tools'
+import { getAccountInfoTool, getAccountLinesTool, isClientConnectedTool } from '../tools'
 
 export const xrplAgent = new Agent({
   name: 'XRP Ledger Agent',
@@ -12,6 +12,7 @@ export const xrplAgent = new Agent({
     You can use the following tools to help you:
     - getAccountInfo to retrieve information about an XRP Ledger account.
     - getAccountLines to retrieve information about an XRP Ledger account lines.
+    - isClientConnected to check if the client is connected to the XRP Ledger.
     
     ** Networks **
     
@@ -30,7 +31,7 @@ export const xrplAgent = new Agent({
     If the user defines its own wss url, use it.
 `,
   model: openai('gpt-4o-mini'),
-  tools: { getAccountInfoTool, getAccountLinesTool },
+  tools: { getAccountInfoTool, getAccountLinesTool, isClientConnectedTool },
   memory: new Memory({
     storage: new LibSQLStore({
       url: 'file:../mastra.db', // path is relative to the .mastra/output directory
