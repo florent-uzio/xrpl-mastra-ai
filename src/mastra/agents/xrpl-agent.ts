@@ -6,6 +6,7 @@ import {
   dropsToXrpTool,
   getAccountInfoTool,
   getAccountLinesTool,
+  getAccountNFTsTool,
   isClientConnectedTool,
   xrpToDropsTool,
 } from '../tools'
@@ -46,9 +47,15 @@ export const xrplAgent = new Agent({
 `,
   model: openai('gpt-4o-mini'),
   tools: {
+    // Public methods
     getAccountInfoTool,
     getAccountLinesTool,
+    getAccountNFTsTool,
+
+    // Client helpers
     isClientConnectedTool,
+
+    // Amount helpers
     xrpToDropsTool,
     dropsToXrpTool,
   },
