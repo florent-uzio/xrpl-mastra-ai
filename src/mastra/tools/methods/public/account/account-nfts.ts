@@ -1,8 +1,8 @@
 import { createTool } from '@mastra/core/tools'
 import { AccountNFTsRequest, AccountNFTsResponse } from 'xrpl'
 import { z } from 'zod'
-import { mastra } from '../../..'
-import { disconnectXrplClient, getXrplClient } from '../../../../helpers'
+import { mastra } from '../../../..'
+import { disconnectXrplClient, getXrplClient } from '../../../../../helpers'
 
 export const getAccountNFTsTool = createTool({
   id: 'get-account-nfts',

@@ -1,8 +1,8 @@
 import { createTool } from '@mastra/core/tools'
 import { AccountTxRequest, AccountTxResponse } from 'xrpl'
 import { z } from 'zod'
-import { mastra } from '../../..'
-import { disconnectXrplClient, getXrplClient } from '../../../../helpers'
+import { mastra } from '../../../..'
+import { disconnectXrplClient, getXrplClient } from '../../../../../helpers'
 
 export const getAccountTxTool = createTool({
   id: 'get-account-tx',

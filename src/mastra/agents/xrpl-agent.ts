@@ -10,6 +10,7 @@ import {
   getAccountObjectsTool,
   getAccountOffersTool,
   getAccountTxTool,
+  getServerInfoTool,
   isClientConnectedTool,
   xrpToDropsTool,
 } from '../tools'
@@ -22,12 +23,16 @@ export const xrplAgent = new Agent({
     You can use the following tools below to help you.
 
     Public methods:
-    - getAccountInfo to retrieve information about an XRP Ledger account.
-    - getAccountLines to retrieve information about an XRP Ledger account lines.
-    - getAccountNFTs to retrieve information about an XRP Ledger account NFTs.
-    - getAccountObjects to retrieve information about an XRP Ledger account objects.
-    - getAccountOffers to retrieve information about an XRP Ledger account offers.
-    - getAccountTx to retrieve information about an XRP Ledger account transactions.
+    - Account:
+      - getAccountInfo to retrieve information about an XRP Ledger account.
+      - getAccountLines to retrieve information about an XRP Ledger account lines.
+      - getAccountNFTs to retrieve information about an XRP Ledger account NFTs.
+      - getAccountObjects to retrieve information about an XRP Ledger account objects.
+      - getAccountOffers to retrieve information about an XRP Ledger account offers.
+      - getAccountTx to retrieve information about an XRP Ledger account transactions.
+
+    - Server Info:
+      - getServerInfo to retrieve information about an XRP Ledger server.
 
     Client helpers:
     - isClientConnected to check if the client is connected to the XRP Ledger.
@@ -55,12 +60,16 @@ export const xrplAgent = new Agent({
   model: openai('gpt-4o-mini'),
   tools: {
     // Public methods
+    // Account
     getAccountInfoTool,
     getAccountLinesTool,
     getAccountNFTsTool,
     getAccountObjectsTool,
     getAccountOffersTool,
     getAccountTxTool,
+
+    // Server Info
+    getServerInfoTool,
 
     // Client helpers
     isClientConnectedTool,
