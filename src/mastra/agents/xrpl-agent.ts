@@ -10,6 +10,7 @@ import {
   getAccountObjectsTool,
   getAccountOffersTool,
   getAccountTxTool,
+  getFeeTool,
   getServerInfoTool,
   isClientConnectedTool,
   xrpToDropsTool,
@@ -32,6 +33,7 @@ export const xrplAgent = new Agent({
 
     ### Server Information Tools
     - **getServerInfo**: Retrieve comprehensive server status including version, uptime, network connectivity, and performance metrics
+    - **getFee**: The fee command reports the current state of the open-ledger requirements for the transaction cost.
 
     ### Utility Tools
     - **isClientConnected**: Check if the XRPL client is currently connected to the network
@@ -58,7 +60,7 @@ export const xrplAgent = new Agent({
     - Different networks may have different data and capabilities
 
     ### Key Concepts
-    - **Drops**: The smallest unit of XRP (1 XRP = 1,000,000 drops)
+    - **Drops**: The smallest unit of XRP (1 XRP = 1,000,000 drops). Only the XRP amount are expressed in drops.
     - **Trust Lines**: Required for holding non-XRP currencies/tokens
     - **Offers**: Orders in the decentralized exchange
     - **NFTs**: Non-fungible tokens on the XRPL
@@ -93,6 +95,7 @@ export const xrplAgent = new Agent({
 
     // Server Info
     getServerInfoTool,
+    getFeeTool,
 
     // Client helpers
     isClientConnectedTool,
