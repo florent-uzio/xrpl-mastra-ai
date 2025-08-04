@@ -4,6 +4,7 @@ import { LibSQLStore } from '@mastra/libsql'
 import { Memory } from '@mastra/memory'
 import {
   dropsToXrpTool,
+  getAccountChannelsTool,
   getAccountInfoTool,
   getAccountLinesTool,
   getAccountNFTsTool,
@@ -30,6 +31,7 @@ export const xrplAgent = new Agent({
     - **getAccountObjects**: Get raw ledger format objects owned by an account (trust lines, offers, escrows, etc.)
     - **getAccountOffers**: Retrieve outstanding offers made by an account in the decentralized exchange
     - **getAccountTx**: Get transaction history for an account with detailed metadata
+    - **getAccountChannels**: The account_channels method returns information about an account's Payment Channels. This includes only channels where the specified account is the channel's source, not the destination. (A channel's "source" and "owner" are the same.) All information retrieved is relative to a particular version of the ledger.
 
     ### Server Information Tools
     - **getServerInfo**: Retrieve comprehensive server status including version, uptime, network connectivity, and performance metrics
@@ -86,6 +88,7 @@ export const xrplAgent = new Agent({
   tools: {
     // Public methods
     // Account
+    getAccountChannelsTool,
     getAccountInfoTool,
     getAccountLinesTool,
     getAccountNFTsTool,
