@@ -5,6 +5,7 @@ import { Memory } from '@mastra/memory'
 import {
   dropsToXrpTool,
   getAccountChannelsTool,
+  getAccountCurrenciesTool,
   getAccountInfoTool,
   getAccountLinesTool,
   getAccountNFTsTool,
@@ -32,6 +33,7 @@ export const xrplAgent = new Agent({
     - **getAccountOffers**: Retrieve outstanding offers made by an account in the decentralized exchange
     - **getAccountTx**: Get transaction history for an account with detailed metadata
     - **getAccountChannels**: The account_channels method returns information about an account's Payment Channels. This includes only channels where the specified account is the channel's source, not the destination. (A channel's "source" and "owner" are the same.) All information retrieved is relative to a particular version of the ledger.
+    - **getAccountCurrencies**: Get an XRP Ledger account's currencies. This method retrieves a list of currencies that an account can send or receive, based on its trust lines. This is not a thoroughly confirmed list, but it can be used to populate user interfaces.
 
     ### Server Information Tools
     - **getServerInfo**: Retrieve comprehensive server status including version, uptime, network connectivity, and performance metrics
@@ -89,6 +91,7 @@ export const xrplAgent = new Agent({
     // Public methods
     // Account
     getAccountChannelsTool,
+    getAccountCurrenciesTool,
     getAccountInfoTool,
     getAccountLinesTool,
     getAccountNFTsTool,
