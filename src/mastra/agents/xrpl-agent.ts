@@ -17,6 +17,7 @@ import {
   getFeeTool,
   getGatewayBalancesTool,
   getServerInfoTool,
+  submitPaymentTool,
   xrpToDropsTool,
 } from '../tools'
 
@@ -50,6 +51,14 @@ export const xrplAgent = new Agent({
     ### Wallet Tools
     - **createWallet**: Create a new XRPL wallet with public/private key pair. This is an off-chain operation that doesn't depend on any network.
     - **fundWalletWithFaucet**: Fund a wallet with XRP using a faucet. This operation is only available on testnet networks and is not possible on mainnet.
+
+    ### Transaction Tools
+    - **submitPayment**: Submit a payment transaction to the XRPL network. This tool can be used to send XRP or tokens to another account.
+
+    ## Transaction Types
+    - **Payment**: A payment transaction is used to send XRP to another account.
+    - **TrustSet**: A trust set transaction is used to set a trust line for a non-XRP currency/token.
+    - **OfferCreate**: An offer create transaction is used to create an offer in the decentralized exchange.
 
     ## Available Networks and WebSocket URLs
 
@@ -165,6 +174,9 @@ export const xrplAgent = new Agent({
     // Wallet
     createWalletTool,
     fundWalletWithFaucetTool,
+
+    // Transactions
+    submitPaymentTool,
   },
   memory: new Memory({
     storage: new LibSQLStore({
