@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { GatewayBalancesRequest } from 'xrpl'
 import { z } from 'zod'
-import { disconnectXrplClient, getXrplClient } from '../../../../../helpers'
+import { executeMethod } from '../../shared'
 
 export const getGatewayBalancesTool = createTool({
   id: 'get-gateway-balances',
@@ -44,25 +44,18 @@ Possible Errors:
 Note: Due to a discrepancy in behavior between the Clio server and rippled (fixed in Clio version 2.3.1), the Clio server returns invalidParams error in API v2 instead of invalidHotWallet when the hotwallet field is invalid. API v1 returns the invalidHotWallet error.`,
   inputSchema: z.object({
     network: z.string(),
-    opts: z.custom<GatewayBalancesRequest>(),
+    request: z.custom<GatewayBalancesRequest>(),
   }),
   execute: async ({ context, mastra }) => {
-    const { network, opts } = context
+    // Extract network and options from the context
+    const { network, request } = context
 
-    const client = await getXrplClient(network)
-
-    const logger = mastra?.getLogger()
-
-    logger?.info('Gateway balances request', { url: client.url, opts: JSON.stringify(opts) })
-
-    const response = await client.request({
-      ...opts,
-      command: 'gateway_balances',
+    // Use the shared utility function to execute the gateway_balances command
+    return await executeMethod({
+      network,
+      request: { ...request, command: 'gateway_balances' },
+      logMessage: 'Gateway balances request',
+      mastra,
     })
-
-    // Disconnect the client
-    await disconnectXrplClient(network)
-
-    return response
   },
 })

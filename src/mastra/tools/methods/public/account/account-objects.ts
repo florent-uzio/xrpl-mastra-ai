@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { AccountObjectsRequest } from 'xrpl'
 import { z } from 'zod'
-import { disconnectXrplClient, getXrplClient } from '../../../../../helpers'
+import { executeMethod } from '../../shared'
 
 export const getAccountObjectsTool = createTool({
   id: 'get-account-objects',
@@ -65,36 +65,18 @@ Each object contains ledger-specific fields such as:
 Note: For a higher-level view of an account's trust lines and balances, see the account_lines method instead.`,
   inputSchema: z.object({
     network: z.string(),
-    opts: z.custom<AccountObjectsRequest>(),
+    request: z.custom<AccountObjectsRequest>(),
   }),
   execute: async ({ context, mastra }) => {
     // Extract network and options from the context
-    const { network, opts } = context
+    const { network, request } = context
 
-    // Get or create an XRPL client instance for the specified network
-    // This handles singleton pattern and connection management
-    const client = await getXrplClient(network)
-
-    // Get the logger instance from Mastra for structured logging
-    const logger = mastra?.getLogger()
-
-    // Log the account objects request with network URL and request options
-    // This helps with debugging and monitoring ledger object retrieval patterns
-    logger?.info('Account objects request', { url: client.url, opts: JSON.stringify(opts) })
-
-    // Execute the account_objects command on the XRPL network
-    // This retrieves raw ledger format objects owned by the specified account
-    const response = await client.request({
-      ...opts, // Spread all the user-provided options (account, type, ledger_index, etc.)
-      command: 'account_objects', // Specify the XRPL API command for ledger object retrieval
+    // Use the shared utility function to execute the account_objects command
+    return await executeMethod({
+      network,
+      request: { ...request, command: 'account_objects' },
+      logMessage: 'Account objects request',
+      mastra,
     })
-
-    // Clean up: Disconnect the XRPL client to free up network resources
-    // This is important for resource management and preventing connection leaks
-    await disconnectXrplClient(network)
-
-    // Return the account objects response to the user
-    // This includes raw ledger objects like trust lines, offers, escrows, NFTs, etc.
-    return response
   },
 })

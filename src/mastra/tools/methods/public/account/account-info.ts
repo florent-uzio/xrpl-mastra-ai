@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { AccountInfoRequest } from 'xrpl'
 import { z } from 'zod'
-import { executeMethod } from '../../../helpers'
+import { executeMethod } from '../../shared'
 
 export const getAccountInfoTool = createTool({
   id: 'get-account-info',
@@ -77,6 +77,7 @@ Possible Errors:
     request: z.custom<AccountInfoRequest>(),
   }),
   execute: async ({ context, mastra }) => {
+    // Extract network and request from the context
     const { network, request } = context
 
     // Use the shared utility function to execute the account_info command

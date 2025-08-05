@@ -1,8 +1,7 @@
 import { createTool } from '@mastra/core/tools'
-import { FeeRequest, FeeResponse } from 'xrpl'
+import { FeeRequest } from 'xrpl'
 import { z } from 'zod'
-import { mastra } from '../../../..'
-import { disconnectXrplClient, getXrplClient } from '../../../../../helpers'
+import { executeMethod } from '../../shared'
 
 export const getFeeTool = createTool({
   id: 'get-fee',
@@ -31,37 +30,18 @@ The response includes:
 Note: Fee levels represent the ratio of transaction cost relative to the minimum cost of that particular transaction. The FeeEscalation amendment must be enabled for this method to work.`,
   inputSchema: z.object({
     network: z.string(),
-    opts: z.custom<FeeRequest>(),
+    request: z.custom<FeeRequest>(),
   }),
-  execute: async ({ context }) => {
-    const { network, opts } = context
+  execute: async ({ context, mastra }) => {
+    // Extract network and request from the context
+    const { network, request } = context
 
-    const feeInfo = await getFee(network, opts)
-
-    return feeInfo
+    // Use the shared utility function to execute the fee command
+    return await executeMethod({
+      network,
+      request: { ...request, command: 'fee' },
+      logMessage: 'Fee request',
+      mastra,
+    })
   },
 })
-
-/**
- * Get fee information
- * @param network - The network to use
- * @param opts - The request options to use
- * @returns The fee information
- */
-const getFee = async (network: string, opts: FeeRequest): Promise<FeeResponse> => {
-  const client = await getXrplClient(network)
-
-  const logger = mastra.getLogger()
-
-  logger.info('Fee request', { url: client.url, opts: JSON.stringify(opts) })
-
-  const response = await client.request({
-    ...opts,
-    command: 'fee',
-  })
-
-  // Disconnect the client
-  await disconnectXrplClient(network)
-
-  return response
-}

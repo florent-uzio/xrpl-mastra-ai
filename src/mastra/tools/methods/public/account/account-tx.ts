@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { AccountTxRequest } from 'xrpl'
 import { z } from 'zod'
-import { disconnectXrplClient, getXrplClient } from '../../../../../helpers'
+import { executeMethod } from '../../shared'
 
 export const getAccountTxTool = createTool({
   id: 'get-account-tx',
@@ -42,25 +42,18 @@ The response includes:
 Note: The server may respond with different values of ledger_index_min and ledger_index_max than provided in the request, for example if it did not have the versions you specified on hand.`,
   inputSchema: z.object({
     network: z.string(),
-    opts: z.custom<AccountTxRequest>(),
+    request: z.custom<AccountTxRequest>(),
   }),
   execute: async ({ context, mastra }) => {
-    const { network, opts } = context
+    // Extract network and options from the context
+    const { network, request } = context
 
-    const client = await getXrplClient(network)
-
-    const logger = mastra?.getLogger()
-
-    logger?.info('Account Tx request', { url: client.url, opts: JSON.stringify(opts) })
-
-    const response = await client.request({
-      ...opts,
-      command: 'account_tx',
+    // Use the shared utility function to execute the account_tx command
+    return await executeMethod({
+      network,
+      request: { ...request, command: 'account_tx' },
+      logMessage: 'Account Tx request',
+      mastra,
     })
-
-    // Disconnect the client
-    await disconnectXrplClient(network)
-
-    return response
   },
 })

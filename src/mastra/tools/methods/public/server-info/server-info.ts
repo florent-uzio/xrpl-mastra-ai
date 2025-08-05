@@ -1,8 +1,7 @@
 import { createTool } from '@mastra/core/tools'
-import { ServerInfoRequest, ServerInfoResponse } from 'xrpl'
+import { ServerInfoRequest } from 'xrpl'
 import { z } from 'zod'
-import { mastra } from '../../../..'
-import { disconnectXrplClient, getXrplClient } from '../../../../../helpers'
+import { executeMethod } from '../../shared'
 
 export const getServerInfoTool = createTool({
   id: 'get-server-info',
@@ -55,37 +54,18 @@ The response includes:
 Note: If closed_ledger field is present with a small seq value (less than 8 digits), it indicates the server does not currently have a copy of the validated ledger from the peer-to-peer network, possibly still syncing.`,
   inputSchema: z.object({
     network: z.string(),
-    opts: z.custom<ServerInfoRequest>(),
+    request: z.custom<ServerInfoRequest>(),
   }),
-  execute: async ({ context }) => {
-    const { network, opts } = context
+  execute: async ({ context, mastra }) => {
+    // Extract network and request from the context
+    const { network, request } = context
 
-    const serverInfo = await getServerInfo(network, opts)
-
-    return serverInfo
+    // Use the shared utility function to execute the server_info command
+    return await executeMethod({
+      network,
+      request: { ...request, command: 'server_info' },
+      logMessage: 'Server info request',
+      mastra,
+    })
   },
 })
-
-/**
- * Get server information
- * @param network - The network to use
- * @param opts - The request options to use
- * @returns The server information
- */
-const getServerInfo = async (network: string, opts: ServerInfoRequest): Promise<ServerInfoResponse> => {
-  const client = await getXrplClient(network)
-
-  const logger = mastra.getLogger()
-
-  logger.info('Server info request', { url: client.url, opts: JSON.stringify(opts) })
-
-  const response = await client.request({
-    ...opts,
-    command: 'server_info',
-  })
-
-  // Disconnect the client
-  await disconnectXrplClient(network)
-
-  return response
-}

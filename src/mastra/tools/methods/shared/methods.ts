@@ -1,6 +1,6 @@
 import { ToolExecutionContext } from '@mastra/core'
 import { Request } from 'xrpl'
-import { disconnectXrplClient, getXrplClient } from '../../../helpers'
+import { disconnectXrplClient, getXrplClient } from '../../../../helpers'
 
 type ExecuteMethodProps = {
   network: string

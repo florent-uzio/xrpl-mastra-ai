@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { AccountLinesRequest } from 'xrpl'
 import { z } from 'zod'
-import { executeMethod } from '../../../helpers'
+import { executeMethod } from '../../shared'
 
 export const getAccountLinesTool = createTool({
   id: 'get-account-lines',
@@ -56,6 +56,7 @@ Possible Errors:
     request: z.custom<AccountLinesRequest>(),
   }),
   execute: async ({ context, mastra }) => {
+    // Extract network and request from the context
     const { network, request } = context
 
     // Use the shared utility function to execute the account_lines command

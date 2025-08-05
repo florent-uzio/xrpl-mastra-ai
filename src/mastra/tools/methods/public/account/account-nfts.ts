@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { AccountNFTsRequest } from 'xrpl'
 import { z } from 'zod'
-import { disconnectXrplClient, getXrplClient } from '../../../../../helpers'
+import { executeMethod } from '../../shared'
 
 export const getAccountNFTsTool = createTool({
   id: 'get-account-nfts',
@@ -51,36 +51,18 @@ Possible Errors:
 - Any of the universal error types`,
   inputSchema: z.object({
     network: z.string(),
-    opts: z.custom<AccountNFTsRequest>(),
+    request: z.custom<AccountNFTsRequest>(),
   }),
   execute: async ({ context, mastra }) => {
     // Extract network and options from the context
-    const { network, opts } = context
+    const { network, request } = context
 
-    // Get or create an XRPL client instance for the specified network
-    // This handles singleton pattern and connection management
-    const client = await getXrplClient(network)
-
-    // Get the logger instance from Mastra for structured logging
-    const logger = mastra?.getLogger()
-
-    // Log the account NFTs request with network URL and request options
-    // This helps with debugging and monitoring NFT retrieval patterns
-    logger?.info('Account NFTs request', { url: client.url, opts: JSON.stringify(opts) })
-
-    // Execute the account_nfts command on the XRPL network
-    // This retrieves all NFTs (Non-Fungible Tokens) owned by the specified account
-    const response = await client.request({
-      ...opts, // Spread all the user-provided options (account, ledger_index, limit, etc.)
-      command: 'account_nfts', // Specify the XRPL API command for NFT retrieval
+    // Use the shared utility function to execute the account_nfts command
+    return await executeMethod({
+      network,
+      request: { ...request, command: 'account_nfts' },
+      logMessage: 'Account NFTs request',
+      mastra,
     })
-
-    // Clean up: Disconnect the XRPL client to free up network resources
-    // This is important for resource management and preventing connection leaks
-    await disconnectXrplClient(network)
-
-    // Return the account NFTs response to the user
-    // This includes the array of NFT objects with metadata like Flags, Issuer, NFTokenID, etc.
-    return response
   },
 })
