@@ -61,6 +61,8 @@ export const xrplAgent = new Agent({
 
     ### Transaction Tools
     - **submitPayment**: Submit a payment transaction to the XRPL network. This tool can be used to send XRP or tokens to another account.
+    - **submitAccountSet**: Submit an account set transaction to the XRPL network. This tool can be used to set the properties of an account.
+    - **submitTrustSet**: Submit a trust set transaction to the XRPL network. This tool can be used to set a trust line for a non-XRP currency/token.
 
     ## Transaction Types
     - **Payment**: A payment transaction is used to send XRP to another account.

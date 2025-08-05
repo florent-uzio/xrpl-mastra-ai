@@ -34,9 +34,9 @@ export const submitPaymentTool = createTool({
   - tfNoRippleDirect (0x00010000): Only use specified paths, not default path
   - tfPartialPayment (0x00020000): Allow partial payment success
   - tfLimitQuality (0x00040000): Set minimum quality for conversions
-- **Fee**: Transaction cost in drops (string, optional)
+- **Fee**: Transaction cost in drops, typically the autofill sets it, don't try to set it unless instructed otherwise (string, optional)
 - **Sequence**: Account sequence number (number, optional)
-- **LastLedgerSequence**: Last ledger to process transaction (number, optional)
+- **LastLedgerSequence**: Last ledger to process transaction, typically the autofill sets it, don't try to set it unless instructed otherwise (number, optional)
 
 ### Special Fields (Require Amendments):
 - **CredentialIDs**: Set of credentials for deposit authorization (array of strings, optional)

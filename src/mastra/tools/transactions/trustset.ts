@@ -16,6 +16,7 @@ export const submitTrustSetTool = createTool({
     - Three-letter ISO 4217 currency code (e.g., "USD", "EUR")
     - 160-bit hex value for custom tokens
     - "XRP" is invalid (XRP doesn't use trust lines)
+    - If the currency code is not a standard currency code, you must use the currencyCodeToHexTool to convert it to a 160-bit hex value.
   - **issuer**: The address of the account to extend trust to (string - address, required)
   - **value**: Quoted decimal representation of the limit to set (string, required)
     - Maximum amount of this currency the account can hold
@@ -56,7 +57,7 @@ export const submitTrustSetTool = createTool({
 - Allows pre-authorization even with 0 limit and balance
 
 ### tfSetNoRipple / tfClearNoRipple (Rippling Control)
-- **tfSetNoRipple**: Blocks rippling between trust lines of the same currency
+- **tfSetNoRipple**: Blocks rippling between trust lines of the same currency, you would typically when a holder sets a trustline.
 - **tfClearNoRipple**: Allows rippling on this trust line
 - Both flags must be enabled on both trust lines to block rippling
 - If transaction tries to enable No Ripple but cannot, fails with tecNO_PERMISSION
