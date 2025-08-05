@@ -17,7 +17,6 @@ import {
   getFeeTool,
   getGatewayBalancesTool,
   getServerInfoTool,
-  isClientConnectedTool,
   xrpToDropsTool,
 } from '../tools'
 
@@ -158,9 +157,6 @@ export const xrplAgent = new Agent({
     // Server Info
     getServerInfoTool,
     getFeeTool,
-
-    // Client helpers
-    isClientConnectedTool,
 
     // Amount helpers
     xrpToDropsTool,
