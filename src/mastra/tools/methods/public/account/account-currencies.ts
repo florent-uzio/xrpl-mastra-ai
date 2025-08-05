@@ -1,7 +1,6 @@
 import { createTool } from '@mastra/core/tools'
-import { AccountCurrenciesRequest, AccountCurrenciesResponse } from 'xrpl'
+import { AccountCurrenciesRequest } from 'xrpl'
 import { z } from 'zod'
-import { mastra } from '../../../..'
 import { disconnectXrplClient, getXrplClient } from '../../../../../helpers'
 
 export const getAccountCurrenciesTool = createTool({
@@ -39,38 +38,23 @@ Possible Errors:
     network: z.string(),
     opts: z.custom<AccountCurrenciesRequest>(),
   }),
-  execute: async ({ context }) => {
+  execute: async ({ context, mastra }) => {
     const { network, opts } = context
 
-    const accountCurrencies = await getAccountCurrencies(network, opts)
+    const client = await getXrplClient(network)
 
-    return accountCurrencies
+    const logger = mastra?.getLogger()
+
+    logger?.info('Account currencies request', { url: client.url, opts: JSON.stringify(opts) })
+
+    const response = await client.request({
+      ...opts,
+      command: 'account_currencies',
+    })
+
+    // Disconnect the client
+    await disconnectXrplClient(network)
+
+    return response
   },
 })
-
-/**
- * Get account currencies
- * @param network - The network to use
- * @param opts - The request options to use
- * @returns The account currencies
- */
-const getAccountCurrencies = async (
-  network: string,
-  opts: AccountCurrenciesRequest,
-): Promise<AccountCurrenciesResponse> => {
-  const client = await getXrplClient(network)
-
-  const logger = mastra.getLogger()
-
-  logger.info('Account currencies request', { url: client.url, opts: JSON.stringify(opts) })
-
-  const response = await client.request({
-    ...opts,
-    command: 'account_currencies',
-  })
-
-  // Disconnect the client
-  await disconnectXrplClient(network)
-
-  return response
-}

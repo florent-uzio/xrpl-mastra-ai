@@ -1,7 +1,6 @@
 import { createTool } from '@mastra/core/tools'
 import { AccountLinesRequest } from 'xrpl'
 import { z } from 'zod'
-import { mastra } from '../../../..'
 import { disconnectXrplClient, getXrplClient } from '../../../../../helpers'
 
 export const getAccountLinesTool = createTool({
@@ -29,35 +28,34 @@ Note: This only shows non-XRP currencies and assets. XRP balance is retrieved se
     network: z.string(),
     opts: z.custom<AccountLinesRequest>(),
   }),
-  execute: async ({ context }) => {
+  execute: async ({ context, mastra }) => {
+    // Extract network and options from the context
     const { network, opts } = context
 
-    const accountInfo = await getAccountLines(network, opts)
+    // Get or create an XRPL client instance for the specified network
+    // This handles singleton pattern and connection management
+    const client = await getXrplClient(network)
 
-    return accountInfo
+    // Get the logger instance from Mastra for structured logging
+    const logger = mastra?.getLogger()
+
+    // Log the account lines request with network URL and request options
+    // This helps with debugging and monitoring request patterns
+    logger?.info('Account lines request', { url: client.url, opts: JSON.stringify(opts) })
+
+    // Execute the account_lines command on the XRPL network
+    // This retrieves trust lines and token balances for the specified account
+    const response = await client.request({
+      ...opts, // Spread all the user-provided options (account, ledger_index, etc.)
+      command: 'account_lines', // Specify the XRPL API command
+    })
+
+    // Clean up: Disconnect the XRPL client to free up network resources
+    // This is important for resource management and preventing connection leaks
+    await disconnectXrplClient(network)
+
+    // Return the account lines response to the user
+    // This includes trust lines, balances, and currency information
+    return response
   },
 })
-
-/**
- * Get account lines
- * @param network - The network to use
- * @param opts - The request options to use
- * @returns The account lines
- */
-const getAccountLines = async (network: string, opts: AccountLinesRequest) => {
-  const client = await getXrplClient(network)
-
-  const logger = mastra.getLogger()
-
-  logger.info('Account lines request', { clientUrl: client.url, requestOpts: JSON.stringify(opts) })
-
-  const response = await client.request({
-    ...opts,
-    command: 'account_lines',
-  })
-
-  // Disconnect the client
-  await disconnectXrplClient(network)
-
-  return response
-}

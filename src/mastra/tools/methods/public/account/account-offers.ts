@@ -1,7 +1,6 @@
 import { createTool } from '@mastra/core/tools'
-import { AccountOffersRequest, AccountOffersResponse } from 'xrpl'
+import { AccountOffersRequest } from 'xrpl'
 import { z } from 'zod'
-import { mastra } from '../../../..'
 import { disconnectXrplClient, getXrplClient } from '../../../../../helpers'
 
 export const getAccountOffersTool = createTool({
@@ -38,35 +37,23 @@ Note: When executing offers, the offer with the most favorable (lowest) quality 
     network: z.string(),
     opts: z.custom<AccountOffersRequest>(),
   }),
-  execute: async ({ context }) => {
+  execute: async ({ context, mastra }) => {
     const { network, opts } = context
 
-    const accountInfo = await getAccountOffers(network, opts)
+    const client = await getXrplClient(network)
 
-    return accountInfo
+    const logger = mastra?.getLogger()
+
+    logger?.info('Account offers request', { url: client.url, opts: JSON.stringify(opts) })
+
+    const response = await client.request({
+      ...opts,
+      command: 'account_offers',
+    })
+
+    // Disconnect the client
+    await disconnectXrplClient(network)
+
+    return response
   },
 })
-
-/**
- * Get account Offers
- * @param network - The network to use
- * @param opts - The request options to use
- * @returns The account offers
- */
-const getAccountOffers = async (network: string, opts: AccountOffersRequest): Promise<AccountOffersResponse> => {
-  const client = await getXrplClient(network)
-
-  const logger = mastra.getLogger()
-
-  logger.info('Account offers request', { url: client.url, opts: JSON.stringify(opts) })
-
-  const response = await client.request({
-    ...opts,
-    command: 'account_offers',
-  })
-
-  // Disconnect the client
-  await disconnectXrplClient(network)
-
-  return response
-}

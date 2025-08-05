@@ -1,7 +1,6 @@
 import { createTool } from '@mastra/core/tools'
-import { AccountTxRequest, AccountTxResponse } from 'xrpl'
+import { AccountTxRequest } from 'xrpl'
 import { z } from 'zod'
-import { mastra } from '../../../..'
 import { disconnectXrplClient, getXrplClient } from '../../../../../helpers'
 
 export const getAccountTxTool = createTool({
@@ -45,35 +44,23 @@ Note: The server may respond with different values of ledger_index_min and ledge
     network: z.string(),
     opts: z.custom<AccountTxRequest>(),
   }),
-  execute: async ({ context }) => {
+  execute: async ({ context, mastra }) => {
     const { network, opts } = context
 
-    const accountInfo = await getAccountTx(network, opts)
+    const client = await getXrplClient(network)
 
-    return accountInfo
+    const logger = mastra?.getLogger()
+
+    logger?.info('Account Tx request', { url: client.url, opts: JSON.stringify(opts) })
+
+    const response = await client.request({
+      ...opts,
+      command: 'account_tx',
+    })
+
+    // Disconnect the client
+    await disconnectXrplClient(network)
+
+    return response
   },
 })
-
-/**
- * Get account transaction history
- * @param network - The network to use
- * @param opts - The request options to use
- * @returns The account transaction history
- */
-const getAccountTx = async (network: string, opts: AccountTxRequest): Promise<AccountTxResponse> => {
-  const client = await getXrplClient(network)
-
-  const logger = mastra.getLogger()
-
-  logger.info('Account Tx request', { url: client.url, opts: JSON.stringify(opts) })
-
-  const response = await client.request({
-    ...opts,
-    command: 'account_tx',
-  })
-
-  // Disconnect the client
-  await disconnectXrplClient(network)
-
-  return response
-}

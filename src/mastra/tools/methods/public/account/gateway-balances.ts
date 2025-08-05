@@ -1,7 +1,6 @@
 import { createTool } from '@mastra/core/tools'
-import { GatewayBalancesRequest, GatewayBalancesResponse } from 'xrpl'
+import { GatewayBalancesRequest } from 'xrpl'
 import { z } from 'zod'
-import { mastra } from '../../../..'
 import { disconnectXrplClient, getXrplClient } from '../../../../../helpers'
 
 export const getGatewayBalancesTool = createTool({
@@ -47,35 +46,23 @@ Note: Due to a discrepancy in behavior between the Clio server and rippled (fixe
     network: z.string(),
     opts: z.custom<GatewayBalancesRequest>(),
   }),
-  execute: async ({ context }) => {
+  execute: async ({ context, mastra }) => {
     const { network, opts } = context
 
-    const gatewayBalances = await getGatewayBalances(network, opts)
+    const client = await getXrplClient(network)
 
-    return gatewayBalances
+    const logger = mastra?.getLogger()
+
+    logger?.info('Gateway balances request', { url: client.url, opts: JSON.stringify(opts) })
+
+    const response = await client.request({
+      ...opts,
+      command: 'gateway_balances',
+    })
+
+    // Disconnect the client
+    await disconnectXrplClient(network)
+
+    return response
   },
 })
-
-/**
- * Get gateway balances
- * @param network - The network to use
- * @param opts - The request options to use
- * @returns The gateway balances
- */
-const getGatewayBalances = async (network: string, opts: GatewayBalancesRequest): Promise<GatewayBalancesResponse> => {
-  const client = await getXrplClient(network)
-
-  const logger = mastra.getLogger()
-
-  logger.info('Gateway balances request', { url: client.url, opts: JSON.stringify(opts) })
-
-  const response = await client.request({
-    ...opts,
-    command: 'gateway_balances',
-  })
-
-  // Disconnect the client
-  await disconnectXrplClient(network)
-
-  return response
-}
