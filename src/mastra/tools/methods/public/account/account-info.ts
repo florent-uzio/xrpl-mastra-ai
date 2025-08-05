@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { AccountInfoRequest } from 'xrpl'
 import { z } from 'zod'
-import { disconnectXrplClient, getXrplClient } from '../../../../../helpers'
+import { executeMethod } from '../../../helpers'
 
 export const getAccountInfoTool = createTool({
   id: 'get-account-info',
@@ -74,25 +74,17 @@ Possible Errors:
 - Any of the universal error types`,
   inputSchema: z.object({
     network: z.string(),
-    opts: z.custom<AccountInfoRequest>(),
+    request: z.custom<AccountInfoRequest>(),
   }),
   execute: async ({ context, mastra }) => {
-    const { network, opts } = context
+    const { network, request } = context
 
-    const client = await getXrplClient(network)
-
-    const logger = mastra?.getLogger()
-
-    logger?.info('Account info request', { url: client.url, opts: JSON.stringify(opts) })
-
-    const response = await client.request({
-      ...opts,
-      command: 'account_info',
+    // Use the shared utility function to execute the account_info command
+    return await executeMethod({
+      network,
+      request: { ...request, command: 'account_info' },
+      logMessage: 'Account info request',
+      mastra,
     })
-
-    // Disconnect the client
-    await disconnectXrplClient(network)
-
-    return response
   },
 })

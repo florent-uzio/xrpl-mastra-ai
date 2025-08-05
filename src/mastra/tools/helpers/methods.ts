@@ -1,34 +1,30 @@
-export * from './account-channels'
-export * from './account-currencies'
-export * from './account-info'
-export * from './account-lines'
-export * from './account-nfts'
-export * from './account-objects'
-export * from './account-offers'
-export * from './account-tx'
-export * from './gateway-balances'
+import { ToolExecutionContext } from '@mastra/core'
+import { Request } from 'xrpl'
+import { disconnectXrplClient, getXrplClient } from '../../../helpers'
+
+type ExecuteMethodProps = {
+  network: string
+  request: Request
+  logMessage: string
+  mastra?: ToolExecutionContext['mastra']
+}
 
 /**
  * Shared utility function to execute XRPL account method requests
  * This reduces code duplication across all account tools
  *
  * @param network - The network to use
- * @param opts - The request options
- * @param command - The XRPL command to execute
+ * @param request - The request options
  * @param logMessage - The message to log for debugging
  * @param mastra - The Mastra instance for logging
  * @returns The XRPL response
  */
-export const executeAccountMethod = async (
-  network: string,
-  opts: any,
-  command: string,
-  logMessage: string,
-  mastra?: any,
-) => {
-  // Extract network and options from the context
-  const { getXrplClient, disconnectXrplClient } = await import('../../../../../helpers')
-
+export const executeMethod = async <R extends Request>({
+  network,
+  request,
+  logMessage,
+  mastra,
+}: ExecuteMethodProps) => {
   // Get or create an XRPL client instance for the specified network
   // This handles singleton pattern and connection management
   const client = await getXrplClient(network)
@@ -38,14 +34,11 @@ export const executeAccountMethod = async (
 
   // Log the account method request with network URL and request options
   // This helps with debugging and monitoring request patterns
-  logger?.info(logMessage, { url: client.url, opts: JSON.stringify(opts) })
+  logger?.info(logMessage, { url: client.url, opts: JSON.stringify(request) })
 
   // Execute the specified command on the XRPL network
   // This retrieves the requested account data
-  const response = await client.request({
-    ...opts, // Spread all the user-provided options
-    command: command, // Specify the XRPL API command
-  })
+  const response = await client.request(request)
 
   // Clean up: Disconnect the XRPL client to free up network resources
   // This is important for resource management and preventing connection leaks
