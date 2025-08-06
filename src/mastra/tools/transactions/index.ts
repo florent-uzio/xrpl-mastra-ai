@@ -1,5 +1,6 @@
 export * from './account-set'
 export * from './nftoken-mint'
+export * from './offer-create'
 export * from './payment'
 export * from './shared'
 export * from './trustset'

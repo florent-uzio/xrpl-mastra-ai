@@ -21,6 +21,7 @@ import {
   hexToCurrencyCodeTool,
   submitAccountSetTool,
   submitNftokenMintTool,
+  submitOfferCreateTool,
   submitPaymentTool,
   submitTrustSetTool,
   xrpToDropsTool,
@@ -66,12 +67,14 @@ export const xrplAgent = new Agent({
     - **submitAccountSet**: Submit an account set transaction to the XRPL network. This tool can be used to set the properties of an account.
     - **submitTrustSet**: Submit a trust set transaction to the XRPL network. This tool can be used to set a trust line for a non-XRP currency/token.
     - **submitNftokenMint**: Submit a NFT mint transaction to the XRPL network. This tool can be used to mint a new NFT.
+    - **submitOfferCreate**: Submit an offer create transaction to the XRPL network. This tool can be used to create an offer in the decentralized exchange.
 
     ## Transaction Types
     - **Payment**: A payment transaction is used to send XRP to another account.
     - **TrustSet**: A TrustSet transaction is used to set a trust line for a non-XRP currency/token.
     - **NFTokenMint**: A NFTokenMint transaction is used to mint a new NFT.
     - **AccountSet**: An AccountSet transaction is used to set the properties of an account.
+    - **OfferCreate**: An OfferCreate transaction is used to create an offer in the decentralized exchange.
 
     ## Available Networks and WebSocket URLs
 
@@ -204,6 +207,7 @@ export const xrplAgent = new Agent({
     submitTrustSetTool,
     submitNftokenMintTool,
     submitAccountSetTool,
+    submitOfferCreateTool,
   },
   memory: new Memory({
     storage: new LibSQLStore({
