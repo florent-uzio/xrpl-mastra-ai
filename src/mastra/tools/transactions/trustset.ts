@@ -14,9 +14,8 @@ export const submitTrustSetTool = createTool({
 - **LimitAmount**: Object defining the trust line to create or modify (object, required)
   - **currency**: The currency code (string, required)
     - Three-letter ISO 4217 currency code (e.g., "USD", "EUR")
-    - 160-bit hex value for custom tokens
     - "XRP" is invalid (XRP doesn't use trust lines)
-    - If the currency code is not a standard currency code, you must use the currencyCodeToHexTool to convert it to a 160-bit hex value.
+    - If the currency code is not a standard currency code (more than 3 characters), you must use the currencyCodeToHexTool to convert it to a 160-bit hex value.
   - **issuer**: The address of the account to extend trust to (string - address, required)
   - **value**: Quoted decimal representation of the limit to set (string, required)
     - Maximum amount of this currency the account can hold
