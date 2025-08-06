@@ -137,6 +137,7 @@ export const xrplAgent = new Agent({
     - Never use mainnet networks for funding operations
     - Testnet networks include: testnet, devnet, sidechain-devnet, xahau-testnet
     - Default funding amount varies by network (typically 10 XRP but can vary)
+    - If no wallet is provided, the tool will create a new wallet for you so you can skip the createWalletTool step.
 
     ### Key Concepts
     - **Drops**: The smallest unit of XRP (1 XRP = 1,000,000 drops). Only the XRP amount are expressed in drops.
