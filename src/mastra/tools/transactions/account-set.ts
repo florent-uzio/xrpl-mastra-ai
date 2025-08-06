@@ -217,5 +217,7 @@ For domain verification:
     } else if (signature) {
       return await submitTransaction({ network, signature, mastra })
     }
+
+    throw new Error('No transaction with seed or signature provided')
   },
 })
