@@ -31,7 +31,7 @@ const createWallets = createStep({
     const { network, holders: numHolders, ...rest } = inputData
 
     try {
-      const client = await getXrplClient(network)
+      const client = await getXrplClient(network, mastra)
 
       // Create issuer wallet
       const issuerPromise = client.fundWallet()
@@ -90,7 +90,7 @@ const setupIssuerAccount = createStep({
     }
 
     try {
-      const client = await getXrplClient(network)
+      const client = await getXrplClient(network, mastra)
       const txnResults: TxnResult[] = []
 
       // Process each flag sequentially to avoid conflicts
@@ -158,7 +158,7 @@ const createTrustLines = createStep({
       // Convert currency string to hex format for XRPL
       const currencyHex = currencyCodeToHex(trustline.currency)
 
-      const client = await getXrplClient(network)
+      const client = await getXrplClient(network, mastra)
       const txnResults: TxnResult[] = []
 
       // Create trust line transactions for each holder in parallel
@@ -225,7 +225,7 @@ const mintTokens = createStep({
     const { issuer, holders, network, mintAmount, trustline, ...rest } = inputData
 
     try {
-      const client = await getXrplClient(network)
+      const client = await getXrplClient(network, mastra)
       const txnResults: TxnResult[] = []
 
       // Mint tokens for each holder sequentially to avoid rate limiting

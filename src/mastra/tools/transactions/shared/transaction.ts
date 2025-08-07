@@ -45,7 +45,7 @@ export const submitTransaction = async <T extends SubmittableTransaction>({
 
   // Get or create an XRPL client instance for the specified network
   // This handles singleton pattern and connection management
-  const client = await getXrplClient(network)
+  const client = await getXrplClient(network, mastra)
 
   // Submit the transaction to the XRPL network
   try {
@@ -68,6 +68,6 @@ export const submitTransaction = async <T extends SubmittableTransaction>({
   } finally {
     // Clean up: Disconnect the XRPL client to free up network resources
     // This is important for resource management and preventing connection leaks
-    await disconnectXrplClient(network)
+    await disconnectXrplClient(network, mastra)
   }
 }
