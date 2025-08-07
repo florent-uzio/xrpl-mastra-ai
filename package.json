@@ -22,11 +22,14 @@
     "@mastra/libsql": "^0.11.2",
     "@mastra/loggers": "^0.10.4",
     "@mastra/memory": "^0.11.5",
+    "xrpl": "^4.4.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^24.1.0",
     "mastra": "^0.10.15",
+    "prettier": "^3.6.2",
+    "prettier-plugin-organize-imports": "^4.2.0",
     "typescript": "^5.8.3"
   }
 }
