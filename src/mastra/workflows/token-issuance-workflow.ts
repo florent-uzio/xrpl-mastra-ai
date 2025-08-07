@@ -1,6 +1,5 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
-import { AccountSet, Payment, TrustSet } from 'xrpl'
-import { z } from 'zod'
+import { AccountSet, convertStringToHex, Payment, TrustSet } from 'xrpl'
 import { currencyStringToHex, getXrplClient } from '../../helpers'
 import {
   AccountSetAsfFlagsMap,
@@ -10,10 +9,18 @@ import {
   walletsSchema,
 } from './token-issuance-workflow.types'
 
-// Step 1: Create wallets for issuer and holders
+/**
+ * Step 1: Create Wallets
+ *
+ * Creates and funds wallets for the issuer and all token holders.
+ * This step establishes the foundation for the token issuance process.
+ *
+ * Input: Workflow parameters (network, holders count, etc.)
+ * Output: Wallets schema with issuer and holder wallets
+ */
 const createWallets = createStep({
   id: 'create-wallets',
-  description: 'Creates wallets for the issuer and all token holders',
+  description: 'Creates and funds wallets for the issuer and all token holders',
   inputSchema: tokenIssuanceWorkflowSchema,
   outputSchema: walletsSchema,
   execute: async ({ inputData, mastra }) => {
@@ -23,29 +30,45 @@ const createWallets = createStep({
 
     const { network, holders: numHolders, ...rest } = inputData
 
-    const client = await getXrplClient(network)
+    try {
+      const client = await getXrplClient(network)
 
-    const issuerPromise = client.fundWallet()
-    const holdersPromises = Array.from({ length: numHolders }, async () => {
-      const { wallet } = await client.fundWallet()
-      return wallet
-    })
+      // Create issuer wallet
+      const issuerPromise = client.fundWallet()
 
-    const [issuer, ...holders] = await Promise.all([issuerPromise, ...holdersPromises])
+      // Create holder wallets in parallel
+      const holdersPromises = Array.from({ length: numHolders }, async () => {
+        const { wallet } = await client.fundWallet()
+        return wallet
+      })
 
-    return {
-      issuer: issuer.wallet,
-      holders: holders,
-      network,
-      ...rest,
+      // Wait for all wallets to be created and funded
+      const [issuer, ...holders] = await Promise.all([issuerPromise, ...holdersPromises])
+
+      return {
+        issuer: issuer.wallet,
+        holders: holders,
+        network,
+        ...rest,
+      }
+    } catch (error) {
+      throw new Error(`Failed to create wallets: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   },
 })
 
-// Step 2: Setup issuer account
+/**
+ * Step 2: Setup Issuer Account
+ *
+ * Configures the issuer account with specified flags and settings.
+ * This step is optional - if no flags are provided, it returns the data unchanged.
+ *
+ * Input: Wallets schema with issuer and holder wallets
+ * Output: Settings schema with transaction results
+ */
 const setupIssuerAccount = createStep({
   id: 'setup-issuer-account',
-  description: 'Sets required flags for the issuer account, including asfDefaultRipple',
+  description: 'Configures the issuer account with specified flags and settings',
   inputSchema: walletsSchema,
   outputSchema: settingsSchema,
   execute: async ({ inputData, mastra }) => {
@@ -55,7 +78,8 @@ const setupIssuerAccount = createStep({
 
     const { issuer, network, issuerSettings, ...rest } = inputData
 
-    if (!issuerSettings.flags) {
+    // If no flags are specified, skip account configuration
+    if (!issuerSettings.flags || issuerSettings.flags.length === 0) {
       return {
         issuer,
         network,
@@ -65,40 +89,59 @@ const setupIssuerAccount = createStep({
       }
     }
 
-    const client = await getXrplClient(network)
+    try {
+      const client = await getXrplClient(network)
+      const txnResults: TxnResult[] = []
 
-    const txnResults: TxnResult[] = []
+      // Process each flag sequentially to avoid conflicts
+      for (const flag of issuerSettings.flags) {
+        const flagValue = AccountSetAsfFlagsMap[flag as keyof typeof AccountSetAsfFlagsMap]
 
-    for (const flag of issuerSettings.flags) {
-      const tx: AccountSet = {
-        TransactionType: 'AccountSet',
-        Account: issuer.address,
-        SetFlag: AccountSetAsfFlagsMap[flag as keyof typeof AccountSetAsfFlagsMap],
+        if (!flagValue) {
+          throw new Error(`Invalid flag: ${flag}`)
+        }
+
+        const tx: AccountSet = {
+          TransactionType: 'AccountSet',
+          Account: issuer.address,
+          Domain: issuerSettings.domain ? convertStringToHex(issuerSettings.domain) : undefined,
+          SetFlag: flagValue,
+        }
+
+        const response = await client.submitAndWait(tx, { autofill: true, wallet: issuer })
+
+        const txnResult: TxnResult = {
+          description: `Set flag ${flag} (${flagValue})`,
+          hash: response.result.hash,
+          // @ts-expect-error - TransactionResult is an object here
+          status: response.result.meta.TransactionResult ?? 'N/A',
+        }
+
+        txnResults.push(txnResult)
       }
 
-      const response = await client.submitAndWait(tx, { autofill: true, wallet: issuer })
-
-      const txnResult: TxnResult = {
-        description: `Set flag ${response.result.tx_json.SetFlag}`,
-        hash: response.result.hash,
-        // @ts-expect-error - TransactionResult is an object here
-        status: response.result.meta.TransactionResult ?? 'N/A',
+      return {
+        issuer,
+        network,
+        issuerSettings,
+        txnResults,
+        ...rest,
       }
-
-      txnResults.push(txnResult)
-    }
-
-    return {
-      issuer,
-      network,
-      issuerSettings,
-      txnResults,
-      ...rest,
+    } catch (error) {
+      throw new Error(`Failed to setup issuer account: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   },
 })
 
-// Step 3: Create trust lines between holders and issuer
+/**
+ * Step 3: Create Trust Lines
+ *
+ * Creates trust lines between holders and the issuer for the specified token.
+ * Each holder creates a trust line to accept tokens from the issuer.
+ *
+ * Input: Settings schema with wallets and configuration
+ * Output: Settings schema with trust line transaction results
+ */
 const createTrustLines = createStep({
   id: 'create-trust-lines',
   description: 'Creates trust lines between holders and issuer for the token',
@@ -111,53 +154,64 @@ const createTrustLines = createStep({
 
     const { issuer, holders, network, trustline, ...rest } = inputData
 
-    // update the trustline object currency field to hex
-    trustline.currency = currencyStringToHex(trustline.currency)
+    try {
+      // Convert currency string to hex format for XRPL
+      const currencyHex = currencyStringToHex(trustline.currency)
 
-    const client = await getXrplClient(network)
+      const client = await getXrplClient(network)
+      const txnResults: TxnResult[] = []
 
-    const txnResults: TxnResult[] = []
+      // Create trust line transactions for each holder in parallel
+      const trustLinePromises = holders.map(async holder => {
+        const tx: TrustSet = {
+          TransactionType: 'TrustSet',
+          Account: holder.address,
+          LimitAmount: {
+            currency: currencyHex,
+            issuer: issuer.address,
+            value: trustline.trustlineLimit,
+          },
+        }
 
-    // Create trust line transactions for each holder
-    const promises = holders.map(async holder => {
-      const tx: TrustSet = {
-        TransactionType: 'TrustSet',
-        Account: holder.address,
-        LimitAmount: {
-          currency: trustline.currency,
-          issuer: issuer.address,
-          value: trustline.trustlineLimit,
-        },
+        return await client.submitAndWait(tx, { autofill: true, wallet: holder })
+      })
+
+      const responses = await Promise.all(trustLinePromises)
+
+      // Process transaction results
+      for (const response of responses) {
+        const txnResult: TxnResult = {
+          description: `Created trust line for ${response.result.tx_json.LimitAmount.issuer}`,
+          hash: response.result.hash,
+          // @ts-expect-error - TransactionResult is an object here
+          status: response.result.meta.TransactionResult ?? 'N/A',
+        }
+        txnResults.push(txnResult)
       }
 
-      return await client.submitAndWait(tx, { autofill: true, wallet: holder })
-    })
-
-    const responses = await Promise.all(promises)
-
-    for (const response of responses) {
-      const txnResult: TxnResult = {
-        description: `Created trust line for ${response.result.tx_json.LimitAmount.issuer}`,
-        hash: response.result.hash,
-        // @ts-expect-error - TransactionResult is an object here
-        status: response.result.meta.TransactionResult ?? 'N/A',
+      return {
+        issuer,
+        holders,
+        network,
+        trustline: { ...trustline, currency: currencyHex },
+        ...rest,
+        txnResults,
       }
-      txnResults.push(txnResult)
-    }
-
-    return {
-      issuer,
-      holders,
-      network,
-      trustline,
-      ...rest,
-      // Reassign txnResults to the output schema
-      txnResults,
+    } catch (error) {
+      throw new Error(`Failed to create trust lines: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   },
 })
 
-// Step 4: Mint tokens by sending payments from issuer to holders
+/**
+ * Step 4: Mint Tokens
+ *
+ * Mints tokens by sending payments from the issuer to each holder.
+ * This creates the actual token supply and distributes it to holders.
+ *
+ * Input: Settings schema with wallets, trust lines, and configuration
+ * Output: Settings schema with mint transaction results
+ */
 const mintTokens = createStep({
   id: 'mint-tokens',
   description: 'Mints tokens by sending payments from issuer to holders',
@@ -167,49 +221,64 @@ const mintTokens = createStep({
     if (!inputData) {
       throw new Error('Input data not found')
     }
+
     const { issuer, holders, network, mintAmount, trustline, ...rest } = inputData
 
-    const client = await getXrplClient(network)
+    try {
+      const client = await getXrplClient(network)
+      const txnResults: TxnResult[] = []
 
-    const txnResults: TxnResult[] = []
+      // Mint tokens for each holder sequentially to avoid rate limiting
+      for (const holder of holders) {
+        const tx: Payment = {
+          TransactionType: 'Payment',
+          Account: issuer.address,
+          Destination: holder.address,
+          Amount: {
+            currency: trustline.currency,
+            value: mintAmount,
+            issuer: issuer.address,
+          },
+        }
 
-    // Create mint transactions for each holder
-    for (const holder of holders) {
-      const tx: Payment = {
-        TransactionType: 'Payment',
-        Account: issuer.address,
-        Destination: holder.address,
-        Amount: {
-          currency: trustline.currency,
-          value: mintAmount,
-          issuer: issuer.address,
-        },
+        const response = await client.submitAndWait(tx, { autofill: true, wallet: issuer })
+
+        const txnResult: TxnResult = {
+          description: `Minted ${mintAmount} ${trustline.currency} to ${holder.address}`,
+          hash: response.result.hash,
+          // @ts-expect-error - TransactionResult is an object here
+          status: response.result.meta.TransactionResult ?? 'N/A',
+        }
+        txnResults.push(txnResult)
       }
 
-      const response = await client.submitAndWait(tx, { autofill: true, wallet: issuer })
-
-      const txnResult: TxnResult = {
-        description: `Minted tokens to ${holder.address}`,
-        hash: response.result.hash,
-        // @ts-expect-error - TransactionResult is an object here
-        status: response.result.meta.TransactionResult ?? 'N/A',
+      return {
+        issuer,
+        holders,
+        network,
+        mintAmount,
+        trustline,
+        ...rest,
+        txnResults,
       }
-      txnResults.push(txnResult)
-    }
-
-    return {
-      issuer,
-      holders,
-      network,
-      mintAmount,
-      trustline,
-      ...rest,
-      txnResults,
+    } catch (error) {
+      throw new Error(`Failed to mint tokens: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   },
 })
 
-// Main workflow
+/**
+ * Token Issuance Workflow
+ *
+ * A complete workflow for issuing tokens on the XRP Ledger.
+ * This workflow automates the entire process from wallet creation to token distribution.
+ *
+ * Workflow Steps:
+ * 1. Create Wallets - Creates and funds issuer and holder wallets
+ * 2. Setup Issuer Account - Configures issuer account flags (optional)
+ * 3. Create Trust Lines - Establishes trust lines for token acceptance
+ * 4. Mint Tokens - Distributes tokens to all holders
+ */
 const tokenIssuanceWorkflow = createWorkflow({
   id: 'token-issuance-workflow',
   description: `Complete token issuance workflow for testnet and devnet networks.
@@ -251,17 +320,14 @@ const tokenIssuanceWorkflow = createWorkflow({
     - **Xahau Testnet (XRPL Labs)**: wss://xahau-test.net/
       - Hooks-enabled Xahau Testnet`,
   inputSchema: tokenIssuanceWorkflowSchema,
-  outputSchema: z.object({
-    network: z.string(),
-  }),
+  outputSchema: settingsSchema,
 })
   .then(createWallets)
   .then(setupIssuerAccount)
   .then(createTrustLines)
   .then(mintTokens)
 
-//   .then(generateSummary)
-
+// Commit the workflow to make it available
 tokenIssuanceWorkflow.commit()
 
 export { tokenIssuanceWorkflow }
