@@ -12,8 +12,6 @@ This template demonstrates how to build sophisticated XRPL applications using Ma
 - **AI Agent Integration**: Intelligent XRPL agent with detailed tool descriptions
 - **Type Safety**: Full TypeScript support with Zod validation
 
-The template is designed for **testnet and devnet networks** and provides a production-ready foundation for XRPL development.
-
 ## Setup
 
 1. **Copy environment variables**:
@@ -111,7 +109,6 @@ The template includes comprehensive XRPL tools:
 - `createWallet` - Generate new XRPL wallets
 - `fundWalletWithFaucet` - Fund wallets using testnet faucets
 - `currencyCodeToHex` - Convert currency codes to hex format
-- `hexToCurrencyCode` - Convert hex values back to currency codes
 
 ## Customization
 

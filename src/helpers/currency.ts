@@ -1,13 +1,8 @@
-import { convertHexToString, convertStringToHex } from 'xrpl'
-
-// Convert hex to string
-export const hexToString = (hex: string) => {
-  return convertHexToString(hex)
-}
+import { convertStringToHex } from 'xrpl'
 
 // If the string is 3 characters long, return it as is
 // Otherwise, convert it to hex
-export const currencyStringToHex = (str: string) => {
+export const currencyCodeToHex = (str: string) => {
   if (str.length === 3) {
     return str
   }

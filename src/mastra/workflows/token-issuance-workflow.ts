@@ -1,6 +1,6 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { AccountSet, convertStringToHex, Payment, TrustSet } from 'xrpl'
-import { currencyStringToHex, getXrplClient } from '../../helpers'
+import { currencyCodeToHex, getXrplClient } from '../../helpers'
 import {
   AccountSetAsfFlagsMap,
   settingsSchema,
@@ -156,7 +156,7 @@ const createTrustLines = createStep({
 
     try {
       // Convert currency string to hex format for XRPL
-      const currencyHex = currencyStringToHex(trustline.currency)
+      const currencyHex = currencyCodeToHex(trustline.currency)
 
       const client = await getXrplClient(network)
       const txnResults: TxnResult[] = []
