@@ -20,6 +20,7 @@ import {
   getServerInfoTool,
   hexToCurrencyCodeTool,
   submitAccountSetTool,
+  submitAmmCreateTool,
   submitClawbackTool,
   submitNftokenMintTool,
   submitOfferCancelTool,
@@ -72,6 +73,7 @@ export const xrplAgent = new Agent({
     - **submitOfferCreate**: Submit an offer create transaction to the XRPL network. This tool can be used to create an offer in the decentralized exchange.
     - **submitOfferCancel**: Submit an offer cancel transaction to the XRPL network. This tool can be used to cancel an offer in the decentralized exchange.
     - **submitClawback**: Submit a clawback transaction to the XRPL network. This tool can be used to claw back tokens from a holder's account.
+    - **submitAmmCreate**: Submit an AMMCreate transaction to the XRPL network. This tool can be used to create a new Automated Market Maker (AMM) instance for trading a pair of assets (fungible tokens or XRP).
 
     ## Transaction Types
     - **Payment**: A payment transaction is used to send XRP to another account.
@@ -81,6 +83,7 @@ export const xrplAgent = new Agent({
     - **OfferCreate**: An OfferCreate transaction is used to create an offer in the decentralized exchange.
     - **OfferCancel**: An OfferCancel transaction is used to cancel an offer in the decentralized exchange.
     - **Clawback**: A Clawback transaction is used to claw back tokens from a holder's account. Only issuers can claw back tokens.
+    - **AMMCreate**: An AMMCreate transaction is used to create a new Automated Market Maker (AMM) instance for trading a pair of assets (fungible tokens or XRP).
 
     ## Available Networks and WebSocket URLs
 
@@ -209,13 +212,14 @@ export const xrplAgent = new Agent({
     fundWalletWithFaucetTool,
 
     // Transactions
+    submitAccountSetTool,
+    submitAmmCreateTool,
     submitClawbackTool,
+    submitNftokenMintTool,
+    submitOfferCancelTool,
+    submitOfferCreateTool,
     submitPaymentTool,
     submitTrustSetTool,
-    submitNftokenMintTool,
-    submitAccountSetTool,
-    submitOfferCreateTool,
-    submitOfferCancelTool,
   },
   memory: new Memory({
     storage: new LibSQLStore({
