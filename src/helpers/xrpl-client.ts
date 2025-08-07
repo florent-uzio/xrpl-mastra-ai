@@ -1,10 +1,10 @@
+import { ToolExecutionContext } from '@mastra/core'
 import { Client } from 'xrpl'
-import { mastra } from '../mastra'
 
 // Singleton pattern: store client instances
 const clientInstances = new Map<string, Client>()
 
-export const getXrplClient = async (network: string): Promise<Client> => {
+export const getXrplClient = async (network: string, mastra: ToolExecutionContext['mastra']): Promise<Client> => {
   // Check if client already exists for this network
   if (clientInstances.has(network)) {
     const existingClient = clientInstances.get(network)!
@@ -12,13 +12,13 @@ export const getXrplClient = async (network: string): Promise<Client> => {
     // Check if client is connected, if not connect it
     if (!existingClient.isConnected()) {
       // Log the connection
-      const logger = mastra.getLogger()
-      logger.info('Connecting to XRP Ledger', { network, clientUrl: existingClient.url })
+      const logger = mastra?.getLogger()
+      logger?.info('Connecting to XRP Ledger', { network, clientUrl: existingClient.url })
 
       await existingClient.connect()
 
       // Log the connection
-      logger.info('Connected to XRP Ledger', { network, clientUrl: existingClient.url })
+      logger?.info('Connected to XRP Ledger', { network, clientUrl: existingClient.url })
     }
 
     return existingClient
@@ -29,13 +29,13 @@ export const getXrplClient = async (network: string): Promise<Client> => {
   clientInstances.set(network, client)
 
   // Log the connection
-  const logger = mastra.getLogger()
-  logger.info('Connecting to XRP Ledger', { network, clientUrl: client.url })
+  const logger = mastra?.getLogger()
+  logger?.info('Connecting to XRP Ledger', { network, clientUrl: client.url })
 
   await client.connect()
 
   // Log the connection
-  logger.info('Connected to XRP Ledger', { network, clientUrl: client.url })
+  logger?.info('Connected to XRP Ledger', { network, clientUrl: client.url })
 
   return client
 }
@@ -44,14 +44,14 @@ export const getXrplClient = async (network: string): Promise<Client> => {
  * Disconnect the client from the XRP Ledger
  * @param network - The network to disconnect from
  */
-export const disconnectXrplClient = async (network: string) => {
+export const disconnectXrplClient = async (network: string, mastra: ToolExecutionContext['mastra']) => {
   const client = clientInstances.get(network)
   if (client) {
     await client.disconnect()
 
     // Log the disconnection
-    const logger = mastra.getLogger()
-    logger.info('Disconnected from XRP Ledger', { network, clientUrl: client.url })
+    const logger = mastra?.getLogger()
+    logger?.info('Disconnected from XRP Ledger', { network, clientUrl: client.url })
 
     // Delete the client from the instances
     clientInstances.delete(network)

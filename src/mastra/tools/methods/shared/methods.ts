@@ -27,7 +27,7 @@ export const executeMethod = async <R extends Request>({
 }: ExecuteMethodProps) => {
   // Get or create an XRPL client instance for the specified network
   // This handles singleton pattern and connection management
-  const client = await getXrplClient(network)
+  const client = await getXrplClient(network, mastra)
 
   // Get the logger instance from Mastra for structured logging
   const logger = mastra?.getLogger()
@@ -42,7 +42,7 @@ export const executeMethod = async <R extends Request>({
 
   // Clean up: Disconnect the XRPL client to free up network resources
   // This is important for resource management and preventing connection leaks
-  await disconnectXrplClient(network)
+  await disconnectXrplClient(network, mastra)
 
   // Return the response to the user
   return response

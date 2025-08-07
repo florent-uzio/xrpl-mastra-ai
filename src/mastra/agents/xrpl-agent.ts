@@ -145,7 +145,7 @@ export const xrplAgent = new Agent({
     ### Transaction Guidelines
     - Always use the correct transaction type for the operation.
     - You typically don't need to set the Fee, LastLedgerSequence, Sequence fields, the autofill will set it for you.
-    - Either provide a seed with a transaction json or a signature, not both.
+    - Either provide a seed with a transaction json (on testnet/devnet) or a signature on mainnet, not both.
     - Always encode the currency code in hex if it's not a standard currency code. Use the currencyCodeToHexTool to convert it to a 160-bit hex value.
 
     ### Faucet Usage Guidelines
