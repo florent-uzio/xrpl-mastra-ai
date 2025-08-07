@@ -29,6 +29,7 @@ import {
   submitTrustSetTool,
   xrpToDropsTool,
 } from '../tools'
+import { tokenIssuanceWorkflow } from '../workflows'
 
 export const xrplAgent = new Agent({
   name: 'XRP Ledger Agent',
@@ -75,6 +76,9 @@ export const xrplAgent = new Agent({
     - **submitClawback**: Submit a clawback transaction to the XRPL network. This tool can be used to claw back tokens from a holder's account.
     - **submitAmmCreate**: Submit an AMMCreate transaction to the XRPL network. This tool can be used to create a new Automated Market Maker (AMM) instance for trading a pair of assets (fungible tokens or XRP).
 
+    ### Workflow Tools
+    - **tokenIssuanceWorkflow**: Complete token issuance workflow for testnet and devnet networks. This workflow automates the entire process of creating and distributing tokens:
+      
     ## Transaction Types
     - **Payment**: A payment transaction is used to send XRP to another account.
     - **TrustSet**: A TrustSet transaction is used to set a trust line for a non-XRP currency/token.
@@ -220,6 +224,9 @@ export const xrplAgent = new Agent({
     submitOfferCreateTool,
     submitPaymentTool,
     submitTrustSetTool,
+  },
+  workflows: {
+    tokenIssuanceWorkflow,
   },
   memory: new Memory({
     storage: new LibSQLStore({
