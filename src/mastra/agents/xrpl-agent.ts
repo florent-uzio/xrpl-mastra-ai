@@ -20,6 +20,7 @@ import {
   getServerInfoTool,
   hexToCurrencyCodeTool,
   submitAccountSetTool,
+  submitClawbackTool,
   submitNftokenMintTool,
   submitOfferCancelTool,
   submitOfferCreateTool,
@@ -69,6 +70,8 @@ export const xrplAgent = new Agent({
     - **submitTrustSet**: Submit a trust set transaction to the XRPL network. This tool can be used to set a trust line for a non-XRP currency/token.
     - **submitNftokenMint**: Submit a NFT mint transaction to the XRPL network. This tool can be used to mint a new NFT.
     - **submitOfferCreate**: Submit an offer create transaction to the XRPL network. This tool can be used to create an offer in the decentralized exchange.
+    - **submitOfferCancel**: Submit an offer cancel transaction to the XRPL network. This tool can be used to cancel an offer in the decentralized exchange.
+    - **submitClawback**: Submit a clawback transaction to the XRPL network. This tool can be used to claw back tokens from a holder's account.
 
     ## Transaction Types
     - **Payment**: A payment transaction is used to send XRP to another account.
@@ -77,6 +80,7 @@ export const xrplAgent = new Agent({
     - **AccountSet**: An AccountSet transaction is used to set the properties of an account.
     - **OfferCreate**: An OfferCreate transaction is used to create an offer in the decentralized exchange.
     - **OfferCancel**: An OfferCancel transaction is used to cancel an offer in the decentralized exchange.
+    - **Clawback**: A Clawback transaction is used to claw back tokens from a holder's account. Only issuers can claw back tokens.
 
     ## Available Networks and WebSocket URLs
 
@@ -205,6 +209,7 @@ export const xrplAgent = new Agent({
     fundWalletWithFaucetTool,
 
     // Transactions
+    submitClawbackTool,
     submitPaymentTool,
     submitTrustSetTool,
     submitNftokenMintTool,
