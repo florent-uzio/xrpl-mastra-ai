@@ -21,6 +21,7 @@ import {
   hexToCurrencyCodeTool,
   submitAccountSetTool,
   submitNftokenMintTool,
+  submitOfferCancelTool,
   submitOfferCreateTool,
   submitPaymentTool,
   submitTrustSetTool,
@@ -75,6 +76,7 @@ export const xrplAgent = new Agent({
     - **NFTokenMint**: A NFTokenMint transaction is used to mint a new NFT.
     - **AccountSet**: An AccountSet transaction is used to set the properties of an account.
     - **OfferCreate**: An OfferCreate transaction is used to create an offer in the decentralized exchange.
+    - **OfferCancel**: An OfferCancel transaction is used to cancel an offer in the decentralized exchange.
 
     ## Available Networks and WebSocket URLs
 
@@ -208,6 +210,7 @@ export const xrplAgent = new Agent({
     submitNftokenMintTool,
     submitAccountSetTool,
     submitOfferCreateTool,
+    submitOfferCancelTool,
   },
   memory: new Memory({
     storage: new LibSQLStore({
