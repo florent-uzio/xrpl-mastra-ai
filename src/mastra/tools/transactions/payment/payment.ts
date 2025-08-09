@@ -1,10 +1,11 @@
-import { createTool } from '@mastra/core/tools'
 import { Payment } from 'xrpl'
-import { z } from 'zod'
-import { submitTransaction } from './shared'
+import { useTransactionToolFactory } from '../factory'
+import { xrplPaymentSchema } from './payment.types'
 
-export const submitPaymentTool = createTool({
-  id: 'submit-payment',
+const { createTransactionTool } = useTransactionToolFactory(xrplPaymentSchema)
+
+export const submitPaymentTool = createTransactionTool({
+  toolId: 'submit-payment',
   description: `Submit a Payment transaction to the XRPL network. A Payment transaction represents a transfer of value from one account to another. This is the only transaction type that can create new accounts by sending enough XRP to an unfunded address.
 
 ## Payment Transaction Fields
@@ -158,19 +159,17 @@ export const submitPaymentTool = createTool({
 - Quality limits help avoid unfavorable exchange rates
 - Deposit authorization requires preauthorized credentials
 - MPT payments only support direct transfers, not DEX trading`,
-  inputSchema: z.object({
-    network: z.string(),
-    txn: z.custom<Payment>().optional(),
-    seed: z.string().optional(),
-    signature: z.string().optional(),
-  }),
-  execute: async ({ context, mastra }) => {
-    const { network, txn, seed, signature } = context
+  buildTransaction: payment => {
+    const builtPayment: Payment = {
+      ...payment,
+      Amount: payment.Amount ?? payment.DeliverMax,
+    }
 
-    if (txn && seed) {
-      return await submitTransaction({ network, txn, seed, mastra })
-    } else if (signature) {
-      return await submitTransaction({ network, signature, mastra })
+    return builtPayment
+  },
+  validateTransaction: params => {
+    if (params.Amount === undefined && params.DeliverMax === undefined) {
+      throw new Error('Provide Amount (API v1) or DeliverMax (API v2)')
     }
   },
 })

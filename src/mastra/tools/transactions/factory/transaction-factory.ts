@@ -4,14 +4,12 @@ import { z } from 'zod'
 import { submitTransaction } from '../shared/transaction'
 
 type CreateToolConfig = Parameters<typeof createTool>[0]
-type InputSchemaTxn = z.ZodObject<any>
+type InputSchemaTxn = z.ZodObject<any> | z.ZodUnion<any>
 
 /**
  * Configuration for creating a transaction tool
  */
 export type TransactionToolConfig<T extends SubmittableTransaction, S extends InputSchemaTxn = z.ZodObject<any>> = {
-  /** The transaction type name (e.g., 'Payment', 'AccountSet') */
-  transactionType: T['TransactionType']
   /** The tool ID (e.g., 'submit-payment', 'submit-account-set') */
   toolId: string
   /** Detailed description of the transaction and its fields */
