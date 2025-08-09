@@ -40,7 +40,7 @@ export const submitTransaction = async <T extends SubmittableTransaction>({
   txn,
   seed,
   signature,
-}: SubmitTransactionProps<T>): Promise<TxResponse<T | SubmittableTransaction>> => {
+}: SubmitTransactionProps<T>): Promise<TxResponse<T>> => {
   const logger = mastra?.getLogger()
 
   // Get or create an XRPL client instance for the specified network
@@ -61,7 +61,9 @@ export const submitTransaction = async <T extends SubmittableTransaction>({
     if (signature) {
       logger?.info('Submitting transaction with signature', { signature })
 
-      return await client.submitAndWait(signature)
+      // For signature-based submission, we can't know the exact transaction type
+      // So we cast to the generic type T
+      return (await client.submitAndWait(signature)) as TxResponse<T>
     }
 
     throw new Error('No transaction or signature provided to submit')
