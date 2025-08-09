@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { submitTransaction } from '../shared/transaction'
 
 type CreateToolConfig = Parameters<typeof createTool>[0]
-type InputSchemaTxn = z.ZodObject<any> | z.ZodUnion<any>
+type InputSchemaTxn = z.AnyZodObject
 
 /**
  * Configuration for creating a transaction tool
@@ -26,9 +26,9 @@ export type TransactionToolConfig<T extends SubmittableTransaction, S extends In
  * Common input schema for all transaction tools
  */
 export const baseTransactionSchema = z.object({
-  network: z.string(),
-  seed: z.string().optional(),
-  signature: z.string().optional(),
+  network: z.string().describe('Network to submit the transaction to, e.g. "wss://s.altnet.rippletest.net:51233"'),
+  seed: z.string().optional().describe('Seed phrase for the account on testnet or devnet, never mainnet'),
+  signature: z.string().optional().describe('Signature for the transaction, typically provided for mainnet'),
 })
 
 export const useTransactionToolFactory = <S extends InputSchemaTxn>(inputSchema: S) => {
