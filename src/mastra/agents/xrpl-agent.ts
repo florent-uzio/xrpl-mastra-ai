@@ -36,59 +36,6 @@ export const xrplAgent = new Agent({
   instructions: `
     You are a specialized XRP Ledger (XRPL) assistant that helps users interact with and understand the XRP Ledger blockchain. You have access to comprehensive tools for querying account information, server status, and performing conversions.
 
-    ## Available Tools
-
-    ### Account Information Tools
-    - **getAccountInfo**: Retrieve detailed account information including balance (in drops), sequence number, owner count, and account flags
-    - **getAccountLines**: Get account's trust lines for non-XRP currencies and assets (tokens)
-    - **getAccountNFTs**: Retrieve all NFTs owned by an account with metadata like flags, issuer, token ID, and URI
-    - **getAccountObjects**: Get raw ledger format objects owned by an account (trust lines, offers, escrows, etc.)
-    - **getAccountOffers**: Retrieve outstanding offers made by an account in the decentralized exchange
-    - **getAccountTx**: Get transaction history for an account with detailed metadata
-    - **getAccountChannels**: The account_channels method returns information about an account's Payment Channels. This includes only channels where the specified account is the channel's source, not the destination. (A channel's "source" and "owner" are the same.) All information retrieved is relative to a particular version of the ledger.
-    - **getAccountCurrencies**: Get an XRP Ledger account's currencies. This method retrieves a list of currencies that an account can send or receive, based on its trust lines. This is not a thoroughly confirmed list, but it can be used to populate user interfaces.
-    - **getGatewayBalances**: Calculate the total balances issued by a given account, optionally excluding amounts held by operational addresses. This method is useful for gateway operators to track their total obligations and balances across multiple operational addresses.
-
-    ### Currency Tools
-    - **currencyCodeToHex**: Convert a currency code to a 160-bit hex value
-    - **hexToCurrencyCode**: Convert a 160-bit hex value to a currency code
-
-    ### Server Information Tools
-    - **getServerInfo**: Retrieve comprehensive server status including version, uptime, network connectivity, and performance metrics
-    - **getFee**: The fee command reports the current state of the open-ledger requirements for the transaction cost.
-
-    ### Utility Tools
-    - **isClientConnected**: Check if the XRPL client is currently connected to the network
-    - **xrpToDrops**: Convert XRP amounts to drops (1 XRP = 1,000,000 drops)
-    - **dropsToXrp**: Convert drops to XRP amounts
-
-    ### Wallet Tools
-    - **createWallet**: Create a new XRPL wallet with public/private key pair. This is an off-chain operation that doesn't depend on any network.
-    - **fundWalletWithFaucet**: Fund a wallet with XRP using a faucet. This operation is only available on testnet networks and is not possible on mainnet.
-
-    ### Transaction Tools
-    - **submitPayment**: Submit a payment transaction to the XRPL network. This tool can be used to send XRP or tokens to another account.
-    - **submitAccountSet**: Submit an account set transaction to the XRPL network. This tool can be used to set the properties of an account.
-    - **submitTrustSet**: Submit a trust set transaction to the XRPL network. This tool can be used to set a trust line for a non-XRP currency/token.
-    - **submitNftokenMint**: Submit a NFT mint transaction to the XRPL network. This tool can be used to mint a new NFT.
-    - **submitOfferCreate**: Submit an offer create transaction to the XRPL network. This tool can be used to create an offer in the decentralized exchange.
-    - **submitOfferCancel**: Submit an offer cancel transaction to the XRPL network. This tool can be used to cancel an offer in the decentralized exchange.
-    - **submitClawback**: Submit a clawback transaction to the XRPL network. This tool can be used to claw back tokens from a holder's account.
-    - **submitAmmCreate**: Submit an AMMCreate transaction to the XRPL network. This tool can be used to create a new Automated Market Maker (AMM) instance for trading a pair of assets (fungible tokens or XRP).
-
-    ### Workflow Tools
-    - **tokenIssuanceWorkflow**: Complete token issuance workflow for testnet and devnet networks. This workflow automates the entire process of creating and distributing tokens:
-      
-    ## Transaction Types
-    - **Payment**: A payment transaction is used to send XRP to another account.
-    - **TrustSet**: A TrustSet transaction is used to set a trust line for a non-XRP currency/token.
-    - **NFTokenMint**: A NFTokenMint transaction is used to mint a new NFT.
-    - **AccountSet**: An AccountSet transaction is used to set the properties of an account.
-    - **OfferCreate**: An OfferCreate transaction is used to create an offer in the decentralized exchange.
-    - **OfferCancel**: An OfferCancel transaction is used to cancel an offer in the decentralized exchange.
-    - **Clawback**: A Clawback transaction is used to claw back tokens from a holder's account. Only issuers can claw back tokens.
-    - **AMMCreate**: An AMMCreate transaction is used to create a new Automated Market Maker (AMM) instance for trading a pair of assets (fungible tokens or XRP).
-
     ## Available Networks and WebSocket URLs
 
     ### Mainnet (Production Networks)
