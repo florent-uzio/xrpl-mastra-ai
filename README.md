@@ -39,41 +39,12 @@ This template demonstrates how to build sophisticated XRPL applications using Ma
 
 ## Usage
 
-### Basic Token Issuance
+You can use the XRPL Agent to do several things that the XRP Ledger and xrpl.js SDK allows. For example:
 
-```typescript
-import { tokenIssuanceWorkflow } from './src/mastra/workflows/token-issuance-workflow'
-
-const result = await tokenIssuanceWorkflow.execute({
-  network: 'wss://s.altnet.rippletest.net:51233/',
-  holders: 3,
-  trustline: {
-    currency: 'REWARDS',
-    trustlineLimit: '10000',
-  },
-  issuerSettings: {
-    flags: ['asfDefaultRipple'],
-  },
-  mintAmount: '1000',
-})
-```
-
-### Using the XRPL Agent
-
-```typescript
-import { mastra } from './src/mastra'
-
-const agent = mastra.getAgent('xrpl-agent')
-
-const response = await agent.generate({
-  messages: [
-    {
-      role: 'user',
-      content: 'Create a wallet and fund it with 1000 XRP on testnet',
-    },
-  ],
-})
-```
+- Creating accounts on mainnet, testnet and devnet
+- Funding those accounts using the faucet on test networks
+- Quering the XRP Ledger to retrieve any kind of data
+- Submitting transactions such as a Payment or minting an NFT
 
 ### Available Tools
 
@@ -112,38 +83,159 @@ The template includes comprehensive XRPL tools:
 
 ## Customization
 
-### Adding New XRPL Methods
+### Adding New Transaction Tools
 
-1. Create a new tool in `src/mastra/tools/methods/public/`:
+The template provides a factory pattern for creating new XRPL transaction tools with minimal boilerplate. Here's how to add a new transaction tool:
+
+#### 1. Create Transaction Schema
+
+First, define the Zod schema for your transaction fields:
 
 ```typescript
-import { createTool } from '@mastra/core/tools'
+// src/mastra/tools/transactions/your-transaction/your-transaction.types.ts
 import { z } from 'zod'
+import { xrplCommonFieldsSchema } from '../shared/common-fields'
 
-export const newMethodTool = createTool({
-  name: 'new_method',
-  description: 'Description of what this method does',
-  inputSchema: z.object({
-    network: z.string(),
-    account: z.string(),
-    // ... other parameters
-  }),
-  execute: async ({ context, mastra }) => {
-    // Extract network and request from the context
-    const { network, request } = context
+export const xrplYourTransactionFieldsSchema = z.object({
+  // Define your transaction-specific fields here
+  Amount: z.string().describe('Amount to transfer'),
+  Destination: z.string().describe('Destination account'),
+  // ... other fields
+})
 
-    // Use the shared utility function to execute the 'command-name' command
-    return await executeMethod({
-      network,
-      request: { ...request, command: 'command-name' },
-      logMessage: 'your-message',
-      mastra,
-    })
+export const xrplYourTransactionSchema = xrplCommonFieldsSchema
+  .merge(xrplYourTransactionFieldsSchema)
+  .extend({ TransactionType: z.literal('YourTransactionType') })
+```
+
+#### 2. Create the Transaction Tool
+
+Use the factory to create your transaction tool:
+
+```typescript
+// src/mastra/tools/transactions/your-transaction/your-transaction.ts
+import { YourTransactionType } from 'xrpl'
+import { useTransactionToolFactory } from '../factory'
+import { xrplYourTransactionSchema } from './your-transaction.types'
+
+const { createTransactionTool } = useTransactionToolFactory({
+  inputSchema: xrplYourTransactionSchema,
+})
+
+export const submitYourTransactionTool = createTransactionTool({
+  toolId: 'submit-your-transaction',
+  description: `Submit a YourTransactionType transaction to the XRPL network. 
+  
+  ## Important Notes:
+  - Explain what this transaction does
+  - List any special requirements or limitations
+  - Include relevant XRPL documentation links`,
+  buildTransaction: params => {
+    const builtTransaction: YourTransactionType = {
+      TransactionType: 'YourTransactionType',
+      ...params,
+    }
+    return builtTransaction
+  },
+  validateTransaction: params => {
+    // Add any custom validation logic
+    if (!params.Amount) {
+      throw new Error('Amount is required')
+    }
   },
 })
 ```
 
-2. Register the tool in `src/mastra/tools/index.ts`
+#### 3. Example: Payment Transaction
+
+Here's a real example from the template:
+
+```typescript
+// src/mastra/tools/transactions/payment/payment.ts
+import { Payment } from 'xrpl'
+import { useTransactionToolFactory } from '../factory'
+import { xrplPaymentSchema } from './payment.types'
+
+const { createTransactionTool } = useTransactionToolFactory({
+  inputSchema: xrplPaymentSchema,
+})
+
+export const submitPaymentTool = createTransactionTool({
+  toolId: 'submit-payment',
+  description: `Submit a Payment transaction to the XRPL network. A Payment transaction represents a transfer of value from one account to another. This is the only transaction type that can create new accounts by sending enough XRP to an unfunded address.
+
+## Important Notes:
+- Payment is the only transaction type that can create accounts
+- Cross-currency payments may involve multiple exchanges atomically
+- Partial payments can exploit integrations that assume exact delivery amounts`,
+  buildTransaction: payment => {
+    const builtPayment: Payment = {
+      ...payment,
+      Amount: payment.Amount ?? payment.DeliverMax,
+    }
+    return builtPayment
+  },
+  validateTransaction: params => {
+    if (params.Amount === undefined && params.DeliverMax === undefined) {
+      throw new Error('Provide Amount (API v1) or DeliverMax (API v2)')
+    }
+  },
+})
+```
+
+#### 4. Factory Benefits
+
+The transaction factory provides several benefits:
+
+- **Automatic Authentication**: Handles seed/signature validation automatically
+- **Consistent Schema**: Merges common fields (network, seed, signature) with your transaction fields
+- **Type Safety**: Full TypeScript support with proper type inference
+- **Error Handling**: Centralized error handling and validation
+- **Reduced Boilerplate**: No need to repeat common transaction submission logic
+
+#### 5. Available Common Fields
+
+All transaction tools automatically include these base fields:
+
+- `network`: WebSocket URL for the XRPL network
+- `seed`: Seed phrase for testnet/devnet accounts (optional)
+- `signature`: Pre-signed transaction signature (optional)
+
+Either `seed` or `signature` must be provided for authentication.
+
+#### 6. Adding to Your Agent
+
+After creating your tool, add it to the agent's tools object:
+
+```typescript
+// src/mastra/agents/xrpl-agent.ts
+import { submitYourTransactionTool } from '../tools/transactions/your-transaction/your-transaction'
+
+export const xrplAgent = new Agent({
+  // ... other config
+  tools: {
+    // ... existing tools
+    submitYourTransactionTool,
+  },
+})
+```
+
+### Customizing Existing Tools
+
+You can customize existing tools by:
+
+1. **Modifying Descriptions**: Update tool descriptions to better match your use case
+2. **Adding Validation**: Enhance validation logic for your specific requirements
+3. **Extending Schemas**: Add additional fields or constraints to existing schemas
+4. **Custom Error Handling**: Implement custom error messages and handling
+
+### Best Practices for Customization
+
+- **Follow Naming Conventions**: Use consistent naming for files and exports
+- **Add Comprehensive Documentation**: Include detailed descriptions and examples
+- **Validate Inputs**: Always validate transaction parameters before submission
+- **Handle Errors Gracefully**: Provide clear error messages for debugging
+- **Test Thoroughly**: Test your custom tools on testnet before mainnet use
 
 ## Supported Networks
 
@@ -185,17 +277,3 @@ The template includes a complete token issuance workflow that:
 - Use Zod for input validation
 - Add comprehensive error handling
 - Include detailed documentation and comments
-
-## Contributing
-
-When contributing to this template:
-
-1. **Follow the existing code structure** and patterns
-2. **Add comprehensive tests** for new features
-3. **Update documentation** for any changes
-4. **Use TypeScript** for all new code
-5. **Follow XRPL best practices** and security guidelines
-
-## License
-
-This template is part of the XRPL Mastra.ai integration project and follows the same licensing terms as the main project.
