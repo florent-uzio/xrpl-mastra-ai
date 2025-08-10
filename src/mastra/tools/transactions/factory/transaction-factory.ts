@@ -28,7 +28,12 @@ export type TransactionToolConfig<T extends SubmittableTransaction, S extends In
 export const baseTransactionSchema = z.object({
   network: z.string().describe('Network to submit the transaction to, e.g. "wss://s.altnet.rippletest.net:51233"'),
   seed: z.string().optional().describe('Seed phrase for the account on testnet or devnet, never mainnet'),
-  signature: z.string().optional().describe('Signature for the transaction, typically provided for mainnet'),
+  signature: z
+    .string()
+    .optional()
+    .describe(
+      'Signature for the transaction, typically provided for mainnet but can also be used for testnet or devnet',
+    ),
 })
 
 export const useTransactionToolFactory = <S extends InputSchemaTxn>(inputSchema: S) => {
