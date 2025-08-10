@@ -2,42 +2,12 @@ import { createTool } from '@mastra/core/tools'
 import { SubmittableTransaction, TxResponse } from 'xrpl'
 import { z } from 'zod'
 import { submitTransaction } from '../shared/transaction'
+import { baseTransactionSchema, FactorySchema, TransactionToolConfig } from './transaction-factory.types'
 
-type CreateToolConfig = Parameters<typeof createTool>[0]
-type InputSchemaTxn = z.AnyZodObject
-
-/**
- * Configuration for creating a transaction tool
- */
-export type TransactionToolConfig<T extends SubmittableTransaction, S extends InputSchemaTxn = z.ZodObject<any>> = {
-  /** The tool ID (e.g., 'submit-payment', 'submit-account-set') */
-  toolId: string
-  /** Detailed description of the transaction and its fields */
-  description: string
-  /** Function to build the transaction object from input parameters */
-  buildTransaction: (params: z.infer<S>) => T
-  /** Optional function to validate transaction before submission */
-  validateTransaction?: (txn: T) => void | Promise<void>
-} & Omit<CreateToolConfig, 'id' | 'inputSchema' | 'execute'>
-
-/**
- * Common input schema for all transaction tools
- */
-export const baseTransactionSchema = z.object({
-  network: z.string().describe('Network to submit the transaction to, e.g. "wss://s.altnet.rippletest.net:51233"'),
-  seed: z.string().optional().describe('Seed phrase for the account on testnet or devnet, never mainnet'),
-  signature: z
-    .string()
-    .optional()
-    .describe(
-      'Signature for the transaction, typically provided for mainnet but can also be used for testnet or devnet',
-    ),
-})
-
-export const useTransactionToolFactory = <S extends InputSchemaTxn>(inputSchema: S) => {
+export const useTransactionToolFactory = <S extends FactorySchema>(params: S) => {
   // Merge the base transaction schema with the input schema
   const schema = baseTransactionSchema
-    .merge(z.object({ txn: inputSchema }))
+    .merge(z.object({ txn: params.inputSchema }))
     .refine(data => data.seed !== undefined || data.signature !== undefined, {
       message: 'Either seed or signature must be provided',
       path: ['seed', 'signature'],
@@ -53,7 +23,7 @@ export const useTransactionToolFactory = <S extends InputSchemaTxn>(inputSchema:
 
         const { network, seed, signature, txn } = context
 
-        const builtTxn = config.buildTransaction(txn as z.infer<S>)
+        const builtTxn = config.buildTransaction(txn as z.infer<S['inputSchema']>)
 
         if (config.validateTransaction) await config.validateTransaction(builtTxn)
 

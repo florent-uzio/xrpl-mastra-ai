@@ -2,7 +2,7 @@ import { Payment } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { xrplPaymentSchema } from './payment.types'
 
-const { createTransactionTool } = useTransactionToolFactory(xrplPaymentSchema)
+const { createTransactionTool } = useTransactionToolFactory({ inputSchema: xrplPaymentSchema })
 
 export const submitPaymentTool = createTransactionTool({
   toolId: 'submit-payment',
