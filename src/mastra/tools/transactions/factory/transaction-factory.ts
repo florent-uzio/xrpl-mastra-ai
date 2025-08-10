@@ -1,5 +1,5 @@
 import { createTool } from '@mastra/core/tools'
-import { SubmittableTransaction, TxResponse } from 'xrpl'
+import { SubmittableTransaction } from 'xrpl'
 import { z } from 'zod'
 import { submitTransaction } from '../shared/transaction'
 import { baseTransactionSchema, FactorySchema, TransactionToolConfig } from './transaction-factory.types'
@@ -18,42 +18,6 @@ const createCompleteTransactionSchema = <S extends FactorySchema>(params: S) => 
 }
 
 /**
- * Handles transaction submission based on whether a signature or seed is provided
- */
-const submitTransactionWithAuth = async <T extends SubmittableTransaction>({
-  mastra,
-  network,
-  signature,
-  seed,
-  builtTxn,
-}: {
-  mastra: any
-  network: string
-  signature?: string
-  seed?: string
-  builtTxn: T
-}): Promise<TxResponse<T>> => {
-  if (signature) {
-    return await submitTransaction<T>({
-      mastra,
-      network,
-      signature,
-    })
-  }
-
-  if (seed) {
-    return await submitTransaction<T>({
-      mastra,
-      network,
-      txn: builtTxn,
-      seed,
-    })
-  }
-
-  throw new Error('Authentication required: either seed or signature must be provided')
-}
-
-/**
  * Factory function that creates transaction tools with consistent base functionality
  *
  * @param params - Configuration containing the input schema for the transaction
@@ -61,11 +25,11 @@ const submitTransactionWithAuth = async <T extends SubmittableTransaction>({
  *
  * @example
  * ```typescript
- * const factory = useTransactionToolFactory({
+ * const { createTransactionTool } = useTransactionToolFactory({
  *   inputSchema: paymentSchema
  * })
  *
- * const paymentTool = factory.createTransactionTool({
+ * const paymentTool = createTransactionTool({
  *   toolId: 'submit-payment',
  *   description: 'Submit a payment transaction',
  *   buildTransaction: (params) => ({ ... }),
@@ -89,7 +53,7 @@ export const useTransactionToolFactory = <S extends FactorySchema>(params: S) =>
           throw new Error('Context not found - ensure the tool is called with proper context')
         }
 
-        const { network, seed, signature, txn } = context
+        const { txn, ...rest } = context
 
         // Build the transaction object from input parameters
         const builtTxn = config.buildTransaction(txn as z.infer<S['inputSchema']>)
@@ -99,13 +63,11 @@ export const useTransactionToolFactory = <S extends FactorySchema>(params: S) =>
           await config.validateTransaction(builtTxn)
         }
 
-        // Submit the transaction using the appropriate authentication method
-        return await submitTransactionWithAuth({
+        // Submit the transaction using the appropriate
+        return await submitTransaction<T>({
           mastra,
-          network,
-          signature,
-          seed,
-          builtTxn,
+          txn: builtTxn,
+          ...rest,
         })
       },
     })

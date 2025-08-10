@@ -188,17 +188,13 @@ export const submitTrustSetTool = createTool({
 - fix1578 amendment: Changes behavior of No Ripple enablement failures`,
   inputSchema: z.object({
     network: z.string(),
-    txn: z.custom<TrustSet>().optional(),
+    txn: z.custom<TrustSet>(),
     seed: z.string().optional(),
     signature: z.string().optional(),
   }),
   execute: async ({ context, mastra }) => {
     const { network, txn, seed, signature } = context
 
-    if (txn && seed) {
-      return await submitTransaction({ network, txn, seed, mastra })
-    } else if (signature) {
-      return await submitTransaction({ network, signature, mastra })
-    }
+    return await submitTransaction({ network, txn, seed, mastra, signature })
   },
 })
