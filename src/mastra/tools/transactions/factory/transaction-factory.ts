@@ -18,8 +18,6 @@ export type TransactionToolConfig<T extends SubmittableTransaction, S extends In
   buildTransaction: (params: z.infer<S>) => T
   /** Optional function to validate transaction before submission */
   validateTransaction?: (txn: T) => void | Promise<void>
-  /** Optional function to transform the response */
-  // transformResponse?: (response: TxResponse<T>) => any
 } & Omit<CreateToolConfig, 'id' | 'inputSchema' | 'execute'>
 
 /**
@@ -38,7 +36,12 @@ export const baseTransactionSchema = z.object({
 
 export const useTransactionToolFactory = <S extends InputSchemaTxn>(inputSchema: S) => {
   // Merge the base transaction schema with the input schema
-  const schema = baseTransactionSchema.merge(z.object({ txn: inputSchema }))
+  const schema = baseTransactionSchema
+    .merge(z.object({ txn: inputSchema }))
+    .refine(data => data.seed !== undefined || data.signature !== undefined, {
+      message: 'Either seed or signature must be provided',
+      path: ['seed', 'signature'],
+    })
 
   const createTransactionTool = <T extends SubmittableTransaction>(config: TransactionToolConfig<T, S>) => {
     return createTool({
