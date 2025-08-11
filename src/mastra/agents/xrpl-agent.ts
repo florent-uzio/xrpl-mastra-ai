@@ -179,5 +179,10 @@ export const xrplAgent = new Agent({
     storage: new LibSQLStore({
       url: 'file:../mastra.db', // path is relative to the .mastra/output directory
     }),
+    options: {
+      threads: {
+        generateTitle: true,
+      },
+    },
   }),
 })
