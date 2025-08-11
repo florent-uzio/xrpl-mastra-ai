@@ -1,39 +1,14 @@
-import { createTool } from '@mastra/core/tools'
-import { TrustSet } from 'xrpl'
-import z from 'zod'
-import { submitTransaction } from './shared'
+import { currencyCodeToHex } from '../../../../helpers'
+import { useTransactionToolFactory } from '../factory'
+import { xrplTrustSetSchema } from './trustset.types'
 
-export const submitTrustSetTool = createTool({
-  id: 'submit-trustset',
+const { createTransactionTool } = useTransactionToolFactory({
+  inputSchema: xrplTrustSetSchema,
+})
+
+export const submitTrustSetTool = createTransactionTool({
+  toolId: 'submit-trustset',
   description: `Submit a TrustSet transaction to the XRPL network. A TrustSet transaction creates or modifies a trust line linking two accounts, allowing them to hold tokens issued by each other. Trust lines are required for holding non-XRP currencies and tokens on the XRPL.
-
-## TrustSet Transaction Fields
-
-### Required Fields:
-- **Account**: The account creating or modifying the trust line (string - address)
-- **LimitAmount**: Object defining the trust line to create or modify (object, required)
-  - **currency**: The currency code (string, required)
-    - Three-letter ISO 4217 currency code (e.g., "USD", "EUR")
-    - "XRP" is invalid (XRP doesn't use trust lines)
-    - If the currency code is not a standard currency code (more than 3 characters), you must use the currencyCodeToHexTool to convert it to a 160-bit hex value.
-  - **issuer**: The address of the account to extend trust to (string - address, required)
-  - **value**: Quoted decimal representation of the limit to set (string, required)
-    - Maximum amount of this currency the account can hold
-    - Example: "100" for 100 USD, "1000" for 1000 EUR
-
-### Optional Fields:
-- **QualityIn**: Value incoming balances at this ratio per 1,000,000,000 units (number, optional)
-  - 0 = treat balances at face value (default)
-  - Example: 10,000,000 = 1% fee on incoming funds
-  - If sender sends 100 currency, sender retains 1 unit, destination receives 99
-- **QualityOut**: Value outgoing balances at this ratio per 1,000,000,000 units (number, optional)
-  - 0 = treat balances at face value (default)
-  - Example: 10,000,000 = 1% fee on outgoing funds
-  - If sender sends 100 currency, issuer retains 1 unit, destination receives 99
-- **Flags**: Transaction flags to control trust line behavior (number, optional)
-- **Fee**: Transaction cost in drops (string, optional)
-- **Sequence**: Account sequence number (number, optional)
-- **LastLedgerSequence**: Last ledger to process transaction (number, optional)
 
 ## TrustSet Flags
 
@@ -85,60 +60,6 @@ export const submitTrustSetTool = createTool({
 - Higher values = fees on outgoing funds
 - Example: 10,000,000 = 1% fee (10,000,000 / 1,000,000,000 = 0.01 = 1%)
 
-## Example TrustSet Transactions
-
-### Basic Trust Line Creation:
-{
-  "TransactionType": "TrustSet",
-  "Account": "ra5nK24KXen9AHvsdFTKHSANinZseWnPcX",
-  "LimitAmount": {
-    "currency": "USD",
-    "issuer": "rsP3mgGb2tcYUrxiLFiHJiQXhsziegtwBc",
-    "value": "100"
-  },
-  "Fee": "12"
-}
-
-### Trust Line with Authorization:
-{
-  "TransactionType": "TrustSet",
-  "Account": "ra5nK24KXen9AHvsdFTKHSANinZseWnPcX",
-  "LimitAmount": {
-    "currency": "EUR",
-    "issuer": "rsP3mgGb2tcYUrxiLFiHJiQXhsziegtwBc",
-    "value": "1000"
-  },
-  "Flags": 65536,
-  "Fee": "12"
-}
-
-### Trust Line with No Ripple:
-{
-  "TransactionType": "TrustSet",
-  "Account": "ra5nK24KXen9AHvsdFTKHSANinZseWnPcX",
-  "LimitAmount": {
-    "currency": "USD",
-    "issuer": "rsP3mgGb2tcYUrxiLFiHJiQXhsziegtwBc",
-    "value": "500"
-  },
-  "Flags": 131072,
-  "Fee": "12"
-}
-
-### Trust Line with Quality Values:
-{
-  "TransactionType": "TrustSet",
-  "Account": "ra5nK24KXen9AHvsdFTKHSANinZseWnPcX",
-  "LimitAmount": {
-    "currency": "USD",
-    "issuer": "rsP3mgGb2tcYUrxiLFiHJiQXhsziegtwBc",
-    "value": "1000"
-  },
-  "QualityIn": 10000000,
-  "QualityOut": 5000000,
-  "Fee": "12"
-}
-
 ## Important Notes:
 
 ### Trust Line Requirements
@@ -186,19 +107,24 @@ export const submitTrustSetTool = createTool({
 ### Amendment Requirements
 - DisallowIncoming amendment: Allows issuers to block incoming trust lines
 - fix1578 amendment: Changes behavior of No Ripple enablement failures`,
-  inputSchema: z.object({
-    network: z.string(),
-    txn: z.custom<TrustSet>().optional(),
-    seed: z.string().optional(),
-    signature: z.string().optional(),
-  }),
-  execute: async ({ context, mastra }) => {
-    const { network, txn, seed, signature } = context
+  buildTransaction: params => {
+    const { LimitAmount, ...rest } = params
+    return {
+      LimitAmount: {
+        currency: currencyCodeToHex(LimitAmount.currency),
+        value: LimitAmount.value,
+        issuer: LimitAmount.issuer,
+      },
+      ...rest,
+    }
+  },
+  validateTransaction: txn => {
+    if (txn.LimitAmount.currency === 'XRP') {
+      throw new Error('XRP is not allowed for TrustSet')
+    }
 
-    if (txn && seed) {
-      return await submitTransaction({ network, txn, seed, mastra })
-    } else if (signature) {
-      return await submitTransaction({ network, signature, mastra })
+    if (txn.LimitAmount.issuer === txn.Account) {
+      throw new Error('Cannot create trust line to yourself (issuer cannot be the same as Account)')
     }
   },
 })

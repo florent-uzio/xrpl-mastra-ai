@@ -251,17 +251,13 @@ const hexUri = Buffer.from(uri).toString('hex')
 - Use memos for additional metadata when needed`,
   inputSchema: z.object({
     network: z.string(),
-    txn: z.custom<NFTokenMint>().optional(),
+    txn: z.custom<NFTokenMint>(),
     seed: z.string().optional(),
     signature: z.string().optional(),
   }),
   execute: async ({ context, mastra }) => {
     const { network, txn, seed, signature } = context
 
-    if (txn && seed) {
-      return await submitTransaction({ network, txn, seed, mastra })
-    } else if (signature) {
-      return await submitTransaction({ network, signature, mastra })
-    }
+    return await submitTransaction({ network, txn, seed, mastra, signature })
   },
 })

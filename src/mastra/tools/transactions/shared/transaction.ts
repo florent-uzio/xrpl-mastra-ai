@@ -7,24 +7,13 @@ type SubmitTransactionProps<T extends SubmittableTransaction> = {
   network: string
   // The mastra instance to use
   mastra?: ToolExecutionContext['mastra']
-} & (
-  | {
-      // The transaction to submit
-      txn: T
-      // The signature to use for the transaction
-      signature?: never
-      // The seed to construct the wallet from
-      seed: string
-    }
-  | {
-      // The transaction to submit
-      txn?: never
-      // The signature to use for the transaction
-      signature: string
-      // The seed to construct the wallet from
-      seed?: never
-    }
-)
+  // The transaction to submit
+  txn: T
+  // The signature to use for the transaction
+  signature?: string
+  // The seed to construct the wallet from
+  seed?: string
+}
 
 /**
  * Submit a transaction to the XRPL network
@@ -40,7 +29,7 @@ export const submitTransaction = async <T extends SubmittableTransaction>({
   txn,
   seed,
   signature,
-}: SubmitTransactionProps<T>): Promise<TxResponse<T | SubmittableTransaction>> => {
+}: SubmitTransactionProps<T>): Promise<TxResponse<T>> => {
   const logger = mastra?.getLogger()
 
   // Get or create an XRPL client instance for the specified network
@@ -49,19 +38,21 @@ export const submitTransaction = async <T extends SubmittableTransaction>({
 
   // Submit the transaction to the XRPL network
   try {
-    if (seed && txn) {
+    if (signature) {
+      logger?.info('Submitting transaction with signature', { signature })
+
+      // For signature-based submission, we can't know the exact transaction type
+      // So we cast to the generic type T
+      return (await client.submitAndWait(signature)) as TxResponse<T>
+    }
+
+    if (seed) {
       logger?.info('Submitting transaction with seed', { txn, seed })
 
       return await client.submitAndWait(txn, {
         autofill: true,
         wallet: Wallet.fromSeed(seed),
       })
-    }
-
-    if (signature) {
-      logger?.info('Submitting transaction with signature', { signature })
-
-      return await client.submitAndWait(signature)
     }
 
     throw new Error('No transaction or signature provided to submit')

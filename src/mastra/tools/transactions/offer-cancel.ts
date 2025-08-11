@@ -154,17 +154,13 @@ Use OfferCreate with the OfferSequence parameter to replace the existing offer:
 - **Transaction History**: Review transaction history for offer lifecycle`,
   inputSchema: z.object({
     network: z.string(),
-    txn: z.custom<OfferCancel>().optional(),
+    txn: z.custom<OfferCancel>(),
     seed: z.string().optional(),
     signature: z.string().optional(),
   }),
   execute: async ({ context, mastra }) => {
     const { network, txn, seed, signature } = context
 
-    if (txn && seed) {
-      return await submitTransaction({ network, txn, seed, mastra })
-    } else if (signature) {
-      return await submitTransaction({ network, signature, mastra })
-    }
+    return await submitTransaction({ network, txn, seed, mastra, signature })
   },
 })

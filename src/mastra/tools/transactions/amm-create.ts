@@ -233,17 +233,13 @@ AMMCreate transactions require a much higher transaction cost than standard tran
 - **Trust Line Management**: Verify trust line status and authorization`,
   inputSchema: z.object({
     network: z.string(),
-    txn: z.custom<AMMCreate>().optional(),
+    txn: z.custom<AMMCreate>(),
     seed: z.string().optional(),
     signature: z.string().optional(),
   }),
   execute: async ({ context, mastra }) => {
     const { network, txn, seed, signature } = context
 
-    if (txn && seed) {
-      return await submitTransaction({ network, txn, seed, mastra })
-    } else if (signature) {
-      return await submitTransaction({ network, signature, mastra })
-    }
+    return await submitTransaction({ network, txn, seed, mastra, signature })
   },
 })
