@@ -44,7 +44,7 @@ export const xrplPathSetSchema = z
 // Payment-specific fields (to be merged with common fields)
 export const xrplPaymentFieldsSchema = z.object({
   // API v1: Amount required (alias to DeliverMax). API v2: DeliverMax required.
-  Amount: xrplAnyAmountSchema.optional().describe('Alias to DeliverMax (API v1)'),
+  Amount: xrplAnyAmountSchema.describe('Alias to DeliverMax (API v1)'),
   DeliverMax: xrplAnyAmountSchema.describe('API v2: Maximum amount to deliver (required in API v2)'),
 
   DeliverMin: xrplAnyAmountSchema

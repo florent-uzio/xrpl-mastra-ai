@@ -1,8 +1,37 @@
-import { Payment } from 'xrpl'
+import { isMPTAmount, Payment } from 'xrpl'
+import { currencyCodeToHex } from '../../../../helpers'
 import { useTransactionToolFactory } from '../factory'
 import { xrplPaymentSchema } from './payment.types'
 
 const { createTransactionTool } = useTransactionToolFactory({ inputSchema: xrplPaymentSchema })
+
+/**
+ * Helper function to process payment amounts (Amount or DeliverMax)
+ * Handles string amounts, MPT amounts, and currency objects
+ */
+const processPaymentAmount = (amount: any): any => {
+  // If it's a string (XRP amount in drops), return as is
+  if (typeof amount === 'string') {
+    return amount
+  }
+
+  // If it's an MPT amount, return as is
+  if (isMPTAmount(amount)) {
+    return amount
+  }
+
+  // If it's a currency object, convert currency to hex and return
+  if (amount && typeof amount === 'object' && amount.currency) {
+    return {
+      currency: currencyCodeToHex(amount.currency),
+      value: amount.value,
+      issuer: amount.issuer,
+    }
+  }
+
+  // Return as is for any other case
+  return amount
+}
 
 export const submitPaymentTool = createTransactionTool({
   toolId: 'submit-payment',
@@ -19,7 +48,8 @@ export const submitPaymentTool = createTransactionTool({
   buildTransaction: payment => {
     const builtPayment: Payment = {
       ...payment,
-      Amount: payment.Amount ?? payment.DeliverMax,
+      Amount: payment.DeliverMax ? undefined : processPaymentAmount(payment.Amount),
+      DeliverMax: processPaymentAmount(payment.DeliverMax),
     }
 
     return builtPayment
