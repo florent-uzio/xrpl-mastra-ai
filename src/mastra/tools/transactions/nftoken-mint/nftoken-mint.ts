@@ -1,4 +1,5 @@
-import { convertStringToHex } from 'xrpl'
+import { Amount, convertStringToHex } from 'xrpl'
+import { isIssuedCurrency } from 'xrpl/dist/npm/models/transactions/common'
 import { currencyCodeToHex, isString } from '../../../../helpers'
 import { useTransactionToolFactory } from '../factory'
 import { xrplNFTokenMintSchema } from './nftoken-mint.types'
@@ -11,14 +12,14 @@ const { createTransactionTool } = useTransactionToolFactory({
  * Helper function to process NFTokenMint Amount field
  * Handles string amounts (XRP) and currency objects (tokens)
  */
-const processNFTokenAmount = (amount: any): any => {
+const processNFTokenAmount = (amount: Amount): Amount => {
   // If it's a string (XRP amount in drops), return as is
   if (isString(amount)) {
     return amount
   }
 
   // If it's a currency object, convert currency to hex and return
-  if (amount && typeof amount === 'object' && amount.currency) {
+  if (isIssuedCurrency(amount)) {
     return {
       ...amount,
       currency: currencyCodeToHex(amount.currency),
@@ -88,7 +89,7 @@ Creates a new NFT and adds it to the NFTokenPage object of the NFTokenMinter. Th
     const { Amount, URI, NFTokenTaxon, ...rest } = nftokenMint
 
     return {
-      Amount: processNFTokenAmount(Amount),
+      Amount: Amount && processNFTokenAmount(Amount),
       URI: URI && convertStringToHex(URI),
       NFTokenTaxon: NFTokenTaxon ?? 0,
       ...rest,
