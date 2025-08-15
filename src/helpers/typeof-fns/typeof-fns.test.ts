@@ -1,13 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  isBoolean,
-  isDate,
-  isFunction,
-  isNumber,
-  isObject,
-  isString,
-  isUndefined,
-} from './typeof-fns'
+import { isBoolean, isDate, isFunction, isNumber, isObject, isString, isUndefined } from './typeof-fns'
 
 describe('isFunction', () => {
   it('correctly identifies functions', () => {
