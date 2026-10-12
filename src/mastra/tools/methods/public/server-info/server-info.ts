@@ -56,9 +56,9 @@ Note: If closed_ledger field is present with a small seq value (less than 8 digi
     network: z.string(),
     request: z.custom<ServerInfoRequest>(),
   }),
-  execute: async ({ context, mastra }) => {
+  execute: async (inputData, { mastra }) => {
     // Extract network and request from the context
-    const { network, request } = context
+    const { network, request } = inputData
 
     // Use the shared utility function to execute the server_info command
     return await executeMethod({

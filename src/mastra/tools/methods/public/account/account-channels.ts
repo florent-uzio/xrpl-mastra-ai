@@ -44,9 +44,9 @@ Note: You can calculate the amount left in a channel by subtracting balance from
     network: z.string(),
     request: z.custom<AccountChannelsRequest>(),
   }),
-  execute: async ({ context, mastra }) => {
+  execute: async (inputData, { mastra }) => {
     // Extract network and request from the context
-    const { network, request } = context
+    const { network, request } = inputData
 
     // Use the shared utility function to execute the account_channels command
     return await executeMethod({

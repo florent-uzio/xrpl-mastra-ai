@@ -32,8 +32,8 @@ Important Notes:
   inputSchema: z.object({
     currency: z.string(),
   }),
-  execute: async ({ context }) => {
-    const { currency } = context
+  execute: async inputData => {
+    const { currency } = inputData
 
     if (currency.length > 3) {
       return convertStringToHex(currency).padEnd(40, '0')
@@ -77,8 +77,8 @@ Example Conversions:
   inputSchema: z.object({
     hex: z.string(),
   }),
-  execute: async ({ context }) => {
-    const { hex } = context
+  execute: async inputData => {
+    const { hex } = inputData
 
     return convertHexToString(hex)
   },

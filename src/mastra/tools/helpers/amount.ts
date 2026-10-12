@@ -8,8 +8,8 @@ export const xrpToDropsTool = createTool({
   inputSchema: z.object({
     amount: z.string(),
   }),
-  execute: async ({ context }) => {
-    const { amount } = context
+  execute: async inputData => {
+    const { amount } = inputData
     return xrpToDrops(amount)
   },
 })
@@ -20,8 +20,8 @@ export const dropsToXrpTool = createTool({
   inputSchema: z.object({
     amount: z.string(),
   }),
-  execute: async ({ context }) => {
-    const { amount } = context
+  execute: async inputData => {
+    const { amount } = inputData
     return dropsToXrp(amount)
   },
 })

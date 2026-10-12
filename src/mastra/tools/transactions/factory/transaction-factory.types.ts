@@ -1,4 +1,4 @@
-import { createTool } from '@mastra/core'
+import { createTool } from '@mastra/core/tools'
 import { SubmittableTransaction } from 'xrpl'
 import z from 'zod'
 

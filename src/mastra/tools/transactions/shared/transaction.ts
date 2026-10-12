@@ -1,4 +1,4 @@
-import { ToolExecutionContext } from '@mastra/core'
+import { ToolExecutionContext } from '@mastra/core/tools'
 import { SubmittableTransaction, TxResponse, Wallet } from 'xrpl'
 import { disconnectXrplClient, getXrplClient } from '../../../../helpers'
 

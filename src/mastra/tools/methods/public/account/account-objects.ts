@@ -67,9 +67,9 @@ Note: For a higher-level view of an account's trust lines and balances, see the 
     network: z.string(),
     request: z.custom<AccountObjectsRequest>(),
   }),
-  execute: async ({ context, mastra }) => {
+  execute: async (inputData, { mastra }) => {
     // Extract network and options from the context
-    const { network, request } = context
+    const { network, request } = inputData
 
     // Use the shared utility function to execute the account_objects command
     return await executeMethod({

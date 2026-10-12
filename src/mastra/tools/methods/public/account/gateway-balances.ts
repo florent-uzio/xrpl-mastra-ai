@@ -46,9 +46,9 @@ Note: Due to a discrepancy in behavior between the Clio server and rippled (fixe
     network: z.string(),
     request: z.custom<GatewayBalancesRequest>(),
   }),
-  execute: async ({ context, mastra }) => {
+  execute: async (inputData, { mastra }) => {
     // Extract network and options from the context
-    const { network, request } = context
+    const { network, request } = inputData
 
     // Use the shared utility function to execute the gateway_balances command
     return await executeMethod({
