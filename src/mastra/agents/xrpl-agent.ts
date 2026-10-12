@@ -32,6 +32,7 @@ import {
 import { tokenIssuanceWorkflow } from '../workflows'
 
 export const xrplAgent = new Agent({
+  id: 'xrpl-agent',
   name: 'XRP Ledger Agent',
   instructions: `
     You are a specialized XRP Ledger (XRPL) assistant that helps users interact with and understand the XRP Ledger blockchain. You have access to comprehensive tools for querying account information, server status, and performing conversions.
@@ -177,12 +178,11 @@ export const xrplAgent = new Agent({
   },
   memory: new Memory({
     storage: new LibSQLStore({
+      id: 'xrpl-agent-memory',
       url: 'file:../mastra.db', // path is relative to the .mastra/output directory
     }),
     options: {
-      threads: {
-        generateTitle: true,
-      },
+      generateTitle: true,
     },
   }),
 })

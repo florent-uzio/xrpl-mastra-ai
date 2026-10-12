@@ -38,9 +38,9 @@ Possible Errors:
     network: z.string(),
     request: z.custom<AccountCurrenciesRequest>(),
   }),
-  execute: async ({ context, mastra }) => {
+  execute: async (inputData, { mastra }) => {
     // Extract network and request from the context
-    const { network, request } = context
+    const { network, request } = inputData
 
     // Use the shared utility function to execute the account_currencies command
     return await executeMethod({

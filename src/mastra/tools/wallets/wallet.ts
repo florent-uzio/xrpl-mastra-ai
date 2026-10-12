@@ -31,8 +31,8 @@ Important Notes:
   inputSchema: z.object({
     algorithm: z.enum(['secp256k1', 'ed25519']),
   }),
-  execute: async ({ context }) => {
-    const { algorithm } = context
+  execute: async inputData => {
+    const { algorithm } = inputData
 
     // Mastra raises an export from xrpl (which should work fine) error by using ECDSA.secp256k1, so we need to use the string value
     const algo = algorithm === 'ed25519' ? 'ed25519' : 'ecdsa-secp256k1'
@@ -85,12 +85,12 @@ Important Notes:
     seed: z.string().optional(),
     opts: z.custom<FundingOptions>().optional(),
   }),
-  execute: async ({ context, mastra }) => {
-    const { network, seed, opts } = context
+  execute: async (inputData, { mastra }) => {
+    const { network, seed, opts } = inputData
 
     const logger = mastra?.getLogger()
 
-    const client = await getXrplClient(network)
+    const client = await getXrplClient(network, mastra)
 
     const options = {
       ...opts,

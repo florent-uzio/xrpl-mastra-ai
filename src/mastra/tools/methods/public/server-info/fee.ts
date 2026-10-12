@@ -32,9 +32,9 @@ Note: Fee levels represent the ratio of transaction cost relative to the minimum
     network: z.string(),
     request: z.custom<FeeRequest>(),
   }),
-  execute: async ({ context, mastra }) => {
+  execute: async (inputData, { mastra }) => {
     // Extract network and request from the context
-    const { network, request } = context
+    const { network, request } = inputData
 
     // Use the shared utility function to execute the fee command
     return await executeMethod({

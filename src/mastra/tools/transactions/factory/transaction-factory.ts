@@ -48,12 +48,12 @@ export const useTransactionToolFactory = <S extends FactorySchema>(params: S) =>
       ...config,
       id: config.toolId,
       inputSchema: completeSchema,
-      execute: async ({ context, mastra }) => {
-        if (!context) {
-          throw new Error('Context not found - ensure the tool is called with proper context')
+      execute: async (inputData, { mastra }) => {
+        if (!inputData) {
+          throw new Error('Input data not found - ensure the tool is called with proper input')
         }
 
-        const { txn, ...rest } = context
+        const { txn, ...rest } = inputData
 
         // Build the transaction object from input parameters
         const builtTxn = config.buildTransaction(txn as z.infer<S['inputSchema']>)

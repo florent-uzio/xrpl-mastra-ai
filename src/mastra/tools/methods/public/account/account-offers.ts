@@ -37,9 +37,9 @@ Note: When executing offers, the offer with the most favorable (lowest) quality 
     network: z.string(),
     request: z.custom<AccountOffersRequest>(),
   }),
-  execute: async ({ context, mastra }) => {
+  execute: async (inputData, { mastra }) => {
     // Extract network and request from the context
-    const { network, request } = context
+    const { network, request } = inputData
 
     // Use the shared utility function to execute the account_offers command
     return await executeMethod({

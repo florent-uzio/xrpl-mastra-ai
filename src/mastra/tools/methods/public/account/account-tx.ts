@@ -44,9 +44,9 @@ Note: The server may respond with different values of ledger_index_min and ledge
     network: z.string(),
     request: z.custom<AccountTxRequest>(),
   }),
-  execute: async ({ context, mastra }) => {
+  execute: async (inputData, { mastra }) => {
     // Extract network and options from the context
-    const { network, request } = context
+    const { network, request } = inputData
 
     // Use the shared utility function to execute the account_tx command
     return await executeMethod({

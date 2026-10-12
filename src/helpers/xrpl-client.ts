@@ -1,4 +1,4 @@
-import { ToolExecutionContext } from '@mastra/core'
+import { ToolExecutionContext } from '@mastra/core/tools'
 import { Client } from 'xrpl'
 
 // Singleton pattern: store client instances
