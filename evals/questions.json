@@ -1,0 +1,23 @@
+[
+  {
+    "id": "drops-per-xrp",
+    "category": "units",
+    "question": "How many drops are in one XRP?",
+    "scoring": "contains",
+    "expected": ["1000000", "one million", "1 million"]
+  },
+  {
+    "id": "require-dest-flag",
+    "category": "accounts",
+    "question": "What does the RequireDest flag do on an XRPL account?",
+    "scoring": "judge",
+    "expected": "It requires incoming payments to that account to include a destination tag; payments without a destination tag are rejected."
+  },
+  {
+    "id": "genesis-balance",
+    "category": "ledger-lookup",
+    "question": "What is the XRP balance of the mainnet account rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh?",
+    "scoring": "tool",
+    "expected": ["getAccountInfoTool"]
+  }
+]

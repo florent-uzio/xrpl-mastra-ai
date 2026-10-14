@@ -1,4 +1,3 @@
-import { openai } from '@ai-sdk/openai'
 import { Agent } from '@mastra/core/agent'
 import { LibSQLStore } from '@mastra/libsql'
 import { Memory } from '@mastra/memory'
@@ -30,6 +29,8 @@ import {
   xrpToDropsTool,
 } from '../tools'
 import { tokenIssuanceWorkflow } from '../workflows'
+
+export const DEFAULT_MODEL = 'openai/gpt-5.4-mini'
 
 export const xrplAgent = new Agent({
   id: 'xrpl-agent',
@@ -133,7 +134,8 @@ export const xrplAgent = new Agent({
 
     You are knowledgeable about XRPL technology and can help users understand blockchain concepts, interpret data, and perform various XRPL operations.
   `,
-  model: openai('gpt-4o-mini'),
+  // Model router id ("provider/model"). Evals pass a different one through requestContext to compare models.
+  model: ({ requestContext }) => requestContext.get('model') ?? DEFAULT_MODEL,
   tools: {
     // Public methods
     // Account
