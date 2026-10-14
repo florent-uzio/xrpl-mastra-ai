@@ -11,7 +11,7 @@ npm run eval -- --model groq/openai/gpt-oss-120b
 npm run eval -- --judge openai/gpt-5.4-mini          # change the judge model (default: Claude)
 ```
 
-Model ids use Mastra's model router format (`provider/model`). API keys come from `.env`. Each run writes a JSON file to `evals/results/`.
+Model ids use Mastra's model router format (`provider/model`). API keys come from `.env`. Each run writes a JSON file to `evals/results/` (git-ignored; copy the numbers worth keeping into a doc).
 
 ## Writing questions
 
