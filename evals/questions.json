@@ -11,7 +11,7 @@
     "category": "accounts",
     "question": "What does the RequireDest flag do on an XRPL account?",
     "scoring": "judge",
-    "expected": "It requires incoming payments to that account to include a destination tag; payments without a destination tag are rejected."
+    "expected": "It requires incoming payments to that account to include a destination tag; payments without a destination tag are rejected with tecDST_TAG_NEEDED."
   },
   {
     "id": "genesis-balance",
