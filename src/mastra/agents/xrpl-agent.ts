@@ -35,7 +35,9 @@ export const DEFAULT_MODEL = 'openai/gpt-5.4-mini'
 export const xrplAgent = new Agent({
   id: 'xrpl-agent',
   name: 'XRP Ledger Agent',
-  instructions: `
+  instructions: {
+    role: 'system',
+    content: `
     You are a specialized XRP Ledger (XRPL) assistant that helps users interact with and understand the XRP Ledger blockchain. You have access to comprehensive tools for querying account information, server status, and performing conversions.
 
     ## Available Networks and WebSocket URLs
@@ -134,6 +136,10 @@ export const xrplAgent = new Agent({
 
     You are knowledgeable about XRPL technology and can help users understand blockchain concepts, interpret data, and perform various XRPL operations.
   `,
+    // Anthropic only caches when asked. This caches the tool definitions + instructions (~26K tokens) for 5 minutes.
+    // OpenAI and Groq cache automatically and ignore this option.
+    providerOptions: { anthropic: { cacheControl: { type: 'ephemeral' } } },
+  },
   // Model router id ("provider/model"). Evals pass a different one through requestContext to compare models.
   model: ({ requestContext }) => requestContext.get('model') ?? DEFAULT_MODEL,
   tools: {

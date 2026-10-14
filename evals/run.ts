@@ -18,8 +18,17 @@ const getPrice = async (modelId: string) => {
   const [provider, ...rest] = modelId.split('/')
   const registry = await fetch('https://models.dev/api.json').then(r => r.json())
   const cost = registry[provider]?.models?.[rest.join('/')]?.cost
-  if (!cost) console.warn(`No price found for ${modelId}; cost will be reported as null.`)
-  return cost ? { input: cost.input as number, output: cost.output as number } : null
+  if (!cost) {
+    console.warn(`No price found for ${modelId}; cost will be reported as null.`)
+    return null
+  }
+  // Providers without a separate cache price bill cached tokens at the normal input price.
+  return {
+    input: cost.input as number,
+    output: cost.output as number,
+    cacheRead: (cost.cache_read ?? cost.input) as number,
+    cacheWrite: (cost.cache_write ?? cost.input) as number,
+  }
 }
 
 const questions: Question[] = JSON.parse(await readFile(new URL('./questions.json', import.meta.url), 'utf8'))
@@ -34,15 +43,34 @@ for (const q of questions) {
     const result = await xrplAgent.generate(q.question, { requestContext })
     const latencyMs = Date.now() - start
     const toolsCalled = result.steps.flatMap(step => step.toolCalls.map(call => call.payload.toolName))
-    const { inputTokens = 0, outputTokens = 0 } = result.totalUsage
-    const costUsd = price ? (inputTokens * price.input + outputTokens * price.output) / 1e6 : null
+    const { inputTokens = 0, outputTokens = 0, cachedInputTokens = 0, cacheCreationInputTokens = 0 } = result.totalUsage
+    // inputTokens includes cached reads and cache writes, which are billed at their own prices.
+    const uncachedInputTokens = inputTokens - cachedInputTokens - cacheCreationInputTokens
+    const costUsd = price
+      ? (uncachedInputTokens * price.input +
+          cachedInputTokens * price.cacheRead +
+          cacheCreationInputTokens * price.cacheWrite +
+          outputTokens * price.output) /
+        1e6
+      : null
 
     let score: Score
     if (q.scoring === 'contains') score = scoreContains(result.text, q.expected)
     else if (q.scoring === 'tool') score = scoreTool(toolsCalled, q.expected)
     else score = await scoreJudge(judgeModel, q.question, result.text, q.expected)
 
-    results.push({ ...q, answer: result.text, toolsCalled, ...score, latencyMs, inputTokens, outputTokens, costUsd })
+    results.push({
+      ...q,
+      answer: result.text,
+      toolsCalled,
+      ...score,
+      latencyMs,
+      inputTokens,
+      cachedInputTokens,
+      cacheCreationInputTokens,
+      outputTokens,
+      costUsd,
+    })
     console.log(`${score.score ? 'PASS' : 'FAIL'}  ${q.id}  (${score.reason})`)
   } catch (error) {
     results.push({ ...q, score: 0, reason: `error: ${String(error)}`, latencyMs: Date.now() - start })
