@@ -6,3 +6,10 @@ dist
 .env
 *.db
 *.db-*
+
+# Private notes (not for the public repo)
+PLAN.md
+private/
+
+# Eval run outputs (record key numbers by hand instead)
+evals/results/
