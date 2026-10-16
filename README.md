@@ -69,11 +69,26 @@ The template includes comprehensive XRPL tools:
 - `AccountSet` - Configure account settings and flags
 - `AMMCreate` - Create Automated Market Makers
 - `Clawback` - Recover issued currencies
+- `LoanBrokerCoverClawback` - Claw back first-loss capital from a loan broker
+- `LoanBrokerCoverDeposit` - Deposit first-loss capital into a loan broker
+- `LoanBrokerCoverWithdraw` - Withdraw first-loss capital from a loan broker
+- `LoanBrokerDelete` - Delete a loan broker
+- `LoanBrokerSet` - Create or update a loan broker
+- `LoanDelete` - Delete a loan
+- `LoanManage` - Default, impair or unimpair a loan
+- `LoanPay` - Make a loan payment
+- `LoanSet` - Create a loan
 - `NFTokenMint` - Create new NFT tokens
 - `OfferCancel` - Cancel existing offers
 - `OfferCreate` - Create exchange offers
 - `Payment` - Send XRP or issued currencies
 - `TrustSet` - Create or modify trust lines
+- `VaultClawback` - Claw back assets or shares from a vault
+- `VaultCreate` - Create a single-asset vault
+- `VaultDelete` - Delete an empty vault
+- `VaultDeposit` - Deposit assets into a vault for shares
+- `VaultSet` - Update a vault
+- `VaultWithdraw` - Redeem vault shares for assets
 
 #### Utilities
 
