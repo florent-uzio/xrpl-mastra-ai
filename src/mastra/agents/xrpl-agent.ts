@@ -30,7 +30,7 @@ import {
 } from '../tools'
 import { tokenIssuanceWorkflow } from '../workflows'
 
-export const DEFAULT_MODEL = 'openai/gpt-5.4-mini'
+export const DEFAULT_MODEL: Agent['model'] = 'openai/gpt-5.4-mini'
 
 export const xrplAgent = new Agent({
   id: 'xrpl-agent',

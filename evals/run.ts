@@ -6,7 +6,7 @@ import { Question, Score, scoreContains, scoreJudge, scoreTool } from './scorers
 
 const { values } = parseArgs({
   options: {
-    model: { type: 'string', default: DEFAULT_MODEL },
+    model: { type: 'string', default: DEFAULT_MODEL as string },
     judge: { type: 'string', default: 'anthropic/claude-sonnet-5-5' },
   },
 })
