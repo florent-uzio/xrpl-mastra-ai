@@ -1,4 +1,5 @@
 import { Agent } from '@mastra/core/agent'
+import { ToolSearchProcessor } from '@mastra/core/processors'
 import { LibSQLStore } from '@mastra/libsql'
 import { Memory } from '@mastra/memory'
 import {
@@ -56,6 +57,68 @@ import {
 } from '../tools'
 import { iouIssuanceWorkflow, mptIssuanceWorkflow } from '../workflows'
 
+// Always sent to the model: read-only lookups and unit/currency conversions.
+const coreTools = {
+  getAccountInfoTool,
+  getAccountLinesTool,
+  getAccountTxTool,
+  getServerInfoTool,
+  getFeeTool,
+  currencyCodeToHexTool,
+  hexToCurrencyCodeTool,
+  xrpToDropsTool,
+  dropsToXrpTool,
+}
+
+// Loaded on demand: every other query tool, wallet/faucet tools and all transaction tools.
+const searchableTools = {
+  getAccountChannelsTool,
+  getAccountCurrenciesTool,
+  getAccountNFTsTool,
+  getAccountObjectsTool,
+  getAccountOffersTool,
+  getGatewayBalancesTool,
+  getFlowRecordsTool,
+  saveFlowRecordTool,
+  createWalletTool,
+  fundWalletWithFaucetTool,
+  submitAccountSetTool,
+  submitAmmCreateTool,
+  submitClawbackTool,
+  submitConfidentialMPTClawbackTool,
+  submitConfidentialMPTConvertBackTool,
+  submitConfidentialMPTConvertTool,
+  submitConfidentialMPTMergeInboxTool,
+  submitConfidentialMPTSendTool,
+  submitLoanBrokerCoverClawbackTool,
+  submitLoanBrokerCoverDepositTool,
+  submitLoanBrokerCoverWithdrawTool,
+  submitLoanBrokerDeleteTool,
+  submitLoanBrokerSetTool,
+  submitLoanDeleteTool,
+  submitLoanManageTool,
+  submitLoanPayTool,
+  submitLoanSetTool,
+  submitMPTokenAuthorizeTool,
+  submitMPTokenIssuanceCreateTool,
+  submitMPTokenIssuanceDestroyTool,
+  submitMPTokenIssuanceSetTool,
+  submitNFTokenMintTool,
+  submitOfferCancelTool,
+  submitOfferCreateTool,
+  submitPaymentTool,
+  submitTrustSetTool,
+  submitVaultClawbackTool,
+  submitVaultCreateTool,
+  submitVaultDeleteTool,
+  submitVaultDepositTool,
+  submitVaultSetTool,
+  submitVaultWithdrawTool,
+}
+
+// 'context' storage derives loaded tools from the conversation, so it survives restarts.
+const toolSearchProcessor = new ToolSearchProcessor({ tools: searchableTools, storage: 'context' })
+
 export const DEFAULT_MODEL: Agent['model'] = 'openai/gpt-5.4-mini'
 
 export const xrplAgent = new Agent({
@@ -87,77 +150,15 @@ export const xrplAgent = new Agent({
     - Only XRP amounts are in drops (1 XRP = 1,000,000 drops): convert them to XRP for display. Trust line and token balances are not in drops.
     - Explain results in plain terms and explain errors clearly.
   `,
-    // Anthropic only caches when asked. This caches the tool definitions + instructions (~26K tokens) for 5 minutes.
+    // Anthropic only caches when asked. This caches the always-on tool definitions + instructions for 5 minutes.
     // OpenAI and Groq cache automatically and ignore this option.
     providerOptions: { anthropic: { cacheControl: { type: 'ephemeral' } } },
   },
   // Model router id ("provider/model"). Evals pass a different one through requestContext to compare models.
   model: ({ requestContext }) => requestContext.get('model') ?? DEFAULT_MODEL,
-  tools: {
-    // Public methods
-    // Account
-    getAccountChannelsTool,
-    getAccountCurrenciesTool,
-    getAccountInfoTool,
-    getAccountLinesTool,
-    getAccountNFTsTool,
-    getAccountObjectsTool,
-    getAccountOffersTool,
-    getAccountTxTool,
-    getGatewayBalancesTool,
-
-    // Currency
-    currencyCodeToHexTool,
-    hexToCurrencyCodeTool,
-
-    // Server Info
-    getServerInfoTool,
-    getFeeTool,
-    getFlowRecordsTool,
-    saveFlowRecordTool,
-
-    // Amount helpers
-    xrpToDropsTool,
-    dropsToXrpTool,
-
-    // Wallet
-    createWalletTool,
-    fundWalletWithFaucetTool,
-
-    // Transactions
-    submitAccountSetTool,
-    submitAmmCreateTool,
-    submitClawbackTool,
-    submitConfidentialMPTClawbackTool,
-    submitConfidentialMPTConvertBackTool,
-    submitConfidentialMPTConvertTool,
-    submitConfidentialMPTMergeInboxTool,
-    submitConfidentialMPTSendTool,
-    submitLoanBrokerCoverClawbackTool,
-    submitLoanBrokerCoverDepositTool,
-    submitLoanBrokerCoverWithdrawTool,
-    submitLoanBrokerDeleteTool,
-    submitLoanBrokerSetTool,
-    submitLoanDeleteTool,
-    submitLoanManageTool,
-    submitLoanPayTool,
-    submitLoanSetTool,
-    submitMPTokenAuthorizeTool,
-    submitMPTokenIssuanceCreateTool,
-    submitMPTokenIssuanceDestroyTool,
-    submitMPTokenIssuanceSetTool,
-    submitNFTokenMintTool,
-    submitOfferCancelTool,
-    submitOfferCreateTool,
-    submitPaymentTool,
-    submitTrustSetTool,
-    submitVaultClawbackTool,
-    submitVaultCreateTool,
-    submitVaultDeleteTool,
-    submitVaultDepositTool,
-    submitVaultSetTool,
-    submitVaultWithdrawTool,
-  },
+  // Only the cheap, frequently used tools are sent on every request; the rest are found with search_tools and loaded with load_tool.
+  tools: coreTools,
+  inputProcessors: [toolSearchProcessor],
   workflows: {
     iouIssuanceWorkflow,
     mptIssuanceWorkflow,
