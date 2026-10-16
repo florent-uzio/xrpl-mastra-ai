@@ -19,6 +19,7 @@ import {
   getGatewayBalancesTool,
   getServerInfoTool,
   hexToCurrencyCodeTool,
+  saveFlowRecordTool,
   submitAccountSetTool,
   submitAmmCreateTool,
   submitClawbackTool,
@@ -188,6 +189,7 @@ export const xrplAgent = new Agent({
     getServerInfoTool,
     getFeeTool,
     getFlowRecordsTool,
+    saveFlowRecordTool,
 
     // Amount helpers
     xrpToDropsTool,
