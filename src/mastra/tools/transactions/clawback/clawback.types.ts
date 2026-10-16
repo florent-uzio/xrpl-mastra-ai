@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { xrplAddressSchema } from '../../../../helpers'
 import { xrplCurrencyAmountSchema } from '../shared'
 import { xrplCommonFieldsSchema } from '../shared/common-fields'
 
@@ -13,8 +14,7 @@ export const xrplClawbackFieldsSchema = z.object({
   ),
 
   // Optional field (requires MPTokensV1 amendment)
-  Holder: z
-    .string()
+  Holder: xrplAddressSchema
     .optional()
     .describe(
       "Specifies the holder's address from which to claw back. The holder must already own an MPToken object with a non-zero balance. Requires the MPTokensV1 amendment.",

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { xrplAddressSchema } from '../../../../helpers'
 import { xrplCommonFieldsSchema } from '../shared/common-fields'
 
 /**
@@ -34,10 +35,16 @@ export const xrplAccountSetFieldsSchema = z.object({
   // AccountSet Flags
   SetFlag: z
     .number()
+    .int()
+    .min(1)
+    .max(17)
     .optional()
     .describe('Integer flag to enable for this account. Use AccountSetFlagsSchema for named flags'),
   ClearFlag: z
     .number()
+    .int()
+    .min(1)
+    .max(17)
     .optional()
     .describe('Unique identifier of a flag to disable for this account. Use AccountSetFlagsSchema for named flags'),
 
@@ -46,7 +53,7 @@ export const xrplAccountSetFieldsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'The domain that owns this account, as a hex string of lowercase ASCII. Max 256 bytes. Example: "6578616D706C652E636F6D" for "example.com"',
+      'The domain that owns this account, as plain lowercase text (hex-encoded automatically). Max 256 bytes. Example: "example.com"',
     ),
   EmailHash: z
     .string()
@@ -60,8 +67,7 @@ export const xrplAccountSetFieldsSchema = z.object({
     ),
 
   // NFToken Management
-  NFTokenMinter: z
-    .string()
+  NFTokenMinter: xrplAddressSchema
     .optional()
     .describe('Another account that can mint NFTokens for you. Use ClearFlag: 10 to remove'),
 

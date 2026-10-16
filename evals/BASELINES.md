@@ -26,3 +26,20 @@ Notes:
 - GPT-5.4 mini fails all 3 runs on the newer features (MPT holders, Batch flags, confidential MPTs, lending, `vault_info`) and on `blackholed-accounts` (one `r` too many in ACCOUNT_ONE).
 - Both models fail `token-types`: they read it as "how many tokens exist" rather than "how many kinds of token".
 - The judge is Claude, so Claude is grading its own answers. Not yet cross-checked with another judge.
+
+## 2026-10-16 — tool schema and outputSchema changes (PR #10) (20 questions × 3 runs)
+
+Judge: `anthropic/claude-sonnet-5-5`. Same questions and settings as the baseline above, agent model `anthropic/claude-sonnet-5-5`.
+
+| Version      | Accuracy | Per run       | Avg latency | Cost per run |
+| ------------ | -------- | ------------- | ----------- | ------------ |
+| Baseline     | 95%      | 95 / 95 / 95% | 7.4 s       | $0.29        |
+| After PR #10 | 95%      | 95 / 95 / 95% | 7.0 s       | $0.25        |
+
+By category: accounts, ledger-lookup, public-api and transactions 100%; tokens 80%. Same as the baseline.
+
+Notes:
+
+- No regression. `token-types` still fails (same cause as the baseline).
+- The cost and latency drop (about 13% and 5%) is within normal variation for 3 runs; it fits the shorter tool schemas but is not confirmed.
+- The evals don't submit transactions, so the transaction tools were not exercised.

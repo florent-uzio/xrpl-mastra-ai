@@ -19,6 +19,32 @@ export type TransactionToolConfig<T extends SubmittableTransaction, S extends Fa
 } & Omit<CreateToolConfig, 'id' | 'inputSchema' | 'execute'>
 
 /**
+ * Output schema shared by all transaction tools (the submitAndWait response).
+ * Fields are optional and extra fields are kept, so a valid response is never rejected.
+ */
+export const transactionResponseSchema = z.looseObject({
+  id: z.union([z.string(), z.number()]).optional(),
+  type: z.string().optional(),
+  result: z.looseObject({
+    hash: z.string().optional().describe('Transaction hash'),
+    validated: z.boolean().optional().describe('true once the transaction is in a validated (final) ledger'),
+    ledger_index: z.number().optional().describe('Ledger the transaction was included in'),
+    meta: z
+      .union([
+        z.string(),
+        z.looseObject({
+          TransactionResult: z
+            .string()
+            .optional()
+            .describe('tesSUCCESS = applied. tec* = included but failed (fee charged). Anything else = not applied'),
+          delivered_amount: z.unknown().optional().describe('Amount actually delivered (Payment)'),
+        }),
+      ])
+      .optional(),
+  }),
+})
+
+/**
  * Common input schema for all transaction tools
  */
 export const baseTransactionSchema = z.object({

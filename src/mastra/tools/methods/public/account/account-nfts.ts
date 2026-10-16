@@ -1,24 +1,43 @@
 import { createTool } from '@mastra/core/tools'
-import { AccountNFTsRequest } from 'xrpl'
 import { z } from 'zod'
-import { executeMethod } from '../../shared'
+import { ledgerSpecifierShape, networkSchema, paginationMarkerSchema, xrplAddressSchema } from '../../../../../helpers'
+import { executeMethod, xrplMethodResponse } from '../../shared'
 
 export const getAccountNFTsTool = createTool({
   id: 'get-account-nfts',
   description: `List the NFTs owned by an account.
 
-Request parameters:
-- account: address (required)
-- ledger_index: number or "validated" | "current" (optional)
-- ledger_hash: string (optional)
-- limit: 20-400, default 100. Counts NFToken pages (up to 32 NFTs each), not NFTs. (optional)
-- marker: pagination marker from a previous response (optional)
-
 URI is returned hex-encoded; decode it to read it.`,
   inputSchema: z.object({
-    network: z.string(),
-    request: z.custom<AccountNFTsRequest>(),
+    network: networkSchema,
+    request: z.object({
+      account: xrplAddressSchema.describe('Account address'),
+      ...ledgerSpecifierShape,
+      limit: z
+        .number()
+        .int()
+        .min(20)
+        .max(400)
+        .optional()
+        .describe('Max results per page (20-400, default 100). Counts NFToken pages (up to 32 NFTs each), not NFTs.'),
+      marker: paginationMarkerSchema,
+    }),
   }),
+  outputSchema: xrplMethodResponse({
+    account: z.string().optional(),
+    account_nfts: z
+      .array(
+        z.looseObject({
+          NFTokenID: z.string(),
+          Issuer: z.string(),
+          NFTokenTaxon: z.number(),
+          URI: z.string().optional().describe('Hex-encoded'),
+          Flags: z.number(),
+        }),
+      )
+      .optional(),
+  }),
+  outputValidation: 'warn',
   execute: async (inputData, { mastra }) => {
     // Extract network and options from the context
     const { network, request } = inputData

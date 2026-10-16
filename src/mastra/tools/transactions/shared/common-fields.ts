@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { xrplAddressSchema } from '../../../../helpers'
 
 // XRPL Common Transaction Fields schema
 // Reference: https://xrpl.org/docs/references/protocol/transactions/common-fields
@@ -37,7 +38,7 @@ export const xrplSignersSchema = z
 
 export const xrplCommonFieldsSchema = z.object({
   // Required (by protocol) but often auto-filled by server if using submitAndWait with autofill
-  Account: z.string().describe('The account that initiated the transaction (r-address)'),
+  Account: xrplAddressSchema.describe('The account that initiated the transaction (r-address)'),
   TransactionType: z.string().describe('The type of transaction (e.g., Payment, TrustSet, OfferCreate, etc.)'),
 
   // Common optional / auto-fillable fields
@@ -51,7 +52,7 @@ export const xrplCommonFieldsSchema = z.object({
     .string()
     .optional()
     .describe('Hash requiring the previous transaction of the sending account to match'),
-  Delegate: z.string().optional().describe('Delegate account sending the transaction on behalf of Account'),
+  Delegate: xrplAddressSchema.optional().describe('Delegate account sending the transaction on behalf of Account'),
   SourceTag: z.number().optional().describe('Arbitrary integer used to identify a payment reason or sender'),
   TicketSequence: z
     .number()

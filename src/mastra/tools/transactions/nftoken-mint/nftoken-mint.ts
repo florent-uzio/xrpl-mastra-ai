@@ -1,5 +1,4 @@
 import { Amount, convertStringToHex } from 'xrpl'
-import { isIssuedCurrency } from 'xrpl/dist/npm/models/transactions/common'
 import { currencyCodeToHex, isString } from '../../../../helpers'
 import { useTransactionToolFactory } from '../factory'
 import { xrplNFTokenMintSchema } from './nftoken-mint.types'
@@ -19,15 +18,10 @@ const processNFTokenAmount = (amount: Amount): Amount => {
   }
 
   // If it's a currency object, convert currency to hex and return
-  if (isIssuedCurrency(amount)) {
-    return {
-      ...amount,
-      currency: currencyCodeToHex(amount.currency),
-    }
+  return {
+    ...amount,
+    currency: currencyCodeToHex(amount.currency),
   }
-
-  // Return as is for any other case
-  return amount
 }
 
 export const submitNFTokenMintTool = createTransactionTool({

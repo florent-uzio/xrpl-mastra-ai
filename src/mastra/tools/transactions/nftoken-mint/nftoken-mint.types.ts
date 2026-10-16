@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { xrplAddressSchema } from '../../../../helpers'
 import { xrplCurrencyAmountSchema } from '../shared'
 import { xrplCommonFieldsSchema } from '../shared/common-fields'
 
@@ -26,13 +27,13 @@ export const xrplNFTokenMintFieldsSchema = z.object({
     .number()
     .int()
     .gte(0)
+    .default(0)
     .describe(
-      'An arbitrary taxon, or shared identifier, for a series or collection of related NFTs. To mint a series of NFTs, give them all the same taxon.',
+      'Defaults to 0. An arbitrary taxon, or shared identifier, for a series or collection of related NFTs. To mint a series of NFTs, give them all the same taxon.',
     ),
 
   // Optional fields
-  Issuer: z
-    .string()
+  Issuer: xrplAddressSchema
     .optional()
     .describe(
       'The issuer of the token, if the sender is issuing it on behalf of another account. Must be omitted if the sender is the issuer. If provided, the issuer must have NFTokenMinter set to the sender.',
@@ -48,10 +49,10 @@ export const xrplNFTokenMintFieldsSchema = z.object({
     ),
   URI: z
     .string()
-    .max(512) // 256 bytes = 512 hex characters
+    .refine(uri => Buffer.byteLength(uri) <= 256, 'URI must be 256 bytes or less')
     .optional()
     .describe(
-      'Up to 256 bytes of arbitrary data encoded as hexadecimal. Typically a URI pointing to NFT data/metadata (HTTP, HTTPS, IPFS, magnet link, data URL, etc.).',
+      'Plain-text URI (hex-encoded automatically), up to 256 bytes. Typically points to NFT metadata (HTTPS, IPFS, magnet link, data URL, etc.).',
     ),
   Amount: z
     .union([z.string(), xrplCurrencyAmountSchema])
@@ -67,8 +68,7 @@ export const xrplNFTokenMintFieldsSchema = z.object({
     .describe(
       'Time after which the offer is no longer active, in seconds since the Ripple Epoch. Requires Amount field to be specified.',
     ),
-  Destination: z
-    .string()
+  Destination: xrplAddressSchema
     .optional()
     .describe(
       'If present, indicates that this offer may only be accepted by the specified account. Requires Amount field to be specified.',
