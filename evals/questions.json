@@ -74,19 +74,19 @@
     "category": "cmpt",
     "question": "What is the new type of key to use the confidential transfers with MPT?",
     "scoring": "contains",
-    "expected": ["el-gamal", "el gamal"]
+    "expected": ["elgamal", "el-gamal", "el gamal"]
   },
   {
     "id": "cmpt-mpt-set",
-    "category": "cmpt-set",
+    "category": "cmpt",
     "question": "What is the only transaction type required to define the issuer and auditor EC-ElGamal public keys?",
     "scoring": "judge",
     "expected": "MPTokenIssuanceSet is the only way to register the issuer and auditor EC-ElGamal public keys required for confidential transfers."
   },
   {
     "id": "loan-transaction-count",
-    "category": "loan-txn-count",
-    "question": "How many Loan related transaction types exist?",
+    "category": "lending",
+    "question": "How many Loan related transaction types exist and list them?",
     "scoring": "judge",
     "expected": "There are nine Loan related transaction types: LoanBrokerCoverClawback, LoanBrokerCoverDeposit, LoanBrokerCoverWithdraw, LoanBrokerDelete, LoanBrokerSet, LoanDelete, LoanManage, LoanPay, LoanSet."
   }
