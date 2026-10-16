@@ -9,6 +9,7 @@ export const currencyCodeToHexTool = createTool({
   inputSchema: z.object({
     currency: z.string().min(1).max(40).describe('Currency code, e.g. "USD" or "RLUSD"'),
   }),
+  outputSchema: z.string().describe('3-character code or 40-character hex code'),
   execute: async inputData => {
     return currencyCodeToHex(inputData.currency)
   },
@@ -20,6 +21,7 @@ export const hexToCurrencyCodeTool = createTool({
   inputSchema: z.object({
     hex: z.string().min(3).max(40).describe('Currency code from a response: 3 characters or 40 hex characters'),
   }),
+  outputSchema: z.string().describe('Readable currency code'),
   execute: async inputData => {
     const { hex } = inputData
 

@@ -19,12 +19,8 @@ type ExecuteMethodProps = {
  * @param mastra - The Mastra instance for logging
  * @returns The XRPL response
  */
-export const executeMethod = async <R extends Request>({
-  network,
-  request,
-  logMessage,
-  mastra,
-}: ExecuteMethodProps) => {
+export const executeMethod = async ({ network, request, logMessage, mastra }: ExecuteMethodProps): Promise<any> => {
+  // The response shape depends on the command; each tool describes it with its outputSchema
   // Get or create an XRPL client instance for the specified network
   // This handles singleton pattern and connection management
   const client = await getXrplClient(network, mastra)

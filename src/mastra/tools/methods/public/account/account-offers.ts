@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { z } from 'zod'
 import { ledgerSpecifierShape, networkSchema, paginationMarkerSchema, xrplAddressSchema } from '../../../../../helpers'
-import { executeMethod } from '../../shared'
+import { executeMethod, xrplMethodResponse } from '../../shared'
 
 export const getAccountOffersTool = createTool({
   id: 'get-account-offers',
@@ -17,6 +17,21 @@ An offer's seq is the OfferSequence to use with OfferCancel.`,
       marker: paginationMarkerSchema,
     }),
   }),
+  outputSchema: xrplMethodResponse({
+    account: z.string().optional(),
+    offers: z
+      .array(
+        z.looseObject({
+          seq: z.number().describe('Use as OfferSequence with OfferCancel'),
+          taker_gets: z.unknown(),
+          taker_pays: z.unknown(),
+          quality: z.string(),
+          expiration: z.number().optional(),
+        }),
+      )
+      .optional(),
+  }),
+  outputValidation: 'warn',
   execute: async (inputData, { mastra }) => {
     // Extract network and request from the context
     const { network, request } = inputData

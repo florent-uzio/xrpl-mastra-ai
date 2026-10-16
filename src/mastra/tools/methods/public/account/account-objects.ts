@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { z } from 'zod'
 import { ledgerSpecifierShape, networkSchema, paginationMarkerSchema, xrplAddressSchema } from '../../../../../helpers'
-import { executeMethod } from '../../shared'
+import { executeMethod, xrplMethodResponse } from '../../shared'
 
 export const getAccountObjectsTool = createTool({
   id: 'get-account-objects',
@@ -33,6 +33,11 @@ export const getAccountObjectsTool = createTool({
       marker: paginationMarkerSchema,
     }),
   }),
+  outputSchema: xrplMethodResponse({
+    account: z.string().optional(),
+    account_objects: z.array(z.looseObject({ LedgerEntryType: z.string() })).optional(),
+  }),
+  outputValidation: 'warn',
   execute: async (inputData, { mastra }) => {
     // Extract network and options from the context
     const { network, request } = inputData

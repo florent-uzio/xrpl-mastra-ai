@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { z } from 'zod'
 import { ledgerSpecifierShape, networkSchema, xrplAddressSchema } from '../../../../../helpers'
-import { executeMethod } from '../../shared'
+import { executeMethod, xrplMethodResponse } from '../../shared'
 
 export const getAccountCurrenciesTool = createTool({
   id: 'get-account-currencies',
@@ -13,6 +13,11 @@ export const getAccountCurrenciesTool = createTool({
       ...ledgerSpecifierShape,
     }),
   }),
+  outputSchema: xrplMethodResponse({
+    receive_currencies: z.array(z.string()).optional(),
+    send_currencies: z.array(z.string()).optional(),
+  }),
+  outputValidation: 'warn',
   execute: async (inputData, { mastra }) => {
     // Extract network and request from the context
     const { network, request } = inputData

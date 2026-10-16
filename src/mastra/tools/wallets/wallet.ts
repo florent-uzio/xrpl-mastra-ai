@@ -1,7 +1,21 @@
 import { createTool } from '@mastra/core/tools'
 import { ECDSA, Wallet } from 'xrpl'
 import { z } from 'zod'
-import { getXrplClient, networkSchema } from '../../../helpers'
+import { getXrplClient, networkSchema, xrplAddressSchema } from '../../../helpers'
+
+const walletOutputSchema = z.object({
+  address: xrplAddressSchema.describe('Classic address, safe to share'),
+  seed: z.string().optional().describe('SECRET: required to sign transactions'),
+  publicKey: z.string(),
+  privateKey: z.string().describe('SECRET'),
+})
+
+const toWalletOutput = (wallet: Wallet) => ({
+  address: wallet.classicAddress,
+  seed: wallet.seed,
+  publicKey: wallet.publicKey,
+  privateKey: wallet.privateKey,
+})
 
 export const createWalletTool = createTool({
   id: 'create-wallet',
@@ -14,13 +28,14 @@ Treat the seed as a secret. Only the address is safe to share.`,
   inputSchema: z.object({
     algorithm: z.enum(['secp256k1', 'ed25519']).default('ed25519').describe('Key algorithm'),
   }),
+  outputSchema: walletOutputSchema,
   execute: async inputData => {
     const { algorithm } = inputData
 
     // Mastra raises an export from xrpl (which should work fine) error by using ECDSA.secp256k1, so we need to use the string value
     const algo = algorithm === 'ed25519' ? 'ed25519' : 'ecdsa-secp256k1'
 
-    return Wallet.generate(algo as ECDSA)
+    return toWalletOutput(Wallet.generate(algo as ECDSA))
   },
 })
 
@@ -50,6 +65,9 @@ Funding can take a few seconds.`,
       })
       .optional(),
   }),
+  outputSchema: walletOutputSchema.extend({
+    balance: z.number().describe('XRP balance after funding'),
+  }),
   execute: async (inputData, { mastra }) => {
     const { network, seed, opts } = inputData
 
@@ -75,16 +93,16 @@ Funding can take a few seconds.`,
 
       logger?.info(`Wallet ${walletInstance.address} funded successfully`)
 
-      return fundedWallet
+      return { ...toWalletOutput(fundedWallet.wallet), balance: fundedWallet.balance }
     }
 
     // Otherwise create a new wallet
     logger?.info(`No wallet provided, creating a new one`)
 
-    const { wallet: newWallet } = await client.fundWallet(null, options)
+    const { wallet: newWallet, balance } = await client.fundWallet(null, options)
 
     logger?.info(`Wallet ${newWallet.address} funded successfully`)
 
-    return newWallet
+    return { ...toWalletOutput(newWallet), balance }
   },
 })

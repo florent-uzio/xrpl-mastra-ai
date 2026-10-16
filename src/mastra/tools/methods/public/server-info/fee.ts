@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { z } from 'zod'
 import { networkSchema } from '../../../../../helpers'
-import { executeMethod } from '../../shared'
+import { executeMethod, xrplMethodResponse } from '../../shared'
 
 export const getFeeTool = createTool({
   id: 'get-fee',
@@ -10,6 +10,20 @@ export const getFeeTool = createTool({
     network: networkSchema,
     request: z.object({}),
   }),
+  outputSchema: xrplMethodResponse({
+    current_ledger_size: z.string().optional(),
+    current_queue_size: z.string().optional(),
+    drops: z
+      .looseObject({
+        base_fee: z.string(),
+        median_fee: z.string(),
+        minimum_fee: z.string(),
+        open_ledger_fee: z.string(),
+      })
+      .optional()
+      .describe('Fees in drops'),
+  }),
+  outputValidation: 'warn',
   execute: async (inputData, { mastra }) => {
     // Extract network and request from the context
     const { network, request } = inputData

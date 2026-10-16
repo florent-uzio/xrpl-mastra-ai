@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { z } from 'zod'
 import { ledgerSpecifierShape, networkSchema, paginationMarkerSchema, xrplAddressSchema } from '../../../../../helpers'
-import { executeMethod } from '../../shared'
+import { executeMethod, xrplMethodResponse } from '../../shared'
 
 export const getAccountChannelsTool = createTool({
   id: 'get-account-channels',
@@ -18,6 +18,20 @@ Funds left in a channel = amount - balance.`,
       marker: paginationMarkerSchema,
     }),
   }),
+  outputSchema: xrplMethodResponse({
+    account: z.string().optional(),
+    channels: z
+      .array(
+        z.looseObject({
+          channel_id: z.string(),
+          destination_account: z.string(),
+          amount: z.string().describe('Total drops allocated to the channel'),
+          balance: z.string().describe('Drops already paid out; funds left = amount - balance'),
+        }),
+      )
+      .optional(),
+  }),
+  outputValidation: 'warn',
   execute: async (inputData, { mastra }) => {
     // Extract network and request from the context
     const { network, request } = inputData

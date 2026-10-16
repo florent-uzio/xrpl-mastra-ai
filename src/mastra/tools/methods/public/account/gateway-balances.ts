@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { z } from 'zod'
 import { ledgerSpecifierShape, networkSchema, xrplAddressSchema } from '../../../../../helpers'
-import { executeMethod } from '../../shared'
+import { executeMethod, xrplMethodResponse } from '../../shared'
 
 export const getGatewayBalancesTool = createTool({
   id: 'get-gateway-balances',
@@ -19,6 +19,13 @@ Response: obligations (issued to non-hotwallet holders), balances (held by the h
       ...ledgerSpecifierShape,
     }),
   }),
+  outputSchema: xrplMethodResponse({
+    account: z.string().optional(),
+    obligations: z.record(z.string(), z.string()).optional().describe('Issued tokens by currency, as decimal strings'),
+    balances: z.record(z.string(), z.array(z.looseObject({ currency: z.string(), value: z.string() }))).optional(),
+    assets: z.record(z.string(), z.array(z.looseObject({ currency: z.string(), value: z.string() }))).optional(),
+  }),
+  outputValidation: 'warn',
   execute: async (inputData, { mastra }) => {
     // Extract network and options from the context
     const { network, request } = inputData

@@ -2,7 +2,12 @@ import { createTool } from '@mastra/core/tools'
 import { SubmittableTransaction } from 'xrpl'
 import { z } from 'zod'
 import { submitTransaction } from '../shared/transaction'
-import { baseTransactionSchema, FactorySchema, TransactionToolConfig } from './transaction-factory.types'
+import {
+  baseTransactionSchema,
+  FactorySchema,
+  TransactionToolConfig,
+  transactionResponseSchema,
+} from './transaction-factory.types'
 
 /**
  * Creates a complete transaction schema by merging base fields with transaction-specific fields
@@ -48,6 +53,9 @@ export const useTransactionToolFactory = <S extends FactorySchema>(params: S) =>
       ...config,
       id: config.toolId,
       inputSchema: completeSchema,
+      outputSchema: transactionResponseSchema,
+      // The transaction is already submitted when the result is validated: never turn it into an error (the model would retry)
+      outputValidation: 'warn',
       execute: async (inputData, { mastra }) => {
         if (!inputData) {
           throw new Error('Input data not found - ensure the tool is called with proper input')
@@ -64,11 +72,14 @@ export const useTransactionToolFactory = <S extends FactorySchema>(params: S) =>
         }
 
         // Submit the transaction using the appropriate
-        return await submitTransaction<T>({
+        const response = await submitTransaction<T>({
           mastra,
           txn: builtTxn,
           ...rest,
         })
+
+        // xrpl's response types have no index signature, so they don't match the loose output schema structurally
+        return response as unknown as z.infer<typeof transactionResponseSchema>
       },
     })
   }

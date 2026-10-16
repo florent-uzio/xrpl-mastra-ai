@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { z } from 'zod'
 import { ledgerSpecifierShape, networkSchema, paginationMarkerSchema, xrplAddressSchema } from '../../../../../helpers'
-import { executeMethod } from '../../shared'
+import { executeMethod, xrplMethodResponse } from '../../shared'
 
 export const getAccountNFTsTool = createTool({
   id: 'get-account-nfts',
@@ -23,6 +23,21 @@ URI is returned hex-encoded; decode it to read it.`,
       marker: paginationMarkerSchema,
     }),
   }),
+  outputSchema: xrplMethodResponse({
+    account: z.string().optional(),
+    account_nfts: z
+      .array(
+        z.looseObject({
+          NFTokenID: z.string(),
+          Issuer: z.string(),
+          NFTokenTaxon: z.number(),
+          URI: z.string().optional().describe('Hex-encoded'),
+          Flags: z.number(),
+        }),
+      )
+      .optional(),
+  }),
+  outputValidation: 'warn',
   execute: async (inputData, { mastra }) => {
     // Extract network and options from the context
     const { network, request } = inputData
