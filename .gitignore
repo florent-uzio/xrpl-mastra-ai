@@ -13,3 +13,6 @@ private/
 
 # Eval run outputs (record key numbers by hand instead)
 evals/results/
+
+# Flow records (wallet seeds of testnet/devnet runs)
+/records/

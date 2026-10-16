@@ -15,6 +15,7 @@ import {
   getAccountOffersTool,
   getAccountTxTool,
   getFeeTool,
+  getFlowRecordsTool,
   getGatewayBalancesTool,
   getServerInfoTool,
   hexToCurrencyCodeTool,
@@ -30,6 +31,7 @@ import {
   submitLoanManageTool,
   submitLoanPayTool,
   submitLoanSetTool,
+  submitMPTokenAuthorizeTool,
   submitNFTokenMintTool,
   submitOfferCancelTool,
   submitOfferCreateTool,
@@ -43,7 +45,7 @@ import {
   submitVaultWithdrawTool,
   xrpToDropsTool,
 } from '../tools'
-import { iouIssuanceWorkflow } from '../workflows'
+import { iouIssuanceWorkflow, mptIssuanceWorkflow } from '../workflows'
 
 export const DEFAULT_MODEL: Agent['model'] = 'openai/gpt-5.4-mini'
 
@@ -177,6 +179,7 @@ export const xrplAgent = new Agent({
     // Server Info
     getServerInfoTool,
     getFeeTool,
+    getFlowRecordsTool,
 
     // Amount helpers
     xrpToDropsTool,
@@ -199,6 +202,7 @@ export const xrplAgent = new Agent({
     submitLoanManageTool,
     submitLoanPayTool,
     submitLoanSetTool,
+    submitMPTokenAuthorizeTool,
     submitNFTokenMintTool,
     submitOfferCancelTool,
     submitOfferCreateTool,
@@ -213,6 +217,7 @@ export const xrplAgent = new Agent({
   },
   workflows: {
     iouIssuanceWorkflow,
+    mptIssuanceWorkflow,
   },
   memory: new Memory({
     storage: new LibSQLStore({
