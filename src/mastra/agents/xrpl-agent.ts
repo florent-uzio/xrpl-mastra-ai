@@ -55,7 +55,7 @@ import {
   submitVaultWithdrawTool,
   xrpToDropsTool,
 } from '../tools'
-import { iouIssuanceWorkflow, mptIssuanceWorkflow } from '../workflows'
+import { confidentialMptWorkflow, iouIssuanceWorkflow, mptIssuanceWorkflow } from '../workflows'
 
 // Always sent to the model: read-only lookups and unit/currency conversions.
 const coreTools = {
@@ -160,6 +160,7 @@ export const xrplAgent = new Agent({
   tools: coreTools,
   inputProcessors: [toolSearchProcessor],
   workflows: {
+    confidentialMptWorkflow,
     iouIssuanceWorkflow,
     mptIssuanceWorkflow,
   },
