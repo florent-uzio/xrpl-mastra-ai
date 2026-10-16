@@ -16,3 +16,4 @@ evals/results/
 
 # Flow records (wallet seeds of testnet/devnet runs)
 /records/
+/src/mastra/public/records/
