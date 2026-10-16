@@ -134,9 +134,9 @@
   },
   {
     "id": "sponsorship-entry-type",
-    "category": "ledger-entry-type",
+    "category": "accounts",
     "question": "What is the ledger entry represents a sponsoring relationship between a sponsor and a sponsee?",
-    "scoring": "contains",
-    "expected": ["Sponsorship"]
+    "scoring": "judge",
+    "expected": "The Sponsorship ledger entry. It records a sponsoring relationship between a sponsor account and a sponsee account."
   }
 ]
