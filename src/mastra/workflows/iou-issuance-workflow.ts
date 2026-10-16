@@ -1,16 +1,13 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
-import { AccountSet, AccountSetAsfFlags, convertStringToHex, Payment, TrustSet, TxResponse } from 'xrpl'
-import { currencyCodeToHex, getXrplClient } from '../../helpers'
-import { settingsSchema, iouIssuanceWorkflowSchema, TxnResult, walletsSchema } from './iou-issuance-workflow.types'
-
-const errorMessage = (error: unknown) => (error instanceof Error ? error.message : 'Unknown error')
-
-const toTxnResult = (description: string, response: TxResponse): TxnResult => ({
-  description,
-  hash: response.result.hash,
-  // @ts-expect-error - TransactionResult is an object here
-  status: response.result.meta.TransactionResult ?? 'N/A',
-})
+import { AccountSet, AccountSetAsfFlags, convertStringToHex, Payment, TrustSet } from 'xrpl'
+import { currencyCodeToHex, getXrplClient, saveFlowRecord, toWalletRecord } from '../../helpers'
+import {
+  iouIssuanceResultSchema,
+  iouIssuanceWorkflowSchema,
+  settingsSchema,
+  walletsSchema,
+} from './iou-issuance-workflow.types'
+import { errorMessage, fundWallets, toTxnResult, TxnResult } from './shared'
 
 /** Step 1: creates and funds the issuer and holder wallets. */
 const createWallets = createStep({
@@ -22,10 +19,7 @@ const createWallets = createStep({
     const { network, holders: numHolders } = inputData
 
     try {
-      const client = await getXrplClient(network, mastra)
-      const [issuer, ...holders] = await Promise.all(
-        Array.from({ length: numHolders + 1 }, async () => (await client.fundWallet()).wallet),
-      )
+      const [issuer, ...holders] = await fundWallets(network, numHolders + 1, mastra)
 
       return { ...inputData, issuer, holders }
     } catch (error) {
@@ -145,21 +139,53 @@ const mintTokens = createStep({
   },
 })
 
+/** Step 5: saves the wallets (with seeds), token settings and transaction hashes to a record file. */
+const recordResults = createStep({
+  id: 'record-results',
+  description: 'Saves the wallets, token settings and transaction results of this run to a record file',
+  inputSchema: settingsSchema,
+  outputSchema: iouIssuanceResultSchema,
+  execute: async ({ inputData }) => {
+    const { issuer, holders, network, trustline, mintAmount, issuerSettings, txnResults } = inputData
+
+    try {
+      const { record, path } = await saveFlowRecord({
+        flow: 'iou-issuance',
+        network,
+        data: {
+          issuer: toWalletRecord(issuer),
+          holders: holders.map(toWalletRecord),
+          currency: trustline.currency,
+          trustlineLimit: trustline.trustlineLimit,
+          mintAmount,
+          issuerSettings,
+          txnResults,
+        },
+      })
+
+      return { ...inputData, recordId: record.id, recordPath: path }
+    } catch (error) {
+      throw new Error(`Failed to save the record: ${errorMessage(error)}`)
+    }
+  },
+})
+
 /**
- * Issues an IOU (trust line token) on the XRPL: create wallets -> set issuer flags -> create trust lines -> mint.
+ * Issues an IOU (trust line token) on the XRPL: create wallets -> set issuer flags -> create trust lines -> mint -> record.
  * Not for MPTs (MPTokenIssuance), which use a different flow.
  */
 const iouIssuanceWorkflow = createWorkflow({
   id: 'iou-issuance-workflow',
-  description: `Issues an IOU (trust line token, e.g. a stablecoin-style currency) on an XRPL testnet or devnet: creates and funds an issuer and N holder wallets, sets issuer flags/domain, creates trust lines, and mints IOUs to each holder. Not for MPTs (Multi-Purpose Tokens).
+  description: `Issues an IOU (trust line token, e.g. a stablecoin-style currency) on an XRPL testnet or devnet: creates and funds an issuer and N holder wallets, sets issuer flags/domain, creates trust lines, and mints IOUs to each holder, then saves a record (wallet addresses and seeds, currency, tx hashes) retrievable with the get-flow-records tool. Not for MPTs (Multi-Purpose Tokens).
 Supported networks: wss://s.altnet.rippletest.net:51233/, wss://testnet.xrpl-labs.com/, wss://s.devnet.rippletest.net:51233/, wss://clio.devnet.rippletest.net:51233/.`,
   inputSchema: iouIssuanceWorkflowSchema,
-  outputSchema: settingsSchema,
+  outputSchema: iouIssuanceResultSchema,
 })
   .then(createWallets)
   .then(setupIssuerAccount)
   .then(createTrustLines)
   .then(mintTokens)
+  .then(recordResults)
 
 iouIssuanceWorkflow.commit()
 

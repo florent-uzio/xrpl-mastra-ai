@@ -1,5 +1,6 @@
 import { AccountSetAsfFlags, Wallet } from 'xrpl'
 import z from 'zod'
+import { txnResultSchema, workflowNetworkSchema } from './shared'
 
 /**
  * Flag names (e.g. "asfDefaultRipple") from xrpl's AccountSetAsfFlags enum.
@@ -12,20 +13,7 @@ const accountSetAsfFlagNames = Object.keys(AccountSetAsfFlags).filter(k => isNaN
   ...(keyof typeof AccountSetAsfFlags)[],
 ]
 
-/**
- * Supported network endpoints for the IOU issuance workflow
- *
- * These are the WebSocket URLs for different XRPL networks.
- * The workflow is designed primarily for testnet and devnet networks.
- */
-export const iouIssuanceWorkflowNetworkSchema = z.enum([
-  // Testnet networks
-  'wss://s.altnet.rippletest.net:51233/',
-  'wss://testnet.xrpl-labs.com/',
-  // Devnet networks
-  'wss://clio.devnet.rippletest.net:51233/',
-  'wss://s.devnet.rippletest.net:51233/',
-])
+export const iouIssuanceWorkflowNetworkSchema = workflowNetworkSchema
 
 /**
  * Schema for XRPL wallet objects
@@ -77,23 +65,6 @@ const issuerAndHoldersSchema = z.object({
 })
 
 /**
- * Transaction result schema
- *
- * Represents the result of a single XRPL transaction with
- * description, hash, and status information.
- */
-const txnResultSchema = z.object({
-  description: z.string().describe('Human-readable description of the transaction'),
-  hash: z.string().describe('Transaction hash for blockchain verification'),
-  status: z.string().describe('Transaction status (success, failure, etc.)'),
-})
-
-/**
- * Type definition for transaction results
- */
-export type TxnResult = z.infer<typeof txnResultSchema>
-
-/**
  * Schema for workflow step that creates wallets
  *
  * Extends the main workflow schema with issuer and holders information
@@ -109,4 +80,12 @@ export const walletsSchema = iouIssuanceWorkflowSchema.extend(issuerAndHoldersSc
  */
 export const settingsSchema = walletsSchema.extend({
   txnResults: z.array(txnResultSchema).describe('Array of transaction results from this step'),
+})
+
+/**
+ * Workflow output: the last step's output plus where the run was recorded
+ */
+export const iouIssuanceResultSchema = settingsSchema.extend({
+  recordId: z.string().describe('Id of the saved record, usable with the get-flow-records tool'),
+  recordPath: z.string().describe('Path of the saved record file'),
 })
