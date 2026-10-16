@@ -5,29 +5,12 @@ import { getXrplClient } from '../../../helpers'
 
 export const createWalletTool = createTool({
   id: 'create-wallet',
-  description: `Create a new XRPL wallet with public/private key pair. This is an off-chain operation that doesn't depend on any network.
+  description: `Generate a new XRPL wallet (address, seed, keys) locally. No network call and the wallet is not funded or activated on-ledger.
 
-XRPL supports only two cryptographic algorithms:
-- secp256k1: Elliptic curve algorithm (older, more widely supported)
-- ed25519: Modern elliptic curve algorithm (faster, more secure, default)
+Input:
+- algorithm: "ed25519" (default) or "secp256k1"
 
-The generated wallet will have:
-- r-address: Public address starting with 'r' (e.g., r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59)
-- s-seed: Private seed starting with 's' (e.g., sEdTM1uX8pu2do5XvTnutH6HsouMaM2)
-- Public/private key pair for signing transactions
-
-Input Parameters:
-- algorithm: The cryptographic algorithm to use (ECDSA, optional)
-  - If not provided, defaults to ed25519
-  - Valid values: 'secp256k1' or 'ed25519'
-
-Important Notes:
-- This is an off-chain operation - no network connection required
-- The wallet is not automatically funded - you need to add XRP to activate it
-- Keep the seed secure - it provides full access to the wallet
-- The r-address is safe to share publicly
-- The s-seed should never be shared or stored insecurely
-- Wallet generation is deterministic but cryptographically secure`,
+Treat the seed as a secret. Only the address is safe to share.`,
   inputSchema: z.object({
     algorithm: z.enum(['secp256k1', 'ed25519']),
   }),
@@ -43,43 +26,15 @@ Important Notes:
 
 export const fundWalletWithFaucetTool = createTool({
   id: 'fund-wallet-with-faucet',
-  description: `Fund a wallet with XRP using a faucet. This operation is only available on testnet networks (testnet, devnet, and other test networks) and is not possible on mainnet.
+  description: `Fund a wallet with test XRP from a faucet. Testnet/devnet only, never mainnet. If no network is given, use a testnet websocket URL.
 
-Default Network:
-- Use a testnet network with the correct websocket URL if no network is provided by the user.
+Input:
+- network: testnet websocket URL (required)
+- seed: wallet to fund (optional). If omitted, a new funded wallet is created.
+- opts.amount: XRP amount as a string, not drops. Default "10". Fractions are rounded up. (optional)
+- opts.faucetHost / opts.faucetPath: only for custom faucets (optional)
 
-Input Parameters:
-- network: The testnet network to use. Use the websocket URL to get the correct xrpl client. This network is not needed for the fundWallet function. (string, required)
-- wallet: Optional wallet to fund (Wallet object, optional)
-- opts: Optional funding configuration (FundingOptions, optional)
-
-Optional Funding Options (opts):
-- amount: Custom amount to fund in XRP (string, optional, default: 10)
-  - Must be provided as a string representing XRP amount (e.g., "100", "50.5")
-  - Do NOT convert to drops - provide the XRP amount directly
-  - Examples: "10", "100", "50", "1000"
-  - If not specified, defaults to 10 XRP
-  - The minimum amount is 1 XRP, if you provide a value less than 1, it will be rounded up to 1 XRP
-  - Decimal amounts are rounded up using Math.ceil (e.g., "50.1" becomes "51", "50.9" becomes "51")
-  - The amount is automatically converted to a string representation of an integer
-- faucetHost: Custom host for faucet server (string, optional)
-  - On devnet, testnet, AMM devnet, and HooksV3 testnet, the correct server is determined automatically
-  - Use this to customize the faucet host in other environments
-- faucetPath: Custom path for faucet server (string, optional)
-  - Example: '/accounts' for 'faucet.altnet.rippletest.net/accounts'
-  - On devnet, testnet, AMM devnet, and HooksV3 testnet, the correct path is determined automatically
-  - Use this to customize the faucet path in other environments
-- usageContext: Optional field to indicate the use case context of the faucet transaction (string, optional)
-  - Examples: 'integration test', 'code snippets'
-
-Important Notes:
-- This operation is NOT available on mainnet - faucets only exist on test networks
-- The default funding amount is 10 XRP if not specified but can vary by network and faucet
-- Faucet servers automatically determine the correct host and path for supported test networks
-- Custom faucet hosts and paths can be specified for other environments
-- The wallet must be a valid XRPL wallet object
-- Funding may take a few seconds to complete
-- Some test networks may have rate limits or availability restrictions`,
+Funding can take a few seconds.`,
   inputSchema: z.object({
     network: z.string(),
     seed: z.string().optional(),

@@ -7,55 +7,15 @@ const { createTransactionTool } = useTransactionToolFactory({
 
 export const submitClawbackTool = createTransactionTool({
   toolId: 'submit-clawback',
-  description: `Submit a Clawback transaction to recover tokens issued by your account from a holder's account.
+  description: `Submit a Clawback transaction. A token issuer recovers issued tokens from a holder.
 
-## What is Clawback?
-Clawback allows token issuers to recover (claw back) tokens they have issued from holders' accounts. This is primarily used for regulatory compliance, such as recovering tokens sent to sanctioned accounts or addressing illegal activity.
+Prerequisites: the issuer must have set asfAllowTrustLineClawback (16) before holding any trust lines, offers or escrows. It is permanent and cannot be combined with NoFreeze.
 
-## Prerequisites:
-- **Clawback Amendment**: Must be enabled on the network
-- **Account Setup**: Issuer must have enabled "Allow Trust Line Clawback" flag (asfAllowTrustLineClawback = 16)
-- **Empty Owner Directory**: Clawback can only be enabled before any trust lines, offers, escrows, etc.
-- **No NoFreeze Flag**: Cannot have both clawback and NoFreeze enabled (mutually exclusive)
-- **Permanent Setting**: Once enabled, clawback cannot be disabled
+Amount is {currency, issuer, value}. The issuer field holds the HOLDER's address, not the issuer's. The Account is the issuer. XRP is not allowed, value must be > 0, and you cannot claw back from yourself. If value exceeds the holder's balance, the whole balance is recovered.
 
-## Required Fields:
-- **Amount**: Currency amount object containing:
-  - currency: Token currency code (cannot be XRP)
-  - value: Amount to claw back (must be > 0)
-  - issuer: Token holder's address (the account to claw back from)
+Holder is only for MPTs. For AMM accounts use AMMClawback.
 
-## Optional Fields:
-- **Holder**: MPToken holder address (requires MPTokensV1 amendment)
-
-## Important Notes:
-- **XRP Exclusion**: Cannot claw back XRP - only issued tokens
-- **Field Confusion**: The issuer field in Amount represents the token holder, not the issuer
-- **Partial Clawback**: If amount exceeds holder's balance, entire balance is clawed back
-- **Self-Clawback Prevention**: Cannot claw back from yourself
-- **AMM Accounts**: Use AMMClawback instead for AMM accounts
-
-## Common Error Cases:
-- **temDISABLED**: Clawback amendment not enabled
-- **temBAD_AMOUNT**: Holder's balance is 0 or self-clawback attempt
-- **tecAMM_ACCOUNT**: Not allowed with AMM accounts
-- **tecNO_LINE**: No trust line exists or balance is 0
-- **tecNO_PERMISSION**: Clawback not enabled or conflicting flags
-
-## Example Usage:
-\`\`\`json
-{
-  "Account": "rp6abvbTbjoce8ZDJkT6snvxTZSYMBCC9S",
-  "Amount": {
-    "currency": "FOO",
-    "issuer": "rsA2LpzuawewSBQXkiju3YQTMzW13pAAdW",
-    "value": "314.159"
-  },
-  "TransactionType": "Clawback"
-}
-\`\`\`
-
-**Note**: This claws back 314.159 FOO tokens from holder rsA2LpzuawewSBQXkiju3YQTMzW13pAAdW.`,
+Errors: tecNO_PERMISSION (clawback not enabled), tecNO_LINE (no trust line or zero balance), tecAMM_ACCOUNT.`,
   buildTransaction: clawback => {
     return clawback
   },

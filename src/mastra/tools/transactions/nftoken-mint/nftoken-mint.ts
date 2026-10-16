@@ -32,59 +32,16 @@ const processNFTokenAmount = (amount: Amount): Amount => {
 
 export const submitNFTokenMintTool = createTransactionTool({
   toolId: 'submit-nftoken-mint',
-  description: `Submit an NFTokenMint transaction to create a new non-fungible token (NFT) on the XRPL.
+  description: `Submit an NFTokenMint transaction to create an NFT. Flags are immutable after minting.
 
-## What is NFTokenMint?
-Creates a new NFT and adds it to the NFTokenPage object of the NFTokenMinter. This is the only opportunity to specify immutable token fields like TokenFlags.
+Flags: tfBurnable (1), tfOnlyXRP (2), tfTransferable (8), tfMutable (16). tfTrustLine (4) is deprecated.
 
-## Required Fields:
-- **NFTokenTaxon**: Arbitrary taxon/identifier for NFT series or collection (number)
-
-## Optional Fields:
-- **Issuer**: Account to issue NFT on behalf of (string, requires NFTokenMinter authorization)
-- **TransferFee**: Fee for secondary sales (number, 0-50000, requires tfTransferable flag)
-- **URI**: Hex-encoded metadata, this will be encoded by the mastra tool (string, max 256 bytes)
-- **Amount**: Expected/offered amount (XRP string or token object)
-- **Expiration**: Offer expiration time in seconds since Ripple Epoch (number)
-- **Destination**: Account that can accept the offer (string)
-
-## NFTokenMint Flags:
-- **tfBurnable** (1): Allow issuer to destroy the NFT
-- **tfOnlyXRP** (2): Only XRP payments allowed
-- **tfTrustLine** (4): DEPRECATED - Auto-create trust lines
-- **tfTransferable** (8): Allow transfers to others (required for TransferFee)
-- **tfMutable** (16): Allow URI updates via NFTokenModify
-
-## Important Notes:
-- **TransferFee**: Requires tfTransferable flag when > 0
-- **Expiration/Destination**: Require Amount field to be specified
-- **Amount**: Must be non-zero for tokens, zero allowed for XRP
-- **URI**: Must be hex-encoded, max 256 bytes (512 hex characters)
-- **Issuer Delegation**: Requires NFTokenMinter account setting
-
-## Common Error Cases:
-- **temDISABLED**: NonFungibleTokensV1 amendment not enabled
-- **temBAD_NFTOKEN_TRANSFER_FEE**: TransferFee outside 0-50000 range
-- **temINVALID_FLAG**: Invalid flag combination
-- **temMALFORMED**: URI too long or invalid specification
-- **tecNO_ISSUER**: Issuer account doesn't exist
-- **tecNO_PERMISSION**: No NFTokenMinter authorization
-- **tecINSUFFICIENT_RESERVE**: Account below reserve requirement
-- **tecMAX_SEQUENCE_REACHED**: Maximum NFTs already minted
-
-## Example Usage:
-\`\`\`json
-{
-  "Account": "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B",
-  "NFTokenTaxon": 0,
-  "TransferFee": 314,
-  "Flags": 8,
-  "URI": "697066733A2F2F62616679626569676479727A74357366703775646D37687537367568377932366E6634646675796C71616266336F636C67747179353566627A6469",
-  "TransactionType": "NFTokenMint"
-}
-\`\`\`
-
-**Note**: This creates a transferable NFT with 0.0314% transfer fee and IPFS metadata.`,
+Rules:
+- NFTokenTaxon identifies the collection (0 is fine).
+- TransferFee is 0-50000 (50000 = 50%) and requires tfTransferable.
+- URI is plain text here. It is hex-encoded automatically (max 256 bytes after encoding).
+- Issuer requires NFTokenMinter authorization from that account.
+- Amount, Destination and Expiration create a sell offer at mint time. Destination and Expiration require Amount.`,
   buildTransaction: nftokenMint => {
     const { Amount, URI, NFTokenTaxon, ...rest } = nftokenMint
 
