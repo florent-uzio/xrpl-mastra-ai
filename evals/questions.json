@@ -138,5 +138,26 @@
     "question": "What is the ledger entry represents a sponsoring relationship between a sponsor and a sponsee?",
     "scoring": "judge",
     "expected": "The Sponsorship ledger entry. It records a sponsoring relationship between a sponsor account and a sponsee account."
+  },
+  {
+    "id": "confidential-mpt-who-can-read",
+    "category": "tokens",
+    "question": "On a confidential MPT, which parties can decrypt a holder's confidential balance, and which ledger fields hold the encrypted copies?",
+    "scoring": "judge",
+    "expected": "The holder, the issuer and, if an auditor key is registered, the auditor. Each has its own ElGamal-encrypted copy: the holder's balance is in ConfidentialBalanceSpending and ConfidentialBalanceInbox on the MPToken, the issuer's copy is IssuerEncryptedBalance and the auditor's is AuditorEncryptedBalance."
+  },
+  {
+    "id": "confidential-mpt-keys",
+    "category": "tokens",
+    "question": "Where are the ElGamal public keys for a confidential MPT registered on the ledger (issuer, auditor and holder)?",
+    "scoring": "judge",
+    "expected": "The issuer and auditor keys are IssuerEncryptionKey and AuditorEncryptionKey on the MPTokenIssuance; the holder's key is HolderEncryptionKey on its MPToken, registered by its first ConfidentialMPTConvert."
+  },
+  {
+    "id": "confidential-mpt-inbox",
+    "category": "transactions",
+    "question": "After a holder receives a confidential MPT transfer, why can't it spend the funds right away, and which transaction fixes that?",
+    "scoring": "judge",
+    "expected": "Received funds go to the confidential inbox balance, not the spending balance. The holder must submit a ConfidentialMPTMergeInbox transaction to move the inbox into the spending balance before it can send or convert back."
   }
 ]

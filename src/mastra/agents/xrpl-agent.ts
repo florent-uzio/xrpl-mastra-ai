@@ -5,6 +5,7 @@ import { Memory } from '@mastra/memory'
 import {
   createWalletTool,
   currencyCodeToHexTool,
+  decryptConfidentialBalanceTool,
   dropsToXrpTool,
   fundWalletWithFaucetTool,
   getAccountChannelsTool,
@@ -65,6 +66,7 @@ const coreTools = {
   getServerInfoTool,
   getFeeTool,
   currencyCodeToHexTool,
+  decryptConfidentialBalanceTool,
   hexToCurrencyCodeTool,
   xrpToDropsTool,
   dropsToXrpTool,
@@ -80,6 +82,7 @@ const searchableTools = {
   getGatewayBalancesTool,
   getFlowRecordsTool,
   saveFlowRecordTool,
+  decryptConfidentialBalanceTool,
   createWalletTool,
   fundWalletWithFaucetTool,
   submitAccountSetTool,
