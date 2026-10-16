@@ -43,3 +43,18 @@ Notes:
 - No regression. `token-types` still fails (same cause as the baseline).
 - The cost and latency drop (about 13% and 5%) is within normal variation for 3 runs; it fits the shorter tool schemas but is not confirmed.
 - The evals don't submit transactions, so the transaction tools were not exercised.
+
+## 2026-10-16 — dynamic tool loading with `ToolSearchProcessor` (20 questions × 1 run)
+
+Judge: `anthropic/claude-sonnet-5-5`. Agent model `anthropic/claude-sonnet-5-5`. 9 core tools are always sent; the other 42 (including every `submit*` tool) are loaded on demand via `search_tools` / `load_tool`. Instructions were also trimmed.
+
+| Version              | Accuracy | Avg latency | Cost per run |
+| -------------------- | -------- | ----------- | ------------ |
+| After PR #10         | 95%      | 7.0 s       | $0.25        |
+| Dynamic tool loading | 100%     | 6.3 s       | $0.20        |
+
+Notes:
+
+- Single run, so the accuracy difference is within noise; the cost drop (about 21%) is the signal.
+- The evals only call core tools. Loading was checked by hand: `gateway_balances` and `submit-amm-create` were both found and loaded without a prompt hint.
+- Loading costs extra model turns (`search_tools`, `load_tool`) the first time a non-core tool is needed.
