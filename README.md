@@ -8,7 +8,7 @@ This template demonstrates how to build sophisticated XRPL applications using Ma
 
 - **XRPL Client Management**: Singleton pattern for efficient client connections
 - **Comprehensive XRPL Tools**: Public methods, transactions, and wallet management
-- **Token Issuance Workflow**: Complete automated token creation and distribution
+- **IOU Issuance Workflow**: Complete automated IOU (trust line token) creation and distribution
 - **AI Agent Integration**: Intelligent XRPL agent with detailed tool descriptions
 - **Type Safety**: Full TypeScript support with Zod validation
 
@@ -256,9 +256,9 @@ You can customize existing tools by:
 
 By default, mainnet will be used, if you need to use another network, simply mention "testnet" or "devnet" in your prompt.
 
-## Token Issuance Workflow
+## IOU Issuance Workflow
 
-The template includes a complete token issuance workflow that:
+The template includes a complete IOU (trust line token) issuance workflow, not applicable to MPTs, that:
 
 1. **Creates Wallets** - Generates and funds issuer and holder wallets
 2. **Configures Issuer** - Sets account flags and domain (optional)
