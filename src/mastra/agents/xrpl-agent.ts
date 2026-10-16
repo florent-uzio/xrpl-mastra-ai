@@ -43,7 +43,7 @@ import {
   submitVaultWithdrawTool,
   xrpToDropsTool,
 } from '../tools'
-import { tokenIssuanceWorkflow } from '../workflows'
+import { iouIssuanceWorkflow } from '../workflows'
 
 export const DEFAULT_MODEL: Agent['model'] = 'openai/gpt-5.4-mini'
 
@@ -212,7 +212,7 @@ export const xrplAgent = new Agent({
     submitVaultWithdrawTool,
   },
   workflows: {
-    tokenIssuanceWorkflow,
+    iouIssuanceWorkflow,
   },
   memory: new Memory({
     storage: new LibSQLStore({
