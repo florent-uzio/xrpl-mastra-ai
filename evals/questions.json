@@ -24,8 +24,8 @@
     "id": "mpt-holders",
     "category": "public-api",
     "question": "What is the public API to know the holders of a specific MPT issuance ID?",
-    "scoring": "contains",
-    "expected": ["clio"]
+    "scoring": "judge",
+    "expected": "The mpt_holders method, which is only available on Clio servers (not on xrpld/rippled)."
   },
   {
     "id": "subscribe",
@@ -45,8 +45,8 @@
     "id": "xrp-clawback",
     "category": "tokens",
     "question": "Can XRP be clawbacked?",
-    "scoring": "contains",
-    "expected": ["No"]
+    "scoring": "judge",
+    "expected": "No. Clawback only applies to issued tokens (trust line tokens and MPTs) when the issuer enabled it; XRP cannot be clawed back."
   },
   {
     "id": "server-info",
