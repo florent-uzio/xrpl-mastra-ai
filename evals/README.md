@@ -9,9 +9,10 @@ npm run eval                                        # default agent model (opena
 npm run eval -- --model anthropic/claude-sonnet-5-5
 npm run eval -- --model groq/openai/gpt-oss-120b
 npm run eval -- --judge openai/gpt-5.4-mini          # change the judge model (default: Claude)
+npm run eval -- --runs 3                            # repeat the set and average (answers vary between runs)
 ```
 
-Model ids use Mastra's model router format (`provider/model`). API keys come from `.env`. Each run writes a JSON file to `evals/results/` (git-ignored; copy the numbers worth keeping into a doc).
+Model ids use Mastra's model router format (`provider/model`). API keys come from `.env`. Each run writes a JSON file to `evals/results/` (git-ignored; copy the numbers worth keeping into `BASELINES.md`).
 
 ## Writing questions
 
