@@ -64,11 +64,20 @@ export const useTransactionToolFactory = <S extends FactorySchema>(params: S) =>
         const { txn, ...rest } = inputData
 
         // Build the transaction object from input parameters
-        const builtTxn = config.buildTransaction(txn as z.infer<S['inputSchema']>)
+        let builtTxn = config.buildTransaction(txn as z.infer<S['inputSchema']>)
 
         // Run optional validation if provided
         if (config.validateTransaction) {
           await config.validateTransaction(builtTxn)
+        }
+
+        if (config.prepareTransaction) {
+          builtTxn = await config.prepareTransaction({
+            txn: builtTxn,
+            input: txn as z.infer<S['inputSchema']>,
+            network: rest.network,
+            mastra,
+          })
         }
 
         // Submit the transaction using the appropriate
