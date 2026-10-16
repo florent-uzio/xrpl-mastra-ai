@@ -9,7 +9,7 @@
   {
     "id": "require-dest-flag",
     "category": "accounts",
-    "question": "What does the RequireDest flag do on an XRPL account?",
+    "question": "What does the RequireDest flag do on an XRPL account and what is the error code if a payment is sent without destination tag?",
     "scoring": "judge",
     "expected": "It requires incoming payments to that account to include a destination tag; payments without a destination tag are rejected with tecDST_TAG_NEEDED."
   },
@@ -19,5 +19,54 @@
     "question": "What is the XRP balance of the mainnet account rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh?",
     "scoring": "tool",
     "expected": ["getAccountInfoTool"]
+  },
+  {
+    "id": "mpt-holders",
+    "category": "public-api",
+    "question": "What is the public API to know the holders of a specific MPT issuance ID?",
+    "scoring": "contains",
+    "expected": ["clio"]
+  },
+  {
+    "id": "subscribe",
+    "category": "public-api",
+    "question": "What is the public API/method to requests periodic notifications from the server when certain events happen?",
+    "scoring": "contains",
+    "expected": ["subscribe"]
+  },
+  {
+    "id": "token-types",
+    "category": "tokens",
+    "question": "How many token types exist on the XRPL as of 2026?",
+    "scoring": "judge",
+    "expected": "There are four, XRP the native currency, IOU which are trustline tokens, NFT and MPT (Multi-purposes token) the newest token type."
+  },
+  {
+    "id": "xrp-clawback",
+    "category": "tokens",
+    "question": "Can XRP be clawbacked?",
+    "scoring": "contains",
+    "expected": ["No"]
+  },
+  {
+    "id": "server-info",
+    "category": "public-api",
+    "question": "What is the xrpld version of the mainnet?",
+    "scoring": "tool",
+    "expected": ["getServerInfoTool"]
+  },
+  {
+    "id": "batch-max-inner-txns",
+    "category": "batch",
+    "question": "How many maximum inner transactions can a Batch transaction have?",
+    "scoring": "contains",
+    "expected": ["eight", "8"]
+  },
+  {
+    "id": "batch-flags",
+    "category": "batch",
+    "question": "How many batch flags exist and list them?",
+    "scoring": "judge",
+    "expected": "There are four batch flags: tfAllOrNothing, tfOnlyOne, tfUntilFailure, tfIndependent."
   }
 ]
