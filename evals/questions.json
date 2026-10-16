@@ -1,7 +1,7 @@
 [
   {
     "id": "drops-per-xrp",
-    "category": "units",
+    "category": "tokens",
     "question": "How many drops are in one XRP?",
     "scoring": "contains",
     "expected": ["1000000", "one million", "1 million"]
@@ -50,44 +50,93 @@
   },
   {
     "id": "server-info",
-    "category": "public-api",
+    "category": "ledger-lookup",
     "question": "What is the xrpld version of the mainnet?",
     "scoring": "tool",
     "expected": ["getServerInfoTool"]
   },
   {
     "id": "batch-max-inner-txns",
-    "category": "batch",
+    "category": "transactions",
     "question": "How many maximum inner transactions can a Batch transaction have?",
     "scoring": "contains",
     "expected": ["eight", "8"]
   },
   {
     "id": "batch-flags",
-    "category": "batch",
+    "category": "transactions",
     "question": "How many batch flags exist and list them?",
     "scoring": "judge",
     "expected": "There are four batch flags: tfAllOrNothing, tfOnlyOne, tfUntilFailure, tfIndependent."
   },
   {
     "id": "cmpt-el-gamal",
-    "category": "cmpt",
+    "category": "tokens",
     "question": "What is the new type of key to use the confidential transfers with MPT?",
     "scoring": "contains",
     "expected": ["elgamal", "el-gamal", "el gamal"]
   },
   {
     "id": "cmpt-mpt-set",
-    "category": "cmpt",
+    "category": "tokens",
     "question": "What is the only transaction type required to define the issuer and auditor EC-ElGamal public keys?",
     "scoring": "judge",
     "expected": "MPTokenIssuanceSet is the only way to register the issuer and auditor EC-ElGamal public keys required for confidential transfers."
   },
   {
     "id": "loan-transaction-count",
-    "category": "lending",
+    "category": "transactions",
     "question": "How many Loan related transaction types exist and list them?",
     "scoring": "judge",
     "expected": "There are nine Loan related transaction types: LoanBrokerCoverClawback, LoanBrokerCoverDeposit, LoanBrokerCoverWithdraw, LoanBrokerDelete, LoanBrokerSet, LoanDelete, LoanManage, LoanPay, LoanSet."
+  },
+  {
+    "id": "sponsorship-goal",
+    "category": "transactions",
+    "question": "What transaction type allows to create, update, or delete a Sponsorship on the XRP Ledger.",
+    "scoring": "contains",
+    "expected": ["SponsorshipSet"]
+  },
+  {
+    "id": "ticket-count-max",
+    "category": "accounts",
+    "question": "What is the maximum amount of tickets an account can have?",
+    "scoring": "contains",
+    "expected": ["250"]
+  },
+  {
+    "id": "vault-info",
+    "category": "public-api",
+    "question": "What is the command/API to retrieve information about a vault, its owner, available assets, and details on issued shares?",
+    "scoring": "contains",
+    "expected": ["vault_info"]
+  },
+  {
+    "id": "fee",
+    "category": "ledger-lookup",
+    "question": "What is the base fee of mainnet?",
+    "scoring": "tool",
+    "expected": ["getFeeTool", "getServerInfoTool"]
+  },
+  {
+    "id": "xrpl-toml",
+    "category": "accounts",
+    "question": "Why is the xrp-ledger.toml file useful?",
+    "scoring": "judge",
+    "expected": "If you run an XRP Ledger validator or use the XRP Ledger for your business, you can provide information about your usage of the XRP Ledger to the world in a machine-readable xrp-ledger.toml file. Scripts and applications can use the information contained in your xrp-ledger.toml file to better understand and represent you in the XRP Ledger. In some cases, humans may also find it useful to read the same file. One of the primary use cases for the xrp-ledger.toml file is domain verification."
+  },
+  {
+    "id": "blackholed-accounts",
+    "category": "accounts",
+    "question": "What is the address of the ACCOUNT_ZERO and ACCOUNT_ONE? Those are blackholed accounts.",
+    "scoring": "judge",
+    "expected": "The account zero is rrrrrrrrrrrrrrrrrrrrrhoLvTp  and the account one is rrrrrrrrrrrrrrrrrrrrBZbvji"
+  },
+  {
+    "id": "sponsorship-entry-type",
+    "category": "ledger-entry-type",
+    "question": "What is the ledger entry represents a sponsoring relationship between a sponsor and a sponsee?",
+    "scoring": "contains",
+    "expected": ["Sponsorship"]
   }
 ]

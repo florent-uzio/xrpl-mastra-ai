@@ -21,6 +21,6 @@ Add entries to `questions.json`. Each question picks one `scoring` type:
 | ---------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | `contains` | list of strings                                                             | the answer contains at least one of them (case-insensitive, `1,000` = `1000`) |
 | `judge`    | reference answer                                                            | an LLM judge says the answer states the same key facts                        |
-| `tool`     | list of tool names (keys in the agent's `tools`, e.g. `getAccountInfoTool`) | the agent called all of them                                                  |
+| `tool`     | list of tool names (keys in the agent's `tools`, e.g. `getAccountInfoTool`) | the agent called at least one of them                                         |
 
 Use `contains` for short facts, `judge` for explanations, `tool` for questions that need live ledger data (the value changes, so only the tool call is checked). Don't write questions that make the agent submit a transaction.

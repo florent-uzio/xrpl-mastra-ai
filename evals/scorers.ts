@@ -17,12 +17,12 @@ export const scoreContains = (answer: string, expected: string[]): Score => {
   return hit ? { score: 1, reason: `contains "${hit}"` } : { score: 0, reason: 'none of the expected strings found' }
 }
 
-// Pass if every expected tool was called at least once.
+// Pass if at least one of the accepted tools was called.
 export const scoreTool = (toolsCalled: string[], expected: string[]): Score => {
-  const missing = expected.filter(t => !toolsCalled.includes(t))
-  return missing.length === 0
-    ? { score: 1, reason: 'all expected tools called' }
-    : { score: 0, reason: `missing tools: ${missing.join(', ')}` }
+  const hit = expected.find(t => toolsCalled.includes(t))
+  return hit
+    ? { score: 1, reason: `called ${hit}` }
+    : { score: 0, reason: `none of the expected tools called (called: ${toolsCalled.join(', ') || 'none'})` }
 }
 
 // An LLM compares the answer to the reference answer and returns pass/fail.
