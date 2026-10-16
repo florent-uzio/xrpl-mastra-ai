@@ -68,5 +68,26 @@
     "question": "How many batch flags exist and list them?",
     "scoring": "judge",
     "expected": "There are four batch flags: tfAllOrNothing, tfOnlyOne, tfUntilFailure, tfIndependent."
+  },
+  {
+    "id": "cmpt-el-gamal",
+    "category": "cmpt",
+    "question": "What is the new type of key to use the confidential transfers with MPT?",
+    "scoring": "contains",
+    "expected": ["el-gamal", "el gamal"]
+  },
+  {
+    "id": "cmpt-mpt-set",
+    "category": "cmpt-set",
+    "question": "What is the only transaction type required to define the issuer and auditor EC-ElGamal public keys?",
+    "scoring": "judge",
+    "expected": "MPTokenIssuanceSet is the only way to register the issuer and auditor EC-ElGamal public keys required for confidential transfers."
+  },
+  {
+    "id": "loan-transaction-count",
+    "category": "loan-txn-count",
+    "question": "How many Loan related transaction types exist?",
+    "scoring": "judge",
+    "expected": "There are nine Loan related transaction types: LoanBrokerCoverClawback, LoanBrokerCoverDeposit, LoanBrokerCoverWithdraw, LoanBrokerDelete, LoanBrokerSet, LoanDelete, LoanManage, LoanPay, LoanSet."
   }
 ]
