@@ -2,10 +2,10 @@ import { Mastra } from '@mastra/core/mastra'
 import { LibSQLStore } from '@mastra/libsql'
 import { PinoLogger } from '@mastra/loggers'
 import { xrplAgent } from './agents/xrpl-agent'
-import { iouIssuanceWorkflow } from './workflows'
+import { iouIssuanceWorkflow, mptIssuanceWorkflow } from './workflows'
 
 export const mastra = new Mastra({
-  workflows: { iouIssuanceWorkflow },
+  workflows: { iouIssuanceWorkflow, mptIssuanceWorkflow },
   agents: { xrplAgent },
   storage: new LibSQLStore({
     id: 'mastra-storage',
