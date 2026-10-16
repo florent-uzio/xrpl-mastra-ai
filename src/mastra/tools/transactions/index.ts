@@ -1,5 +1,6 @@
 export * from './account-set'
 export * from './amm-create'
+export * from './batch'
 export * from './clawback'
 export * from './confidential-mpt-clawback'
 export * from './confidential-mpt-convert'

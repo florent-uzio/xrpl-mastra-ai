@@ -46,8 +46,8 @@ export const fundWalletWithFaucetTool = createTool({
 Input:
 - network: testnet websocket URL (required)
 - seed: wallet to fund (optional). If omitted, a new funded wallet is created.
-- opts.amount: XRP amount as a string, not drops. Default "10". Fractions are rounded up. (optional)
-- opts.faucetHost / opts.faucetPath: only for custom faucets (optional)
+- opts.amount: XRP amount as a string, not drops. Default "10". Fractions are rounded up. Public testnet/devnet faucets reject amounts above 1000. (optional)
+- opts.faucetHost / opts.faucetPath / opts.faucetProtocol (default "https"): faucetHost is REQUIRED on any network other than testnet/devnet (optional)
 
 Funding can take a few seconds.`,
   inputSchema: z.object({
@@ -62,6 +62,7 @@ Funding can take a few seconds.`,
           .describe('XRP amount (not drops), default "10". Fractions are rounded up.'),
         faucetHost: z.string().optional().describe('Custom faucet host'),
         faucetPath: z.string().optional().describe('Custom faucet path'),
+        faucetProtocol: z.enum(['http', 'https']).optional().describe('Custom faucet protocol, default https'),
       })
       .optional(),
   }),

@@ -1,4 +1,4 @@
-import { createTool } from '@mastra/core/tools'
+import { createTool, ToolExecutionContext } from '@mastra/core/tools'
 import { SubmittableTransaction } from 'xrpl'
 import z from 'zod'
 
@@ -16,6 +16,13 @@ export type TransactionToolConfig<T extends SubmittableTransaction, S extends Fa
   buildTransaction: (params: z.infer<S['inputSchema']>) => T
   /** Optional function to validate transaction before submission */
   validateTransaction?: (txn: T) => void | Promise<void>
+  /** Optional async step after validation to complete the transaction before submission (e.g. extra signatures) */
+  prepareTransaction?: (props: {
+    txn: T
+    input: z.infer<S['inputSchema']>
+    network: string
+    mastra?: ToolExecutionContext['mastra']
+  }) => Promise<T>
 } & Omit<CreateToolConfig, 'id' | 'inputSchema' | 'execute'>
 
 /**
