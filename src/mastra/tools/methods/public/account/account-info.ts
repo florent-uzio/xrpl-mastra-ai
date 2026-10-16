@@ -1,23 +1,21 @@
 import { createTool } from '@mastra/core/tools'
-import { AccountInfoRequest } from 'xrpl'
 import { z } from 'zod'
+import { ledgerSpecifierShape, networkSchema, xrplAddressSchema } from '../../../../../helpers'
 import { executeMethod } from '../../shared'
 
 export const getAccountInfoTool = createTool({
   id: 'get-account-info',
   description: `Get an account's XRP balance, sequence, owner count and flags (AccountRoot).
 
-Request parameters:
-- account: address (required)
-- ledger_index: number or "validated" | "current" (optional)
-- ledger_hash: string (optional)
-- queue: boolean, optional. Include queued transactions (current ledger only).
-- signer_lists: boolean, optional. Include SignerList objects.
-
 Balance is in drops (1 XRP = 1,000,000 drops). Error actNotFound means the account does not exist or is not funded.`,
   inputSchema: z.object({
-    network: z.string(),
-    request: z.custom<AccountInfoRequest>(),
+    network: networkSchema,
+    request: z.object({
+      account: xrplAddressSchema.describe('Account address'),
+      ...ledgerSpecifierShape,
+      queue: z.boolean().optional().describe('Include queued transactions (current ledger only)'),
+      signer_lists: z.boolean().optional().describe('Include SignerList objects'),
+    }),
   }),
   execute: async (inputData, { mastra }) => {
     // Extract network and request from the context

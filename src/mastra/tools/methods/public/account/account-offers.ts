@@ -1,23 +1,21 @@
 import { createTool } from '@mastra/core/tools'
-import { AccountOffersRequest } from 'xrpl'
 import { z } from 'zod'
+import { ledgerSpecifierShape, networkSchema, paginationMarkerSchema, xrplAddressSchema } from '../../../../../helpers'
 import { executeMethod } from '../../shared'
 
 export const getAccountOffersTool = createTool({
   id: 'get-account-offers',
   description: `List an account's outstanding DEX offers (taker_gets, taker_pays, quality, seq, expiration).
 
-Request parameters:
-- account: address (required)
-- ledger_index: number or "validated" | "current" (optional)
-- ledger_hash: string (optional)
-- limit: 10-400, default 200 (optional)
-- marker: pagination marker from a previous response (optional)
-
 An offer's seq is the OfferSequence to use with OfferCancel.`,
   inputSchema: z.object({
-    network: z.string(),
-    request: z.custom<AccountOffersRequest>(),
+    network: networkSchema,
+    request: z.object({
+      account: xrplAddressSchema.describe('Account address'),
+      ...ledgerSpecifierShape,
+      limit: z.number().int().min(10).max(400).optional().describe('Max results per page (10-400, default 200).'),
+      marker: paginationMarkerSchema,
+    }),
   }),
   execute: async (inputData, { mastra }) => {
     // Extract network and request from the context

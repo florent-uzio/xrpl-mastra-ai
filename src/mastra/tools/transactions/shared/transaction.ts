@@ -47,7 +47,7 @@ export const submitTransaction = async <T extends SubmittableTransaction>({
     }
 
     if (seed) {
-      logger?.info('Submitting transaction with seed', { txn, seed })
+      logger?.info('Submitting transaction with seed', { txn })
 
       return await client.submitAndWait(txn, {
         autofill: true,

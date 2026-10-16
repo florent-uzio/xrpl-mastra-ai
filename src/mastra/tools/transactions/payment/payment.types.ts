@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { xrplAddressSchema, xrplDecimalValueSchema } from '../../../../helpers'
 import { xrplCommonFieldsSchema } from '../shared/common-fields'
 
 // XRPL Payment Transaction Fields schema
@@ -12,8 +13,8 @@ export const xrplCurrencyAmountSchema = z.union([
   z
     .object({
       currency: z.string().describe('Currency code (3-char ISO or 160-bit hex)'),
-      value: z.string().describe('Amount value as a decimal string'),
-      issuer: z.string().describe('Issuer account address'),
+      value: xrplDecimalValueSchema.describe('Amount value as a decimal string'),
+      issuer: xrplAddressSchema.describe('Issuer account address'),
     })
     .describe('Issued currency amount'),
 ])
@@ -44,14 +45,16 @@ export const xrplPathSetSchema = z
 // Payment-specific fields (to be merged with common fields)
 export const xrplPaymentFieldsSchema = z.object({
   // API v1: Amount required (alias to DeliverMax). API v2: DeliverMax required.
-  Amount: xrplAnyAmountSchema.describe('Alias to DeliverMax (API v1)'),
-  DeliverMax: xrplAnyAmountSchema.describe('API v2: Maximum amount to deliver (required in API v2)'),
+  Amount: xrplAnyAmountSchema.optional().describe('Amount to deliver (API v1). Provide Amount or DeliverMax, not both'),
+  DeliverMax: xrplAnyAmountSchema
+    .optional()
+    .describe('Maximum amount to deliver (API v2). Provide Amount or DeliverMax, not both'),
 
   DeliverMin: xrplAnyAmountSchema
     .optional()
     .describe('Minimum amount destination should receive (only for partial payments)'),
 
-  Destination: z.string().describe('The account receiving the payment (r-address)'),
+  Destination: xrplAddressSchema.describe('The account receiving the payment (r-address)'),
 
   DestinationTag: z.number().optional().describe('Arbitrary tag identifying the reason/recipient'),
 

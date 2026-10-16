@@ -1,14 +1,14 @@
 import { createTool } from '@mastra/core/tools'
-import { FeeRequest } from 'xrpl'
 import { z } from 'zod'
+import { networkSchema } from '../../../../../helpers'
 import { executeMethod } from '../../shared'
 
 export const getFeeTool = createTool({
   id: 'get-fee',
-  description: `Get current XRPL transaction fee data: base, median, minimum and open-ledger fee (in drops), plus queue and ledger sizes. Call before submitting a transaction to pick a fee. No request parameters.`,
+  description: `Get current XRPL transaction fee data: base, median, minimum and open-ledger fee (in drops), plus queue and ledger sizes. Call before submitting a transaction to pick a fee. `,
   inputSchema: z.object({
-    network: z.string(),
-    request: z.custom<FeeRequest>(),
+    network: networkSchema,
+    request: z.object({}),
   }),
   execute: async (inputData, { mastra }) => {
     // Extract network and request from the context

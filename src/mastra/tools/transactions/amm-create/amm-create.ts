@@ -1,4 +1,4 @@
-import { currencyCodeToHex, isString, isUndefined } from '../../../../helpers'
+import { currencyCodeToHex, isString } from '../../../../helpers'
 import { useTransactionToolFactory } from '../factory'
 import { xrplAmmCreateSchema } from './amm-create.types'
 
@@ -35,15 +35,6 @@ Errors: tecDUPLICATE (pool already exists), tecUNFUNDED_AMM, tecNO_LINE, tecFROZ
             currency: currencyCodeToHex(Amount2.currency),
           },
       ...rest,
-    }
-  },
-  validateTransaction: params => {
-    if (isUndefined(params.Amount) || isUndefined(params.Amount2)) {
-      throw new Error('Both Amount and Amount2 must be provided for AMMCreate')
-    }
-
-    if (params.TradingFee < 0 || params.TradingFee > 1000) {
-      throw new Error('TradingFee must be between 0 and 1000')
     }
   },
 })

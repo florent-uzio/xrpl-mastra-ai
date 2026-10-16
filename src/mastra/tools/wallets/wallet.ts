@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
-import { ECDSA, FundingOptions, Wallet } from 'xrpl'
+import { ECDSA, Wallet } from 'xrpl'
 import { z } from 'zod'
-import { getXrplClient } from '../../../helpers'
+import { getXrplClient, networkSchema } from '../../../helpers'
 
 export const createWalletTool = createTool({
   id: 'create-wallet',
@@ -12,7 +12,7 @@ Input:
 
 Treat the seed as a secret. Only the address is safe to share.`,
   inputSchema: z.object({
-    algorithm: z.enum(['secp256k1', 'ed25519']),
+    algorithm: z.enum(['secp256k1', 'ed25519']).default('ed25519').describe('Key algorithm'),
   }),
   execute: async inputData => {
     const { algorithm } = inputData
@@ -36,9 +36,19 @@ Input:
 
 Funding can take a few seconds.`,
   inputSchema: z.object({
-    network: z.string(),
-    seed: z.string().optional(),
-    opts: z.custom<FundingOptions>().optional(),
+    network: networkSchema.describe('Testnet or devnet websocket URL, never mainnet'),
+    seed: z.string().optional().describe('Seed of the wallet to fund. If omitted, a new funded wallet is created.'),
+    opts: z
+      .object({
+        amount: z
+          .string()
+          .regex(/^\d+(\.\d+)?$/)
+          .optional()
+          .describe('XRP amount (not drops), default "10". Fractions are rounded up.'),
+        faucetHost: z.string().optional().describe('Custom faucet host'),
+        faucetPath: z.string().optional().describe('Custom faucet path'),
+      })
+      .optional(),
   }),
   execute: async (inputData, { mastra }) => {
     const { network, seed, opts } = inputData
@@ -71,7 +81,7 @@ Funding can take a few seconds.`,
     // Otherwise create a new wallet
     logger?.info(`No wallet provided, creating a new one`)
 
-    const { wallet: newWallet } = await client.fundWallet(null, opts)
+    const { wallet: newWallet } = await client.fundWallet(null, options)
 
     logger?.info(`Wallet ${newWallet.address} funded successfully`)
 
