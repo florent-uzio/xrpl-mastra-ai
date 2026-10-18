@@ -5,7 +5,7 @@ A fixed set of XRPL questions with expected answers. Running it gives an accurac
 ## Run
 
 ```sh
-npm run eval                                        # default agent model (openai/gpt-5.4-mini)
+npm run eval                                        # default agent model (anthropic/claude-haiku-5-5)
 npm run eval -- --model anthropic/claude-sonnet-5-5
 npm run eval -- --model groq/openai/gpt-oss-120b
 npm run eval -- --judge openai/gpt-5.4-mini          # change the judge model (default: Claude)
