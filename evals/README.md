@@ -25,3 +25,12 @@ Add entries to `questions.json`. Each question picks one `scoring` type:
 | `tool`     | list of tool names (keys in the agent's `tools`, e.g. `getAccountInfoTool`) | the agent called at least one of them                                         |
 
 Use `contains` for short facts, `judge` for explanations, `tool` for questions that need live ledger data (the value changes, so only the tool call is checked). Don't write questions that make the agent submit a transaction.
+
+## Datasets and experiments in Studio
+
+`npm run eval` saves each score to `mastra.db` in the project root (git-ignored), the same database `npm run dev` uses, so Studio can show them. Then:
+
+1. `npm run eval`, then `npm run dev` and open Studio. Scores appear under Observability.
+2. Save scored results as dataset items, and run experiments from the agent's Evaluate tab.
+
+`questions.json` stays the source of truth for `npm run eval`; Studio datasets are for exploring and comparing runs interactively.

@@ -57,6 +57,7 @@ import {
   submitVaultWithdrawTool,
   xrpToDropsTool,
 } from '../tools'
+import { getStorageUrl } from '../../helpers'
 import { confidentialMptWorkflow, iouIssuanceWorkflow, mptIssuanceWorkflow } from '../workflows'
 
 // Always sent to the model: read-only lookups and unit/currency conversions.
@@ -172,7 +173,7 @@ export const xrplAgent = new Agent({
   memory: new Memory({
     storage: new LibSQLStore({
       id: 'xrpl-agent-memory',
-      url: 'file:../mastra.db', // path is relative to the .mastra/output directory
+      url: getStorageUrl(),
     }),
     options: {
       generateTitle: true,
