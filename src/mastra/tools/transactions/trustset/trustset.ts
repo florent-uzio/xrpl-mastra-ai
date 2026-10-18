@@ -1,3 +1,4 @@
+import { TrustSet } from 'xrpl'
 import { currencyCodeToHex } from '../../../../helpers'
 import { useTransactionToolFactory } from '../factory'
 import { xrplTrustSetSchema } from './trustset.types'
@@ -6,7 +7,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplTrustSetSchema,
 })
 
-export const submitTrustSetTool = createTransactionTool({
+export const submitTrustSetTool = createTransactionTool<TrustSet>({
   toolId: 'submit-trustset',
   description: `Submit a TrustSet transaction to create or modify a trust line so an account can hold a token. Not valid for XRP. The issuer cannot be the sender. Each trust line adds to the account's reserve. Currency codes are converted to hex automatically.
 

@@ -1,3 +1,4 @@
+import { LoanSet } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { xrplLoanSetSchema } from './loan-set.types'
 
@@ -5,7 +6,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplLoanSetSchema,
 })
 
-export const submitLoanSetTool = createTransactionTool({
+export const submitLoanSetTool = createTransactionTool<LoanSet>({
   toolId: 'submit-loan-set',
   description: `Submit a LoanSet transaction to create a loan between a loan broker and a borrower. Requires the LendingProtocol amendment.
 

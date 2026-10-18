@@ -33,7 +33,7 @@ const processPaymentAmount = (amount: any): any => {
   return amount
 }
 
-export const submitPaymentTool = createTransactionTool({
+export const submitPaymentTool = createTransactionTool<Payment>({
   toolId: 'submit-payment',
   description: `Submit a Payment transaction to send XRP, tokens or MPTs. Sending enough XRP to an unfunded address creates the account.
 

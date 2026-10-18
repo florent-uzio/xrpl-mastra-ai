@@ -6,7 +6,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplMPTokenIssuanceSetSchema,
 })
 
-export const submitMPTokenIssuanceSetTool = createTransactionTool({
+export const submitMPTokenIssuanceSetTool = createTransactionTool<MPTokenIssuanceSet>({
   toolId: 'submit-mptoken-issuance-set',
   description: `Submit an MPTokenIssuanceSet transaction (issuer only) to lock/unlock balances or update an issuance.
 

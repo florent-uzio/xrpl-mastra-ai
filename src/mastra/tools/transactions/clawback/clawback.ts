@@ -1,3 +1,4 @@
+import { Clawback, isMPTAmount } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { xrplClawbackSchema } from './clawback.types'
 
@@ -5,7 +6,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplClawbackSchema,
 })
 
-export const submitClawbackTool = createTransactionTool({
+export const submitClawbackTool = createTransactionTool<Clawback>({
   toolId: 'submit-clawback',
   description: `Submit a Clawback transaction. A token issuer recovers issued tokens from a holder.
 
@@ -22,6 +23,11 @@ Errors: tecNO_PERMISSION (clawback not enabled), tecNO_LINE (no trust line or ze
   validateTransaction: params => {
     if (!params.Amount || parseFloat(params.Amount.value) <= 0) {
       throw new Error('Amount value must be greater than zero')
+    }
+
+    // MPT amounts have no currency or issuer
+    if (isMPTAmount(params.Amount)) {
+      return
     }
 
     if (params.Amount.currency.toUpperCase() === 'XRP') {

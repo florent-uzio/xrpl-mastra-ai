@@ -1,3 +1,4 @@
+import { VaultCreate } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { encodeCurrencyCodes } from '../shared'
 import { xrplVaultCreateSchema } from './vault-create.types'
@@ -6,7 +7,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplVaultCreateSchema,
 })
 
-export const submitVaultCreateTool = createTransactionTool({
+export const submitVaultCreateTool = createTransactionTool<VaultCreate>({
   toolId: 'submit-vault-create',
   description: `Submit a VaultCreate transaction to create a single-asset vault. Depositors receive shares (an MPT) for their deposits. Requires the SingleAssetVault amendment.
 

@@ -1,3 +1,4 @@
+import { LoanManage } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { xrplLoanManageSchema } from './loan-manage.types'
 
@@ -5,7 +6,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplLoanManageSchema,
 })
 
-export const submitLoanManageTool = createTransactionTool({
+export const submitLoanManageTool = createTransactionTool<LoanManage>({
   toolId: 'submit-loan-manage',
   description: `Submit a LoanManage transaction to default, impair or unimpair a loan. Only the loan broker owner can send it. Requires the LendingProtocol amendment.
 

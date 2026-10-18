@@ -1,3 +1,4 @@
+import { LoanPay } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { encodeCurrencyCodes } from '../shared'
 import { xrplLoanPaySchema } from './loan-pay.types'
@@ -6,7 +7,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplLoanPaySchema,
 })
 
-export const submitLoanPayTool = createTransactionTool({
+export const submitLoanPayTool = createTransactionTool<LoanPay>({
   toolId: 'submit-loan-pay',
   description: `Submit a LoanPay transaction to make a payment on a loan. Only the borrower can send it. Requires the LendingProtocol amendment.
 

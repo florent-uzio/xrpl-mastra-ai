@@ -1,3 +1,4 @@
+import { LoanBrokerDelete } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { xrplLoanBrokerDeleteSchema } from './loan-broker-delete.types'
 
@@ -5,7 +6,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplLoanBrokerDeleteSchema,
 })
 
-export const submitLoanBrokerDeleteTool = createTransactionTool({
+export const submitLoanBrokerDeleteTool = createTransactionTool<LoanBrokerDelete>({
   toolId: 'submit-loan-broker-delete',
   description: `Submit a LoanBrokerDelete transaction to delete a loan broker. Only the broker owner can send it. Requires the LendingProtocol amendment.
 
