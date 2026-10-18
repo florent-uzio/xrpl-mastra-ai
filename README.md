@@ -63,6 +63,11 @@ The template includes comprehensive XRPL tools:
 - `gateway_balances` - Get balances held by gateways
 - `server_info` - Get server information and status
 - `fee` - Get current transaction fees
+- `feature` - Get the status of protocol amendments
+- `manifest` - Look up a validator's public manifest
+- `server_definitions` - Get serialization definitions, formats and flags
+- `server_state` - Get machine-readable server status
+- `version` - Get the supported API version range
 
 #### Transactions
 
