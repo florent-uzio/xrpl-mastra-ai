@@ -28,7 +28,7 @@ Use `contains` for short facts, `judge` for explanations, `tool` for questions t
 
 ## Datasets and experiments in Studio
 
-`npm run eval` saves each score to Mastra storage, which is in memory by default and lost when the process exits. To keep scores and use Studio's datasets and experiments, set `MASTRA_STORAGE_URL` in `.env` to an absolute `file:` URL (see `.env.example`). Then:
+`npm run eval` saves each score to `mastra.db` in the project root (git-ignored), the same database `npm run dev` uses, so Studio can show them. Then:
 
 1. `npm run eval`, then `npm run dev` and open Studio. Scores appear under Observability.
 2. Save scored results as dataset items, and run experiments from the agent's Evaluate tab.

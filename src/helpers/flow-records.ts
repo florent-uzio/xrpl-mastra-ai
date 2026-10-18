@@ -1,6 +1,7 @@
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { Wallet } from 'xrpl'
+import { getProjectRoot } from './storage'
 
 /**
  * Persistent records of what a flow (workflow run) created on a test network: wallets, token IDs, tx hashes.
@@ -16,19 +17,9 @@ export type FlowRecord = {
   data: Record<string, unknown>
 }
 
-/**
- * `XRPL_RECORDS_DIR` if set, otherwise `<project root>/records`.
- * `mastra dev` runs from `<project root>/.mastra/output`, so the project root is whatever precedes `.mastra`.
- */
-export const getRecordsDir = () => {
-  if (process.env.XRPL_RECORDS_DIR) return path.resolve(process.env.XRPL_RECORDS_DIR)
-
-  const cwd = process.cwd()
-  const marker = `${path.sep}.mastra${path.sep}`
-  const markerIndex = cwd.indexOf(marker)
-  const root = markerIndex === -1 ? cwd : cwd.slice(0, markerIndex)
-  return path.join(root, 'records')
-}
+/** `XRPL_RECORDS_DIR` if set, otherwise `<project root>/records`. */
+export const getRecordsDir = () =>
+  process.env.XRPL_RECORDS_DIR ? path.resolve(process.env.XRPL_RECORDS_DIR) : path.join(getProjectRoot(), 'records')
 
 /** The address and seed of a wallet: enough to use it again later. */
 export const toWalletRecord = (wallet: Wallet) => ({ address: wallet.classicAddress, seed: wallet.seed })
