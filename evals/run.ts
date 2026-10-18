@@ -2,7 +2,7 @@ import { RequestContext } from '@mastra/core/request-context'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { parseArgs } from 'node:util'
 import { DEFAULT_MODEL, xrplAgent } from '../src/mastra/agents/xrpl-agent'
-import { Question, Score, scoreContains, scoreJudge, scoreTool } from './scorers'
+import { Question, scoreQuestion } from './scorers'
 
 const { values } = parseArgs({
   options: {
@@ -44,7 +44,7 @@ for (let run = 1; run <= runs; run++) {
     requestContext.set('model', model)
     const start = Date.now()
     try {
-      const result = await xrplAgent.generate(q.question, { requestContext })
+      const result = await xrplAgent.generate(q.question, { requestContext, returnScorerData: true })
       const latencyMs = Date.now() - start
       const toolsCalled = result.steps.flatMap(step => step.toolCalls.map(call => call.payload.toolName))
       const {
@@ -63,10 +63,7 @@ for (let run = 1; run <= runs; run++) {
           1e6
         : null
 
-      let score: Score
-      if (q.scoring === 'contains') score = scoreContains(result.text, q.expected)
-      else if (q.scoring === 'tool') score = scoreTool(toolsCalled, q.expected)
-      else score = await scoreJudge(judgeModel, q.question, result.text, q.expected)
+      const score = await scoreQuestion(judgeModel, q, result.scoringData!)
 
       results.push({
         run,
