@@ -4,12 +4,12 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { parseArgs } from 'node:util'
 import { mastra } from '../src/mastra'
 import { DEFAULT_MODEL } from '../src/mastra/agents/xrpl-agent'
-import { containsScorer, createJudgeScorer, Question, toolScorer } from './scorers'
+import { containsScorer, createJudgeScorer, DEFAULT_JUDGE_MODEL, Question, toolScorer } from '../src/mastra/scorers'
 
 const { values } = parseArgs({
   options: {
     model: { type: 'string', default: DEFAULT_MODEL as string },
-    judge: { type: 'string', default: 'anthropic/claude-sonnet-5-5' },
+    judge: { type: 'string', default: DEFAULT_JUDGE_MODEL },
     // Answers and judge verdicts vary between runs, so average several runs before comparing models.
     runs: { type: 'string', default: '1' },
   },

@@ -7,6 +7,8 @@ export type Question =
   | { id: string; category: string; question: string; scoring: 'judge'; expected: string }
   | { id: string; category: string; question: string; scoring: 'tool'; expected: string[] }
 
+export const DEFAULT_JUDGE_MODEL = 'anthropic/claude-sonnet-5-5'
+
 // Lowercase and drop thousands separators so "1,000,000" matches "1000000".
 const normalize = (text: string) => text.toLowerCase().replace(/(\d),(\d)/g, '$1$2')
 
@@ -64,7 +66,7 @@ export const toolScorer = createScorer({
   })
 
 // An LLM compares the answer to the reference answer and returns pass/fail.
-export const createJudgeScorer = (judgeModel: string) =>
+export const createJudgeScorer = (judgeModel: string = DEFAULT_JUDGE_MODEL) =>
   createScorer({
     id: 'judge',
     description: 'An LLM judge passes the answer when it states the same key facts as the reference',
