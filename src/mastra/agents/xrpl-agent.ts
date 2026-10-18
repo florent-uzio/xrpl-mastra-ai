@@ -16,10 +16,15 @@ import {
   getAccountObjectsTool,
   getAccountOffersTool,
   getAccountTxTool,
+  getFeatureTool,
   getFeeTool,
   getFlowRecordsTool,
   getGatewayBalancesTool,
+  getManifestTool,
+  getServerDefinitionsTool,
   getServerInfoTool,
+  getServerStateTool,
+  getVersionTool,
   hexToCurrencyCodeTool,
   saveFlowRecordTool,
   submitAccountSetTool,
@@ -84,6 +89,11 @@ const searchableTools = {
   getAccountObjectsTool,
   getAccountOffersTool,
   getGatewayBalancesTool,
+  getFeatureTool,
+  getManifestTool,
+  getServerDefinitionsTool,
+  getServerStateTool,
+  getVersionTool,
   getFlowRecordsTool,
   saveFlowRecordTool,
   decryptConfidentialBalanceTool,
@@ -129,7 +139,7 @@ const searchableTools = {
 // 'context' storage derives loaded tools from the conversation, so it survives restarts.
 const toolSearchProcessor = new ToolSearchProcessor({ tools: searchableTools, storage: 'context' })
 
-export const DEFAULT_MODEL: Agent['model'] = 'openai/gpt-5.4-mini'
+export const DEFAULT_MODEL: Agent['model'] = 'anthropic/claude-haiku-5-5'
 
 export const xrplAgent = new Agent({
   id: 'xrpl-agent',
