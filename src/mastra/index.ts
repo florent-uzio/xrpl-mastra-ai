@@ -9,8 +9,9 @@ export const mastra = new Mastra({
   agents: { xrplAgent },
   storage: new LibSQLStore({
     id: 'mastra-storage',
-    // stores telemetry, evals, ... into memory storage, if it needs to persist, change to file:../mastra.db
-    url: ':memory:',
+    // stores telemetry, evals, ... in memory by default. Set MASTRA_STORAGE_URL (e.g. file:/abs/path/mastra.db) to persist
+    // them, so Studio and `npm run eval` share the same datasets, experiments and scores.
+    url: process.env.MASTRA_STORAGE_URL ?? ':memory:',
   }),
   logger: new PinoLogger({
     name: 'Mastra',
