@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { containsScorer, scoreQuestion, toolScorer, type Question } from './scorers'
+import { containsScorer, toolScorer, type Question } from './scorers'
 
 const message = (parts: any[]) => ({
   id: 'm1',
@@ -28,26 +28,28 @@ const tool: Question = {
   expected: ['getAccountInfoTool', 'getAccountTool'],
 }
 
+const score = async (scorer: typeof containsScorer | typeof toolScorer, question: Question, output: any[]) => {
+  const result = await scorer.run({ output, groundTruth: question })
+  return { score: result.score, reason: result.reason }
+}
+
 describe('eval scorers', () => {
   it('contains passes on any accepted string, ignoring case and thousands separators', async () => {
-    const pass = await scoreQuestion('unused', contains, { input: {}, output: [text('There are 1,000,000 drops.')] })
+    const pass = await score(containsScorer, contains, [text('There are 1,000,000 drops.')])
     expect(pass.score).toBe(1)
-    const alt = await scoreQuestion('unused', contains, { input: {}, output: [text('One Million drops.')] })
+    const alt = await score(containsScorer, contains, [text('One Million drops.')])
     expect(alt.score).toBe(1)
   })
 
   it('contains fails when no accepted string is present', async () => {
-    const fail = await scoreQuestion('unused', contains, { input: {}, output: [text('A lot of drops.')] })
+    const fail = await score(containsScorer, contains, [text('A lot of drops.')])
     expect(fail).toEqual({ score: 0, reason: 'none of the expected strings found' })
   })
 
   it('tool passes when an accepted tool was called and fails otherwise', async () => {
-    const pass = await scoreQuestion('unused', tool, {
-      input: {},
-      output: [toolCall('getAccountInfoTool'), text('ok')],
-    })
+    const pass = await score(toolScorer, tool, [toolCall('getAccountInfoTool'), text('ok')])
     expect(pass).toEqual({ score: 1, reason: 'called getAccountInfoTool' })
-    const fail = await scoreQuestion('unused', tool, { input: {}, output: [toolCall('otherTool')] })
+    const fail = await score(toolScorer, tool, [toolCall('otherTool')])
     expect(fail.score).toBe(0)
     expect(fail.reason).toContain('called: otherTool')
   })

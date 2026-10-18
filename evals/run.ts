@@ -1,8 +1,10 @@
+import { runEvals } from '@mastra/core/evals'
 import { RequestContext } from '@mastra/core/request-context'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { parseArgs } from 'node:util'
-import { DEFAULT_MODEL, xrplAgent } from '../src/mastra/agents/xrpl-agent'
-import { Question, scoreQuestion } from './scorers'
+import { mastra } from '../src/mastra'
+import { DEFAULT_MODEL } from '../src/mastra/agents/xrpl-agent'
+import { containsScorer, createJudgeScorer, Question, toolScorer } from './scorers'
 
 const { values } = parseArgs({
   options: {
@@ -37,22 +39,36 @@ const getPrice = async (modelId: string) => {
 const questions: Question[] = JSON.parse(await readFile(new URL('./questions.json', import.meta.url), 'utf8'))
 const price = await getPrice(model)
 
+const agent = mastra.getAgent('xrplAgent')
+const scorers = [containsScorer, toolScorer, createJudgeScorer(judgeModel)]
+// runEvals saves scores to storage, which only works for scorers registered on the Mastra instance.
+for (const scorer of scorers) mastra.addScorer(scorer)
+
 const results: Record<string, any>[] = []
 for (let run = 1; run <= runs; run++) {
-  for (const q of questions) {
-    const requestContext = new RequestContext()
-    requestContext.set('model', model)
-    const start = Date.now()
-    try {
-      const result = await xrplAgent.generate(q.question, { requestContext, returnScorerData: true })
-      const latencyMs = Date.now() - start
-      const toolsCalled = result.steps.flatMap(step => step.toolCalls.map(call => call.payload.toolName))
+  // Questions run one at a time, so the agent call of an item starts when the previous item finished
+  // and ends at onFinish. Latency leaves out the scoring time (the judge call).
+  let itemStart = Date.now()
+  let agentEnd = itemStart
+  await runEvals({
+    data: questions.map(q => {
+      const requestContext = new RequestContext()
+      requestContext.set('model', model)
+      return { input: q.question, groundTruth: q, requestContext }
+    }),
+    target: agent,
+    scorers,
+    targetOptions: { onFinish: () => void (agentEnd = Date.now()) },
+    onItemComplete: ({ item, targetResult, scorerResults }) => {
+      const q = item.groundTruth as Question
+      const latencyMs = agentEnd - itemStart
+      const toolsCalled = targetResult.steps.flatMap(step => step.toolCalls.map(call => call.payload.toolName))
       const {
         inputTokens = 0,
         outputTokens = 0,
         cachedInputTokens = 0,
         cacheCreationInputTokens = 0,
-      } = result.totalUsage
+      } = targetResult.totalUsage
       // inputTokens includes cached reads and cache writes, which are billed at their own prices.
       const uncachedInputTokens = inputTokens - cachedInputTokens - cacheCreationInputTokens
       const costUsd = price
@@ -63,14 +79,18 @@ for (let run = 1; run <= runs; run++) {
           1e6
         : null
 
-      const score = await scoreQuestion(judgeModel, q, result.scoringData!)
+      // Every scorer but the one matching the question's scoring type returns notScorable.
+      const scored = Object.values<any>(scorerResults).find(result => !result.notScorable)
+      const score = scored?.score ?? 0
+      const reason = scored ? String(scored.reason) : 'no scorer produced a score'
 
       results.push({
         run,
         ...q,
-        answer: result.text,
+        answer: targetResult.text,
         toolsCalled,
-        ...score,
+        score,
+        reason,
         latencyMs,
         inputTokens,
         cachedInputTokens,
@@ -78,12 +98,10 @@ for (let run = 1; run <= runs; run++) {
         outputTokens,
         costUsd,
       })
-      console.log(`[run ${run}] ${score.score ? 'PASS' : 'FAIL'}  ${q.id}  (${score.reason})`)
-    } catch (error) {
-      results.push({ run, ...q, score: 0, reason: `error: ${String(error)}`, latencyMs: Date.now() - start })
-      console.log(`[run ${run}] ERROR ${q.id}  ${String(error)}`)
-    }
-  }
+      console.log(`[run ${run}] ${score ? 'PASS' : 'FAIL'}  ${q.id}  (${reason})`)
+      itemStart = Date.now()
+    },
+  })
 }
 
 const sum = (rows: Record<string, any>[], key: 'score' | 'latencyMs' | 'costUsd') =>

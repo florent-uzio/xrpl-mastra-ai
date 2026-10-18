@@ -7,8 +7,6 @@ export type Question =
   | { id: string; category: string; question: string; scoring: 'judge'; expected: string }
   | { id: string; category: string; question: string; scoring: 'tool'; expected: string[] }
 
-export type Score = { score: number; reason: string }
-
 // Lowercase and drop thousands separators so "1,000,000" matches "1000000".
 const normalize = (text: string) => text.toLowerCase().replace(/(\d),(\d)/g, '$1$2')
 
@@ -93,16 +91,3 @@ Fail (score 0) if it misses a key fact or contradicts the reference.`,
     })
     .generateScore(({ results }) => results.analyzeStepResult.score)
     .generateReason(({ results }) => results.analyzeStepResult.reason)
-
-// Run whichever scorer matches the question's scoring type. Scorers that skip it return `notScorable`.
-export const scoreQuestion = async (
-  judgeModel: string,
-  question: Question,
-  scoringData: { input: any; output: ScorerRunOutputForAgent },
-): Promise<Score> => {
-  for (const scorer of [containsScorer, toolScorer, createJudgeScorer(judgeModel)]) {
-    const result = await scorer.run({ input: scoringData.input, output: scoringData.output, groundTruth: question })
-    if (!result.notScorable) return { score: result.score, reason: String(result.reason) }
-  }
-  throw new Error(`No scorer for question ${question.id}`)
-}
