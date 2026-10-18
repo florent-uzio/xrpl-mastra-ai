@@ -6,7 +6,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplMPTokenIssuanceCreateSchema,
 })
 
-export const submitMPTokenIssuanceCreateTool = createTransactionTool({
+export const submitMPTokenIssuanceCreateTool = createTransactionTool<MPTokenIssuanceCreate>({
   toolId: 'submit-mptoken-issuance-create',
   description: `Submit an MPTokenIssuanceCreate transaction to create an MPT issuance. The sender becomes the issuer. The issuance ID is in the result metadata (mpt_issuance_id). Adds to the issuer's reserve.
 

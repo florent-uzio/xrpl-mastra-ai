@@ -1,3 +1,4 @@
+import { LoanBrokerCoverClawback } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { encodeCurrencyCodes } from '../shared'
 import { xrplLoanBrokerCoverClawbackSchema } from './loan-broker-cover-clawback.types'
@@ -6,7 +7,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplLoanBrokerCoverClawbackSchema,
 })
 
-export const submitLoanBrokerCoverClawbackTool = createTransactionTool({
+export const submitLoanBrokerCoverClawbackTool = createTransactionTool<LoanBrokerCoverClawback>({
   toolId: 'submit-loan-broker-cover-clawback',
   description: `Submit a LoanBrokerCoverClawback transaction to claw back first-loss capital from a loan broker. Only the issuer of the vault's asset can send it. Requires the LendingProtocol amendment.
 

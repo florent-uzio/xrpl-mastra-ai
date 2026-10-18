@@ -6,7 +6,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplConfidentialMPTSendSchema,
 })
 
-export const submitConfidentialMPTSendTool = createTransactionTool({
+export const submitConfidentialMPTSendTool = createTransactionTool<ConfidentialMPTSend>({
   toolId: 'submit-confidential-mpt-send',
   description: `Submit a ConfidentialMPTSend transaction: send MPT confidentially (amount hidden) between holders; the receiver gets it in their inbox. Neither party may be the issuer. Needs ConfidentialTransfer and CanTransfer. ZK proofs and ciphertexts must be generated client-side by the holder/issuer wallet; they cannot be made by this tool.
 

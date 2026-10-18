@@ -1,3 +1,4 @@
+import { VaultClawback } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { encodeCurrencyCodes } from '../shared'
 import { xrplVaultClawbackSchema } from './vault-clawback.types'
@@ -6,7 +7,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplVaultClawbackSchema,
 })
 
-export const submitVaultClawbackTool = createTransactionTool({
+export const submitVaultClawbackTool = createTransactionTool<VaultClawback>({
   toolId: 'submit-vault-clawback',
   description: `Submit a VaultClawback transaction to claw back assets or shares from a vault holder. It performs a VaultWithdraw on the holder's behalf. Requires the SingleAssetVault amendment. XRP cannot be clawed back.
 

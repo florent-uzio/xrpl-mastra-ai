@@ -6,7 +6,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplMPTokenAuthorizeSchema,
 })
 
-export const submitMPTokenAuthorizeTool = createTransactionTool({
+export const submitMPTokenAuthorizeTool = createTransactionTool<MPTokenAuthorize>({
   toolId: 'submit-mptoken-authorize',
   description: `Submit an MPTokenAuthorize transaction. Used in two ways:
 - Holder opt-in: the holder sends it with MPTokenIssuanceID only. Required before the holder can receive the MPT. Also adds to the holder's reserve.

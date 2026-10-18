@@ -1,3 +1,4 @@
+import { LoanBrokerSet } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { xrplLoanBrokerSetSchema } from './loan-broker-set.types'
 
@@ -5,7 +6,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplLoanBrokerSetSchema,
 })
 
-export const submitLoanBrokerSetTool = createTransactionTool({
+export const submitLoanBrokerSetTool = createTransactionTool<LoanBrokerSet>({
   toolId: 'submit-loan-broker-set',
   description: `Submit a LoanBrokerSet transaction to create or update a loan broker linked to a vault. Only the vault owner can send it. Requires the LendingProtocol amendment.
 

@@ -1,4 +1,4 @@
-import { Amount } from 'xrpl'
+import { Amount, OfferCreate } from 'xrpl'
 import { currencyCodeToHex, isString } from '../../../../helpers'
 import { useTransactionToolFactory } from '../factory'
 import { xrplOfferCreateSchema } from './offer-create.types'
@@ -24,7 +24,7 @@ const processOfferAmount = (amount: Amount): Amount => {
   }
 }
 
-export const submitOfferCreateTool = createTransactionTool({
+export const submitOfferCreateTool = createTransactionTool<OfferCreate>({
   toolId: 'submit-offer-create',
   description: `Submit an OfferCreate transaction to place an order on the XRPL DEX. It matches existing offers first, and any unfilled remainder stays in the ledger.
 

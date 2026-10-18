@@ -6,7 +6,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplConfidentialMPTMergeInboxSchema,
 })
 
-export const submitConfidentialMPTMergeInboxTool = createTransactionTool({
+export const submitConfidentialMPTMergeInboxTool = createTransactionTool<ConfidentialMPTMergeInbox>({
   toolId: 'submit-confidential-mpt-merge-inbox',
   description: `Submit a ConfidentialMPTMergeInbox transaction: move a holder's confidential inbox balance into the spending balance and reset the inbox. Needed to spend received confidential funds. Holder only, not the issuer. Needs ConfidentialTransfer. No proof needed.
 

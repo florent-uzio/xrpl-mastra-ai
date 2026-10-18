@@ -1,4 +1,4 @@
-import { Amount, convertStringToHex } from 'xrpl'
+import { Amount, convertStringToHex, NFTokenMint } from 'xrpl'
 import { currencyCodeToHex, isString } from '../../../../helpers'
 import { useTransactionToolFactory } from '../factory'
 import { xrplNFTokenMintSchema } from './nftoken-mint.types'
@@ -24,7 +24,7 @@ const processNFTokenAmount = (amount: Amount): Amount => {
   }
 }
 
-export const submitNFTokenMintTool = createTransactionTool({
+export const submitNFTokenMintTool = createTransactionTool<NFTokenMint>({
   toolId: 'submit-nftoken-mint',
   description: `Submit an NFTokenMint transaction to create an NFT. Flags are immutable after minting.
 

@@ -1,3 +1,4 @@
+import { VaultWithdraw } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { encodeCurrencyCodes } from '../shared'
 import { xrplVaultWithdrawSchema } from './vault-withdraw.types'
@@ -6,7 +7,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplVaultWithdrawSchema,
 })
 
-export const submitVaultWithdrawTool = createTransactionTool({
+export const submitVaultWithdrawTool = createTransactionTool<VaultWithdraw>({
   toolId: 'submit-vault-withdraw',
   description: `Submit a VaultWithdraw transaction to redeem vault shares for assets. Requires the SingleAssetVault and LendingProtocolV1_1 amendments.
 

@@ -1,3 +1,4 @@
+import { LoanBrokerCoverDeposit } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { encodeCurrencyCodes } from '../shared'
 import { xrplLoanBrokerCoverDepositSchema } from './loan-broker-cover-deposit.types'
@@ -6,7 +7,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplLoanBrokerCoverDepositSchema,
 })
 
-export const submitLoanBrokerCoverDepositTool = createTransactionTool({
+export const submitLoanBrokerCoverDepositTool = createTransactionTool<LoanBrokerCoverDeposit>({
   toolId: 'submit-loan-broker-cover-deposit',
   description: `Submit a LoanBrokerCoverDeposit transaction to deposit first-loss capital into a loan broker, which protects the vault's depositors. Only the broker owner can send it. Requires the LendingProtocol amendment.
 

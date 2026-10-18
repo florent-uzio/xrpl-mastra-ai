@@ -1,3 +1,4 @@
+import { AMMCreate } from 'xrpl'
 import { currencyCodeToHex, isString } from '../../../../helpers'
 import { useTransactionToolFactory } from '../factory'
 import { xrplAmmCreateSchema } from './amm-create.types'
@@ -6,7 +7,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplAmmCreateSchema,
 })
 
-export const submitAmmCreateTool = createTransactionTool({
+export const submitAmmCreateTool = createTransactionTool<AMMCreate>({
   toolId: 'submit-amm-create',
   description: `Submit an AMMCreate transaction to create an AMM pool for an asset pair. The creator receives LP tokens.
 

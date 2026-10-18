@@ -1,3 +1,4 @@
+import { LoanBrokerCoverWithdraw } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { encodeCurrencyCodes } from '../shared'
 import { xrplLoanBrokerCoverWithdrawSchema } from './loan-broker-cover-withdraw.types'
@@ -6,7 +7,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplLoanBrokerCoverWithdrawSchema,
 })
 
-export const submitLoanBrokerCoverWithdrawTool = createTransactionTool({
+export const submitLoanBrokerCoverWithdrawTool = createTransactionTool<LoanBrokerCoverWithdraw>({
   toolId: 'submit-loan-broker-cover-withdraw',
   description: `Submit a LoanBrokerCoverWithdraw transaction to withdraw first-loss capital from a loan broker. Only the broker owner can send it. Requires the LendingProtocol and fixCleanup3_4_0 amendments.
 

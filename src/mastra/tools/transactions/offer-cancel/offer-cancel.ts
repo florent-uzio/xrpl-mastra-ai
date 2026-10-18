@@ -1,3 +1,4 @@
+import { OfferCancel } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { xrplOfferCancelSchema } from './offer-cancel.types'
 
@@ -5,7 +6,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplOfferCancelSchema,
 })
 
-export const submitOfferCancelTool = createTransactionTool({
+export const submitOfferCancelTool = createTransactionTool<OfferCancel>({
   toolId: 'submit-offer-cancel',
   description: `Submit an OfferCancel transaction to remove one of your DEX offers. OfferSequence is the sequence number of the transaction that created the offer. You can find it with get-account-offers.`,
   buildTransaction: offerCancel => {

@@ -1,4 +1,4 @@
-import { convertStringToHex } from 'xrpl'
+import { AccountSet, convertStringToHex } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { xrplAccountSetSchema } from './account-set.types'
 
@@ -6,7 +6,7 @@ const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplAccountSetSchema,
 })
 
-export const submitAccountSetTool = createTransactionTool({
+export const submitAccountSetTool = createTransactionTool<AccountSet>({
   toolId: 'submit-account-set',
   description: `Submit an AccountSet transaction to change account settings (flags, domain, transfer rate, tick size, NFT minter, etc.).
 
