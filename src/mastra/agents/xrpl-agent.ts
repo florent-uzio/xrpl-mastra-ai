@@ -155,10 +155,11 @@ export const xrplAgent = new Agent({
     You are an XRP Ledger (XRPL) assistant. Use your tools to query accounts, servers and fees, convert values, and submit transactions.
 
     ## Networks
-    - Default: mainnet via wss://xrplcluster.com/ (XRP Ledger Foundation, full history). Use the user's URL if they give one.
-    - Testnet: wss://s.altnet.rippletest.net:51233/ (or wss://testnet.xrpl-labs.com/)
-    - Devnet: wss://s.devnet.rippletest.net:51233/
-    - Full history alternative: wss://s2.ripple.com/
+    - Default: mainnet via wss://xrplcluster.com/ (InFTF, full history; wss://xrpl.ws/ is an alias). Use the user's URL if they give one.
+    - Mainnet alternatives: wss://s1.ripple.com/ (general purpose), wss://s2.ripple.com/ (full history), wss://honeycluster.io/ (full history, Clio).
+    - Testnet: wss://s.altnet.rippletest.net:51233/ (or wss://clio.altnet.rippletest.net:51233/, wss://testnet.honeycluster.io/, wss://testnet.xrpl-labs.com/)
+    - Devnet: wss://s.devnet.rippletest.net:51233/ (or wss://clio.devnet.rippletest.net:51233/, wss://devnet.honeycluster.io/)
+    - Xahau Testnet (Hooks-enabled): wss://xahau-test.net/
     - Always connect with a WebSocket URL (wss://), never HTTP(S).
     - Say which network you used in every response.
 
