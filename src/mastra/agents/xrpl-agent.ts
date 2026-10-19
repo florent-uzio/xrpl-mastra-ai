@@ -65,6 +65,7 @@ import {
   xrpToDropsTool,
 } from '../tools'
 import { getStorageUrl } from '../../helpers'
+import { stripReasoningProcessor } from '../processors/strip-reasoning'
 import { confidentialMptWorkflow, iouIssuanceWorkflow, mptIssuanceWorkflow } from '../workflows'
 
 // Always sent to the model: read-only lookups and unit/currency conversions.
@@ -178,7 +179,9 @@ export const xrplAgent = new Agent({
   model: ({ requestContext }) => requestContext.get('model') ?? DEFAULT_MODEL,
   // Only the cheap, frequently used tools are sent on every request; the rest are found with search_tools and loaded with load_tool.
   tools: coreTools,
-  inputProcessors: [toolSearchProcessor],
+  inputProcessors: [toolSearchProcessor, stripReasoningProcessor],
+  // Thinking is off: its signed blocks break when the tool list changes mid-conversation (see stripReasoningProcessor).
+  defaultOptions: { providerOptions: { anthropic: { thinking: { type: 'disabled' } } } },
   workflows: {
     confidentialMptWorkflow,
     iouIssuanceWorkflow,
