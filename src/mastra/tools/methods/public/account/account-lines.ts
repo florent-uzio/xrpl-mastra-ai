@@ -5,7 +5,9 @@ import { executeMethod, xrplMethodResponse } from '../../shared'
 
 export const getAccountLinesTool = createTool({
   id: 'get-account-lines',
-  description: `Get an account's trust lines (token balances and limits).
+  description: `Get an account's trust lines (issued-currency token balances and limits).
+
+Trust lines only: this does NOT return Multi-Purpose Token (MPT) balances. MPT holdings are MPToken ledger objects; read them with get-account-objects using type "mptoken" (the balance is the MPToken's MPTAmount).
 
 Each line has balance (positive: the account holds tokens; negative: the account owes them), limit, limit_peer, and freeze/auth/no_ripple flags.`,
   inputSchema: z.object({
