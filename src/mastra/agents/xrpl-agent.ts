@@ -67,6 +67,7 @@ import {
   xrpToDropsTool,
 } from '../tools'
 import { getStorageUrl } from '../../helpers'
+import { workingMemorySchema } from '../memory/working-memory'
 import { stripReasoningProcessor } from '../processors/strip-reasoning'
 import { confidentialMptWorkflow, iouIssuanceWorkflow, mptIssuanceWorkflow } from '../workflows'
 
@@ -172,6 +173,11 @@ export const xrplAgent = new Agent({
     - Testnet/devnet networks only (testnet, devnet, sidechain-devnet, xahau-testnet). Never fund on mainnet.
     - If no wallet is given, the faucet tool creates one, so skip createWalletTool.
 
+    ## Memory
+    - Your working memory persists across the conversation. Update it right after you create or learn something reusable: wallets (address, plus seed on testnet/devnet only), MPT issuance IDs, ElGamal keys, the network in use, other IDs or hashes you will need later.
+    - Check it before asking the user for a value or creating a new one.
+    - On mainnet, never store seeds or private keys: keep only the address and public keys.
+
     ## Responses
     - Only XRP amounts are in drops (1 XRP = 1,000,000 drops): convert them to XRP for display. Trust line and token balances are not in drops.
     - Explain results in plain terms and explain errors clearly.
@@ -199,6 +205,8 @@ export const xrplAgent = new Agent({
     }),
     options: {
       generateTitle: true,
+      // Resource scope: shared by every thread of the same resourceId, so a wallet survives a new thread.
+      workingMemory: { enabled: true, scope: 'resource', schema: workingMemorySchema },
     },
   }),
 })
