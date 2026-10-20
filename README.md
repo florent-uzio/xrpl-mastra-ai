@@ -71,6 +71,7 @@ The template includes comprehensive XRPL tools:
 - `noripple_check` - Check DefaultRipple/NoRipple flag settings
 - `ledger`, `ledger_closed`, `ledger_current`, `ledger_data`, `ledger_entry` - Read ledgers and raw ledger entries
 - `tx`, `transaction_entry` - Look up a transaction by hash
+- `submit` - Submit a pre-signed transaction blob
 - `amm_info`, `book_offers`, `deposit_authorized`, `ripple_path_find` - AMM pools, order books, deposit authorization and payment paths
 - `nft_buy_offers`, `nft_sell_offers` - Open offers for an NFT
 - `nft_info`, `nft_history`, `nfts_by_issuer` - NFT details and history (Clio servers only)

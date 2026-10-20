@@ -24,6 +24,7 @@ describe('query tools', () => {
   it.each([
     ['getTxTool', { transaction: 'A'.repeat(64) }],
     ['getLedgerTool', {}],
+    ['submitSignedBlobTool', { tx_blob: '1200' + 'AB'.repeat(10) }],
     ['getBookOffersTool', { taker_gets: { currency: 'XRP' }, taker_pays: { currency: 'USD', issuer: account } }],
     ['getNftSellOffersTool', { nft_id: 'B'.repeat(64) }],
     ['getNoRippleCheckTool', { account, role: 'gateway' }],
@@ -33,6 +34,7 @@ describe('query tools', () => {
 
   it.each([
     ['getTxTool', { transaction: 'short' }],
+    ['submitSignedBlobTool', { tx_blob: 'not hex' }],
     ['getNoRippleCheckTool', { account, role: 'admin' }],
   ])('%s rejects invalid input', (name, request) => {
     expect(getTool(name).inputSchema.safeParse({ network, request }).success).toBe(false)
