@@ -1,6 +1,6 @@
 import { ToolExecutionContext } from '@mastra/core/tools'
 import { SubmittableTransaction, TxResponse, Wallet } from 'xrpl'
-import { disconnectXrplClient, getXrplClient } from '../../../../helpers'
+import { getXrplClient } from '../../../../helpers'
 
 type SubmitTransactionProps<T extends SubmittableTransaction> = {
   // The network to use
@@ -37,28 +37,22 @@ export const submitTransaction = async <T extends SubmittableTransaction>({
   const client = await getXrplClient(network, mastra)
 
   // Submit the transaction to the XRPL network
-  try {
-    if (signature) {
-      logger?.info('Submitting transaction with signature', { signature })
+  if (signature) {
+    logger?.info('Submitting transaction with signature', { signature })
 
-      // For signature-based submission, we can't know the exact transaction type
-      // So we cast to the generic type T
-      return (await client.submitAndWait(signature)) as TxResponse<T>
-    }
-
-    if (seed) {
-      logger?.info('Submitting transaction with seed', { txn })
-
-      return await client.submitAndWait(txn, {
-        autofill: true,
-        wallet: Wallet.fromSeed(seed),
-      })
-    }
-
-    throw new Error('No transaction or signature provided to submit')
-  } finally {
-    // Clean up: Disconnect the XRPL client to free up network resources
-    // This is important for resource management and preventing connection leaks
-    await disconnectXrplClient(network, mastra)
+    // For signature-based submission, we can't know the exact transaction type
+    // So we cast to the generic type T
+    return (await client.submitAndWait(signature)) as TxResponse<T>
   }
+
+  if (seed) {
+    logger?.info('Submitting transaction with seed', { txn })
+
+    return await client.submitAndWait(txn, {
+      autofill: true,
+      wallet: Wallet.fromSeed(seed),
+    })
+  }
+
+  throw new Error('No transaction or signature provided to submit')
 }

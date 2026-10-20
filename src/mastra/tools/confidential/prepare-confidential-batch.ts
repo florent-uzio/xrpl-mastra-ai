@@ -8,7 +8,7 @@ import {
   SubmittableTransaction,
 } from 'xrpl'
 import { z } from 'zod'
-import { disconnectXrplClient, getXrplClient, networkSchema, xrplAddressSchema } from '../../../helpers'
+import { getXrplClient, networkSchema, xrplAddressSchema } from '../../../helpers'
 
 const mptIssuanceId = z.string().describe('Hex ID of the MPT issuance')
 const amount = z.string().regex(/^\d+$/).describe('Integer string')
@@ -171,8 +171,6 @@ Seeds are secrets: never repeat them.`,
       return { txn: await prepareBatch(client, inputData) }
     } catch (error) {
       return { error: errorMessage(error) }
-    } finally {
-      await disconnectXrplClient(inputData.network, mastra)
     }
   },
 })

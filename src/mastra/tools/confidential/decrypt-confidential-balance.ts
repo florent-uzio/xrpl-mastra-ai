@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { Client, deriveConfidentialKeypair, fetchMPToken, fetchMPTokenIssuance, loadMptCrypto } from 'xrpl'
 import { z } from 'zod'
-import { disconnectXrplClient, getXrplClient, networkSchema, xrplAddressSchema } from '../../../helpers'
+import { getXrplClient, networkSchema, xrplAddressSchema } from '../../../helpers'
 
 const roleSchema = z.enum(['holder', 'issuer', 'auditor'])
 type Role = z.infer<typeof roleSchema>
@@ -91,18 +91,14 @@ The seed is a secret: never repeat it.`,
   execute: async (inputData, { mastra }) => {
     const { network, holder, role } = inputData
     const client = await getXrplClient(network, mastra)
-    try {
-      const { ledgerIndex, total, spending, inbox } = await decryptConfidentialBalance(client, inputData)
-      return {
-        holder,
-        role,
-        ledgerIndex: Number(ledgerIndex),
-        total: total.toString(),
-        spending: spending?.toString(),
-        inbox: inbox?.toString(),
-      }
-    } finally {
-      await disconnectXrplClient(network, mastra)
+    const { ledgerIndex, total, spending, inbox } = await decryptConfidentialBalance(client, inputData)
+    return {
+      holder,
+      role,
+      ledgerIndex: Number(ledgerIndex),
+      total: total.toString(),
+      spending: spending?.toString(),
+      inbox: inbox?.toString(),
     }
   },
 })

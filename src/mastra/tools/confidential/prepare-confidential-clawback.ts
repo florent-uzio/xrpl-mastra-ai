@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { Client, deriveConfidentialKeypair, fetchMPTokenIssuance, prepareConfidentialClawback } from 'xrpl'
 import { z } from 'zod'
-import { disconnectXrplClient, getXrplClient, networkSchema, xrplAddressSchema } from '../../../helpers'
+import { getXrplClient, networkSchema, xrplAddressSchema } from '../../../helpers'
 
 type PrepareParams = {
   issuer: string
@@ -57,11 +57,7 @@ The seed is a secret: never repeat it.`,
   }),
   execute: async (inputData, { mastra }) => {
     const client = await getXrplClient(inputData.network, mastra)
-    try {
-      const txn = await prepareClawback(client, inputData)
-      return { txn, amount: txn.MPTAmount }
-    } finally {
-      await disconnectXrplClient(inputData.network, mastra)
-    }
+    const txn = await prepareClawback(client, inputData)
+    return { txn, amount: txn.MPTAmount }
   },
 })

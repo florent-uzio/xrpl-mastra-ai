@@ -1,6 +1,6 @@
 import { ToolExecutionContext } from '@mastra/core/tools'
 import { Request } from 'xrpl'
-import { disconnectXrplClient, getXrplClient } from '../../../../helpers'
+import { getXrplClient } from '../../../../helpers'
 
 type ExecuteMethodProps = {
   network: string
@@ -32,11 +32,6 @@ export const executeMethod = async ({ network, request, logMessage, mastra }: Ex
   // This helps with debugging and monitoring request patterns
   logger?.info(logMessage, { url: client.url, opts: JSON.stringify(request) })
 
-  try {
-    // Execute the specified command on the XRPL network
-    return await client.request(request)
-  } finally {
-    // Always disconnect, even if the request fails, to avoid leaking connections
-    await disconnectXrplClient(network, mastra)
-  }
+  // Execute the specified command on the XRPL network
+  return await client.request(request)
 }
