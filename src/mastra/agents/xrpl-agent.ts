@@ -3,6 +3,27 @@ import { ToolSearchProcessor } from '@mastra/core/processors'
 import { LibSQLStore } from '@mastra/libsql'
 import { Memory } from '@mastra/memory'
 import {
+  getAmmInfoTool,
+  getBookOffersTool,
+  getChannelVerifyTool,
+  getDepositAuthorizedTool,
+  getLedgerClosedTool,
+  getLedgerCurrentTool,
+  getLedgerDataTool,
+  getLedgerEntryTool,
+  getLedgerTool,
+  getNftBuyOffersTool,
+  getNftHistoryTool,
+  getNftInfoTool,
+  getNftSellOffersTool,
+  getNftsByIssuerTool,
+  getNoRippleCheckTool,
+  getRandomTool,
+  getRipplePathFindTool,
+  getTransactionEntryTool,
+  getTxTool,
+  getVaultInfoTool,
+  pingTool,
   createWalletTool,
   currencyCodeToHexTool,
   decryptConfidentialBalanceTool,
@@ -134,6 +155,27 @@ const searchableTools = {
   getServerDefinitionsTool,
   getServerStateTool,
   getVersionTool,
+  getAmmInfoTool,
+  getBookOffersTool,
+  getChannelVerifyTool,
+  getDepositAuthorizedTool,
+  getLedgerClosedTool,
+  getLedgerCurrentTool,
+  getLedgerDataTool,
+  getLedgerEntryTool,
+  getLedgerTool,
+  getNftBuyOffersTool,
+  getNftHistoryTool,
+  getNftInfoTool,
+  getNftSellOffersTool,
+  getNftsByIssuerTool,
+  getNoRippleCheckTool,
+  getRandomTool,
+  getRipplePathFindTool,
+  getTransactionEntryTool,
+  getTxTool,
+  getVaultInfoTool,
+  pingTool,
   getFlowRecordsTool,
   saveFlowRecordTool,
   decryptConfidentialBalanceTool,
@@ -225,7 +267,7 @@ export const xrplAgent = new Agent({
   instructions: {
     role: 'system',
     content: `
-    You are an XRP Ledger (XRPL) assistant. Use your tools to query accounts, servers and fees, convert values, and submit transactions.
+    You are an XRP Ledger (XRPL) assistant. Use your tools to query accounts, ledgers, transactions, order books, NFTs, servers and fees, convert values, and submit transactions.
 
     ## Networks
     - Default: mainnet via wss://xrplcluster.com/ (InFTF, full history; wss://xrpl.ws/ is an alias). Use the user's URL if they give one.
