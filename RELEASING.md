@@ -29,7 +29,7 @@ Changes that do not reach the published bundle (the Mastra app, evals, docs) nee
 
 ## One-time setup
 
-- **npm**: on npmjs.com, add a trusted publisher to `@florent-uzio/xrpl-mcp`: GitHub Actions, repository `florent-uzio/xrpl-mastra-ai`, workflow `release.yml`.
+- **npm**: on npmjs.com, add a trusted publisher to `@florent-uzio/xrpl-mcp`: GitHub Actions, repository `florent-uzio/xrpl-mastra-ai`, workflow `release.yml`. Leave the environment name empty (the workflow uses no GitHub environment). Under allowed actions, enable `npm publish` (otherwise the workflow can only stage a release); `npm dist-tag` is not needed.
 - **GitHub**: in Settings → Actions → General, allow GitHub Actions to create and approve pull requests, so the workflow can open the version PR.
 
 ## Decision: publish from GitHub Actions
