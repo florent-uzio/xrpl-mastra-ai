@@ -51,6 +51,8 @@ Flow records (wallets, MPT IDs, keys, hashes) are stored in `~/.xrpl-mastra-ai/r
 
 To run the server from a clone of the repo instead, use `npm run mcp` (`claude mcp add xrpl -- npm --prefix "$(pwd)" run --silent mcp`).
 
+Releases of the package follow [RELEASING.md](https://github.com/florent-uzio/xrpl-mastra-ai/blob/main/RELEASING.md).
+
 ### Custom test networks
 
 Wallet seeds are refused in code on any network that is not a test network, before any connection is made. The known test networks are the testnet, devnet and Xahau testnet URLs (including their Clio, honeycluster and xrpl-labs alternatives). To use a seed on another test network, add its URL to `XRPL_EXTRA_TEST_NETWORKS` (comma-separated) in the environment of the process that runs the tools:

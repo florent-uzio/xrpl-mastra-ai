@@ -32,6 +32,7 @@
     "model-context-protocol"
   ],
   "scripts": {
-    "prepack": "node build.mjs"
+    "prepack": "node build.mjs",
+    "prepublishOnly": "node release-guard.mjs"
   }
 }

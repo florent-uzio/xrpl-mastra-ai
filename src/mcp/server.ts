@@ -1,5 +1,6 @@
 import type { ToolsInput } from '@mastra/core/agent'
 import { MCPServer } from '@mastra/mcp'
+import packageJson from '../../packages/xrpl-mcp/package.json'
 import { XRPL_INSTRUCTIONS } from '../mastra/instructions'
 import * as toolsBarrel from '../mastra/tools'
 import { confidentialMptWorkflow, iouIssuanceWorkflow, mptIssuanceWorkflow } from '../mastra/workflows'
@@ -21,7 +22,7 @@ const MEMORY_INSTRUCTIONS = `
 export const xrplMcpServer = new MCPServer({
   id: 'xrpl-mcp',
   name: 'XRPL',
-  version: '1.0.0',
+  version: packageJson.version,
   description: 'XRP Ledger tools and token issuance workflows',
   instructions: XRPL_INSTRUCTIONS + MEMORY_INSTRUCTIONS,
   tools,
