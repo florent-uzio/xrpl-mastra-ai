@@ -1,8 +1,10 @@
 import { MCPClient } from '@mastra/mcp'
 import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import packageJson from '../../packages/xrpl-mcp/package.json'
 import { XRPL_INSTRUCTIONS } from '../mastra/instructions'
 import * as toolsBarrel from '../mastra/tools'
+import { xrplMcpServer } from './server'
 
 const SERVER = 'xrpl'
 
@@ -34,6 +36,10 @@ describe('xrpl MCP server', () => {
   }, 60_000)
 
   afterAll(() => client.disconnect())
+
+  it('reports the version of the npm package', () => {
+    expect(xrplMcpServer.version).toBe(packageJson.version)
+  })
 
   it('lists every tool of the tools barrel', () => {
     const expected = Object.entries(toolsBarrel)
