@@ -37,6 +37,18 @@ This template demonstrates how to build sophisticated XRPL applications using Ma
 
 - `OPENAI_API_KEY`: Your OpenAI API key. Get one at [OpenAI Platform](https://platform.openai.com/api-keys)
 
+## Use the tools from Claude Code (MCP server)
+
+`npm run mcp` starts a local stdio MCP server that exposes every XRPL tool and the three workflows (`iou-issuance`, `mpt-issuance`, `confidential-mpt`). It never exposes the Mastra agent, so Claude Code does the reasoning on your own subscription and no model key is involved. The server's instructions are the same rules the agent follows.
+
+Add it to Claude Code from the repo root:
+
+```bash
+claude mcp add xrpl --env XRPL_RECORDS_DIR=~/.xrpl-mastra-ai/records -- npm --prefix "$(pwd)" run --silent mcp
+```
+
+`XRPL_RECORDS_DIR` puts flow records (wallets, MPT IDs, keys, hashes) in one per-user folder, whatever directory Claude Code starts from. Set the same value in `.env` so Mastra Studio reads and writes the same records.
+
 ## Usage
 
 You can use the XRPL Agent to do several things that the XRP Ledger and xrpl.js SDK allows. For example:
