@@ -51,6 +51,12 @@ Flow records (wallets, MPT IDs, keys, hashes) are stored in `~/.xrpl-mastra-ai/r
 
 To run the server from a clone of the repo instead, use `npm run mcp` (`claude mcp add xrpl -- npm --prefix "$(pwd)" run --silent mcp`).
 
+`npx` picks up a new release the next time Claude Code starts the server: start a new session, or reconnect `xrpl` from `/mcp`. If you still get the old version, or `npx` reports `No matching version found`, your npm cache holds outdated package data. Refresh it once (the server then waits for input: stop it with Ctrl+C), then reconnect:
+
+```bash
+npx -y --prefer-online @florent-uzio/xrpl-mcp
+```
+
 Releases of the package follow [RELEASING.md](https://github.com/florent-uzio/xrpl-mastra-ai/blob/main/RELEASING.md).
 
 ### Custom test networks
