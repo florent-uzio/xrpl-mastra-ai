@@ -1,4 +1,5 @@
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { homedir } from 'node:os'
 import path from 'node:path'
 import { Wallet } from 'xrpl'
 import { getProjectRoot } from './storage'
@@ -17,9 +18,14 @@ export type FlowRecord = {
   data: Record<string, unknown>
 }
 
-/** `XRPL_RECORDS_DIR` if set, otherwise `<project root>/records`. */
+/** Expands a leading `~` to the home directory, since MCP clients pass env values without going through a shell. */
+const expandHome = (p: string) => (p === '~' || p.startsWith('~/') ? path.join(homedir(), p.slice(1)) : p)
+
+/** `XRPL_RECORDS_DIR` if set (a leading `~` is expanded), otherwise `<project root>/records`. */
 export const getRecordsDir = () =>
-  process.env.XRPL_RECORDS_DIR ? path.resolve(process.env.XRPL_RECORDS_DIR) : path.join(getProjectRoot(), 'records')
+  process.env.XRPL_RECORDS_DIR
+    ? path.resolve(expandHome(process.env.XRPL_RECORDS_DIR))
+    : path.join(getProjectRoot(), 'records')
 
 /** The address and seed of a wallet: enough to use it again later. */
 export const toWalletRecord = (wallet: Wallet) => ({ address: wallet.classicAddress, seed: wallet.seed })

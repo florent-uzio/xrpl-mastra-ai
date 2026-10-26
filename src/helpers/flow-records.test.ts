@@ -1,8 +1,8 @@
 import { mkdtemp, rm } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
+import { homedir, tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { listFlowRecords, saveFlowRecord } from './flow-records'
+import { getRecordsDir, listFlowRecords, saveFlowRecord } from './flow-records'
 
 describe('flow records', () => {
   let dir: string
@@ -19,6 +19,11 @@ describe('flow records', () => {
 
   it('returns nothing when no record was saved', async () => {
     expect(await listFlowRecords()).toEqual([])
+  })
+
+  it('expands a leading ~ in XRPL_RECORDS_DIR to the home directory', () => {
+    process.env.XRPL_RECORDS_DIR = '~/.xrpl-mastra-ai/records'
+    expect(getRecordsDir()).toBe(path.join(homedir(), '.xrpl-mastra-ai', 'records'))
   })
 
   it('saves a record and lists it back, newest first, filtered by flow', async () => {
