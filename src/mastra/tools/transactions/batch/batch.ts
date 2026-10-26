@@ -1,5 +1,5 @@
 import { Batch, BatchFlags, combineBatchSigners, decode, GlobalFlags, signMultiBatch, Wallet } from 'xrpl'
-import { getXrplClient } from '../../../../helpers'
+import { assertSeedAllowed, getXrplClient } from '../../../../helpers'
 import { useTransactionToolFactory } from '../factory'
 import { encodeCurrencyCodes } from '../shared'
 import { xrplBatchSchema } from './batch.types'
@@ -67,6 +67,8 @@ Errors: temINVALID_FLAG (zero or several modes), temARRAY_EMPTY/temARRAY_TOO_LAR
     }
   },
   prepareTransaction: async ({ txn, input, network, mastra }) => {
+    if (input.innerSeeds?.length) assertSeedAllowed(network)
+
     const innerWallets = (input.innerSeeds ?? []).map(seed => Wallet.fromSeed(seed))
     const signers = innerWallets.filter(wallet => wallet.classicAddress !== txn.Account)
 

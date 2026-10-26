@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { ECDSA, Wallet } from 'xrpl'
 import { z } from 'zod'
-import { getXrplClient, networkSchema, xrplAddressSchema } from '../../../helpers'
+import { assertSeedAllowed, getXrplClient, networkSchema, xrplAddressSchema } from '../../../helpers'
 
 const walletOutputSchema = z.object({
   address: xrplAddressSchema.describe('Classic address, safe to share'),
@@ -73,6 +73,8 @@ Funding can take a few seconds.`,
     const { network, seed, opts } = inputData
 
     const logger = mastra?.getLogger()
+
+    if (seed) assertSeedAllowed(network)
 
     const client = await getXrplClient(network, mastra)
 
