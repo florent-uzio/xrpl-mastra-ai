@@ -49,6 +49,16 @@ claude mcp add xrpl --env XRPL_RECORDS_DIR=~/.xrpl-mastra-ai/records -- npm --pr
 
 `XRPL_RECORDS_DIR` puts flow records (wallets, MPT IDs, keys, hashes) in one per-user folder, whatever directory Claude Code starts from. Set the same value in `.env` so Mastra Studio reads and writes the same records.
 
+### Custom test networks
+
+Wallet seeds are refused in code on any network that is not a test network, before any connection is made. The known test networks are the testnet, devnet and Xahau testnet URLs (including their Clio, honeycluster and xrpl-labs alternatives). To use a seed on another test network, add its URL to `XRPL_EXTRA_TEST_NETWORKS` (comma-separated) in the environment of the process that runs the tools:
+
+```bash
+claude mcp add xrpl --env XRPL_EXTRA_TEST_NETWORKS=wss://my-testnet.example.com/,ws://localhost:6006 -- npm --prefix "$(pwd)" run --silent mcp
+```
+
+On mainnet, sign the transaction yourself and pass the `signature`: signed transactions are accepted on any network.
+
 ## Usage
 
 You can use the XRPL Agent to do several things that the XRP Ledger and xrpl.js SDK allows. For example:

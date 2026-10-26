@@ -18,7 +18,7 @@ import {
   Wallet,
 } from 'xrpl'
 import type { ECDSA } from 'xrpl'
-import { getXrplClient, saveFlowRecord, toWalletRecord } from '../../helpers'
+import { assertSeedAllowed, getXrplClient, saveFlowRecord, toWalletRecord } from '../../helpers'
 import {
   confidentialMptResultSchema,
   confidentialMptWorkflowSchema,
@@ -79,6 +79,8 @@ const setupWallets = createStep({
     const { network, issuer, holder, send } = inputData
 
     try {
+      if ([issuer, holder, send?.destination].some(account => account?.source === 'seed')) assertSeedAllowed(network)
+
       const client = await getXrplClient(network, mastra)
       const loadOrFund = async (account: Account) =>
         account.source === 'seed' ? Wallet.fromSeed(account.seed) : (await client.fundWallet()).wallet

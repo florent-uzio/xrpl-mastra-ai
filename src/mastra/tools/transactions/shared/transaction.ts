@@ -1,6 +1,6 @@
 import { ToolExecutionContext } from '@mastra/core/tools'
 import { SubmittableTransaction, TxResponse, Wallet } from 'xrpl'
-import { getXrplClient } from '../../../../helpers'
+import { assertSeedAllowed, getXrplClient } from '../../../../helpers'
 
 type SubmitTransactionProps<T extends SubmittableTransaction> = {
   // The network to use
@@ -31,6 +31,9 @@ export const submitTransaction = async <T extends SubmittableTransaction>({
   signature,
 }: SubmitTransactionProps<T>): Promise<TxResponse<T>> => {
   const logger = mastra?.getLogger()
+
+  // Before any connection: a seed must never reach a node that is not a test network
+  if (seed) assertSeedAllowed(network)
 
   // Get or create an XRPL client instance for the specified network
   // This handles singleton pattern and connection management
