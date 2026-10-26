@@ -1,13 +1,14 @@
 import { createScorer, notScorable } from '@mastra/core/evals'
 import type { ScorerRunOutputForAgent } from '@mastra/core/evals'
 import { z } from 'zod'
+import { resolveModel } from '../models'
 
 export type Question =
   | { id: string; category: string; question: string; scoring: 'contains'; expected: string[] }
   | { id: string; category: string; question: string; scoring: 'judge'; expected: string }
   | { id: string; category: string; question: string; scoring: 'tool'; expected: string[] }
 
-export const DEFAULT_JUDGE_MODEL = 'anthropic/claude-sonnet-5-5'
+export const DEFAULT_JUDGE_MODEL = 'amazon-bedrock/us.anthropic.claude-sonnet-5-5'
 
 // Lowercase and drop thousands separators so "1,000,000" matches "1000000".
 const normalize = (text: string) => text.toLowerCase().replace(/(\d),(\d)/g, '$1$2')
@@ -72,7 +73,7 @@ export const createJudgeScorer = (judgeModel: string = DEFAULT_JUDGE_MODEL) =>
     description: 'An LLM judge passes the answer when it states the same key facts as the reference',
     type: 'agent',
     judge: {
-      model: judgeModel,
+      model: resolveModel(judgeModel),
       instructions: `You grade answers about the XRP Ledger. Compare the candidate answer to the reference answer.
 Pass (score 1) if the candidate states the same key facts as the reference, even with different wording or extra detail.
 Fail (score 0) if it misses a key fact or contradicts the reference.`,

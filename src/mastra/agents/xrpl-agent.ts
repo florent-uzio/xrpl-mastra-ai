@@ -126,6 +126,7 @@ import {
 } from '../tools'
 import { getStorageUrl } from '../../helpers'
 import { workingMemorySchema } from '../memory/working-memory'
+import { resolveModel } from '../models'
 import { stripReasoningProcessor } from '../processors/strip-reasoning'
 import { confidentialMptWorkflow, iouIssuanceWorkflow, mptIssuanceWorkflow } from '../workflows'
 
@@ -261,7 +262,7 @@ const searchableTools = {
 // 'context' storage derives loaded tools from the conversation, so it survives restarts.
 const toolSearchProcessor = new ToolSearchProcessor({ tools: searchableTools, storage: 'context' })
 
-export const DEFAULT_MODEL: Agent['model'] = 'anthropic/claude-haiku-5-5'
+export const DEFAULT_MODEL = 'amazon-bedrock/us.anthropic.claude-haiku-5-5'
 
 export const xrplAgent = new Agent({
   id: 'xrpl-agent',
@@ -298,17 +299,26 @@ export const xrplAgent = new Agent({
     - Only XRP amounts are in drops (1 XRP = 1,000,000 drops): convert them to XRP for display. Trust line and token balances are not in drops.
     - Explain results in plain terms and explain errors clearly.
   `,
-    // Anthropic only caches when asked. This caches the always-on tool definitions + instructions for 5 minutes.
+    // Anthropic and Bedrock only cache when asked. This caches the always-on tool definitions + instructions for 5 minutes.
     // OpenAI and Groq cache automatically and ignore this option.
-    providerOptions: { anthropic: { cacheControl: { type: 'ephemeral' } } },
+    providerOptions: {
+      anthropic: { cacheControl: { type: 'ephemeral' } },
+      bedrock: { cachePoint: { type: 'default' } },
+    },
   },
-  // Model router id ("provider/model"). Evals pass a different one through requestContext to compare models.
-  model: ({ requestContext }) => requestContext.get('model') ?? DEFAULT_MODEL,
+  // "provider/model" id (see resolveModel). Evals pass a different one through requestContext to compare models.
+  model: ({ requestContext }) => resolveModel(requestContext.get('model') ?? DEFAULT_MODEL),
   // Only the cheap, frequently used tools are sent on every request; the rest are found with search_tools and loaded with load_tool.
   tools: coreTools,
   inputProcessors: [toolSearchProcessor, stripReasoningProcessor],
   // Thinking is off: its signed blocks break when the tool list changes mid-conversation (see stripReasoningProcessor).
-  defaultOptions: { providerOptions: { anthropic: { thinking: { type: 'disabled' } } } },
+  // Bedrock has no option to send a disabled thinking config, so it goes in the raw request fields.
+  defaultOptions: {
+    providerOptions: {
+      anthropic: { thinking: { type: 'disabled' } },
+      bedrock: { additionalModelRequestFields: { thinking: { type: 'disabled' } } },
+    },
+  },
   workflows: {
     confidentialMptWorkflow,
     iouIssuanceWorkflow,

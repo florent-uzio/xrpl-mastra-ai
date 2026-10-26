@@ -8,7 +8,7 @@ import { containsScorer, createJudgeScorer, DEFAULT_JUDGE_MODEL, Question, toolS
 
 const { values } = parseArgs({
   options: {
-    model: { type: 'string', default: DEFAULT_MODEL as string },
+    model: { type: 'string', default: DEFAULT_MODEL },
     judge: { type: 'string', default: DEFAULT_JUDGE_MODEL },
     // Answers and judge verdicts vary between runs, so average several runs before comparing models.
     runs: { type: 'string', default: '1' },

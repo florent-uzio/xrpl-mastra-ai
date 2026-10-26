@@ -35,7 +35,11 @@ This template demonstrates how to build sophisticated XRPL applications using Ma
 
 ## Environment Variables
 
-- `OPENAI_API_KEY`: Your OpenAI API key. Get one at [OpenAI Platform](https://platform.openai.com/api-keys)
+The agent and the eval judge run Claude on AWS Bedrock, so they need AWS credentials, not an Anthropic API key:
+
+- `AWS_PROFILE`: The AWS profile with Bedrock access (SSO, `credential_process` and access keys all work)
+- `AWS_REGION`: The Bedrock region, for example `us-east-1`
+- `OPENAI_API_KEY`: Your OpenAI API key, only needed to run evals with an `openai/...` model. Get one at [OpenAI Platform](https://platform.openai.com/api-keys)
 
 ## Usage
 
