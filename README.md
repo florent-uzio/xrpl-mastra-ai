@@ -39,22 +39,24 @@ This template demonstrates how to build sophisticated XRPL applications using Ma
 
 ## Use the tools from Claude Code (MCP server)
 
-`npm run mcp` starts a local stdio MCP server that exposes every XRPL tool and the three workflows (`iou-issuance`, `mpt-issuance`, `confidential-mpt`). It never exposes the Mastra agent, so Claude Code does the reasoning on your own subscription and no model key is involved. The server's instructions are the same rules the agent follows.
+`npx -y @florent-uzio/xrpl-mcp` starts a local stdio MCP server that exposes every XRPL tool and the three workflows (`iou-issuance`, `mpt-issuance`, `confidential-mpt`). It never exposes the Mastra agent, so Claude Code does the reasoning on your own subscription and no model key is involved. The server's instructions are the same rules the agent follows.
 
-Add it to Claude Code from the repo root:
+Add it to Claude Code from any folder:
 
 ```bash
-claude mcp add xrpl --env XRPL_RECORDS_DIR=~/.xrpl-mastra-ai/records -- npm --prefix "$(pwd)" run --silent mcp
+claude mcp add xrpl -- npx -y @florent-uzio/xrpl-mcp
 ```
 
-`XRPL_RECORDS_DIR` puts flow records (wallets, MPT IDs, keys, hashes) in one per-user folder, whatever directory Claude Code starts from. Set the same value in `.env` so Mastra Studio reads and writes the same records.
+Flow records (wallets, MPT IDs, keys, hashes) are stored in `~/.xrpl-mastra-ai/records` by default. Set `XRPL_RECORDS_DIR` to use another folder (`--env XRPL_RECORDS_DIR=...`), and set `XRPL_RECORDS_DIR=~/.xrpl-mastra-ai/records` in this repo's `.env` so Mastra Studio reads and writes the same records.
+
+To run the server from a clone of the repo instead, use `npm run mcp` (`claude mcp add xrpl -- npm --prefix "$(pwd)" run --silent mcp`).
 
 ### Custom test networks
 
 Wallet seeds are refused in code on any network that is not a test network, before any connection is made. The known test networks are the testnet, devnet and Xahau testnet URLs (including their Clio, honeycluster and xrpl-labs alternatives). To use a seed on another test network, add its URL to `XRPL_EXTRA_TEST_NETWORKS` (comma-separated) in the environment of the process that runs the tools:
 
 ```bash
-claude mcp add xrpl --env XRPL_EXTRA_TEST_NETWORKS=wss://my-testnet.example.com/,ws://localhost:6006 -- npm --prefix "$(pwd)" run --silent mcp
+claude mcp add xrpl --env XRPL_EXTRA_TEST_NETWORKS=wss://my-testnet.example.com/,ws://localhost:6006 -- npx -y @florent-uzio/xrpl-mcp
 ```
 
 On mainnet, sign the transaction yourself and pass the `signature`: signed transactions are accepted on any network.
