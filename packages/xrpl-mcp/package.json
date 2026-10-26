@@ -1,0 +1,37 @@
+{
+  "name": "@florent-uzio/xrpl-mcp",
+  "version": "1.0.0",
+  "description": "MCP server exposing XRP Ledger tools and token issuance workflows",
+  "license": "ISC",
+  "author": "Florent Uzio",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/florent-uzio/xrpl-mastra-ai.git",
+    "directory": "packages/xrpl-mcp"
+  },
+  "type": "module",
+  "bin": {
+    "xrpl-mcp": "dist/xrpl-mcp.js"
+  },
+  "files": [
+    "dist/xrpl-mcp.js",
+    "dist/THIRD_PARTY_LICENSES.txt",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "keywords": [
+    "xrpl",
+    "xrp-ledger",
+    "mcp",
+    "model-context-protocol"
+  ],
+  "scripts": {
+    "prepack": "node build.mjs"
+  }
+}

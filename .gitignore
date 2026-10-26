@@ -17,3 +17,7 @@ evals/results/
 # Flow records (wallet seeds of testnet/devnet runs)
 /records/
 /src/mastra/public/records/
+
+# Copied into the npm package at build time
+/packages/xrpl-mcp/README.md
+/packages/xrpl-mcp/LICENSE

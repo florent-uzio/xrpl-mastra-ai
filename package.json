@@ -1,7 +1,8 @@
 {
-  "name": "@florent-uzio/xrpl-mcp",
+  "name": "xrpl-mastra-ai",
+  "private": true,
   "version": "1.0.0",
-  "description": "MCP server exposing XRP Ledger tools and token issuance workflows",
+  "description": "Mastra agent, tools and workflows for the XRP Ledger",
   "license": "ISC",
   "author": "Florent Uzio",
   "repository": {
@@ -9,26 +10,9 @@
     "url": "git+https://github.com/florent-uzio/xrpl-mastra-ai.git"
   },
   "type": "module",
-  "bin": {
-    "xrpl-mcp": "dist/mcp/xrpl-mcp.js"
-  },
-  "files": [
-    "dist/mcp/xrpl-mcp.js",
-    "README.md",
-    "LICENSE"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
   "engines": {
     "node": ">=22.13.0"
   },
-  "keywords": [
-    "xrpl",
-    "xrp-ledger",
-    "mcp",
-    "model-context-protocol"
-  ],
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
@@ -37,8 +21,7 @@
     "start": "mastra start",
     "eval": "tsx --env-file=.env evals/run.ts",
     "mcp": "tsx src/mcp/stdio.ts",
-    "build:mcp": "esbuild src/mcp/stdio.ts --bundle --platform=node --format=esm --target=node22 --packages=external --banner:js=\"#!/usr/bin/env node\" --outfile=dist/mcp/xrpl-mcp.js",
-    "prepack": "npm run build:mcp"
+    "build:mcp": "node packages/xrpl-mcp/build.mjs"
   },
   "dependencies": {
     "@mastra/core": "^1.78.0",
