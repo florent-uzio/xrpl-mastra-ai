@@ -24,7 +24,9 @@
     "build:mcp": "node packages/xrpl-mcp/build.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version && npm install --package-lock-only",
-    "release": "changeset publish"
+    "release": "changeset publish",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@mastra/core": "^1.78.0",
