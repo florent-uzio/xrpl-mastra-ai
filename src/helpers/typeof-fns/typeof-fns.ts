@@ -1,11 +1,4 @@
-type TypeofType =
-  | 'bigint'
-  | 'boolean'
-  | 'function'
-  | 'number'
-  | 'object'
-  | 'string'
-  | 'undefined'
+type TypeofType = 'bigint' | 'boolean' | 'function' | 'number' | 'object' | 'string' | 'undefined'
 
 type TypeCheckFn = (thing: unknown) => boolean
 
@@ -26,19 +19,14 @@ const isTypeof =
 /** Determines if a value is a function type. */
 export const isFunction = isTypeof<(...args: unknown[]) => unknown>('function')
 /** Determines if a value is a numeric type (int or float). */
-export const isNumber = isTypeof<number>(
-  'number',
-  (thing) => !isNaN(thing as number),
-)
+export const isNumber = isTypeof<number>('number', thing => !isNaN(thing as number))
 /** Determins if a value is string type. */
 export const isString = isTypeof<string>('string')
 /** Determines if a value is the special type `undefined`. */
 export const isUndefined = isTypeof<undefined>('undefined')
 
 /** Determines if a value is an object (excluding arrays and functions). */
-export const isObject = <T = Record<string, any>>(
-  thing: unknown,
-): thing is T => {
+export const isObject = <T = Record<string, any>>(thing: unknown): thing is T => {
   if (thing === null || typeof thing !== 'object') return false
   return thing.toString() === '[object Object]'
 }
@@ -46,7 +34,4 @@ export const isObject = <T = Record<string, any>>(
 /** Determines if a value is boolean type. */
 export const isBoolean = isTypeof<boolean>('boolean')
 
-export const isDate = isTypeof<Date>(
-  'object',
-  (maybeDate) => maybeDate instanceof Date && !isNaN(+maybeDate),
-)
+export const isDate = isTypeof<Date>('object', maybeDate => maybeDate instanceof Date && !isNaN(+maybeDate))

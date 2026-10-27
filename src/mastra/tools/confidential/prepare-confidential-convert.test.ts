@@ -12,9 +12,7 @@ const clientWith = (mptoken: Record<string, unknown>) => {
     getLedgerIndex: async () => 5,
     request: async (req: { command: string; mptoken?: unknown }) => ({
       result:
-        req.command === 'account_info'
-          ? { account_data: { Sequence: 7 } }
-          : { node: req.mptoken ? mptoken : issuance },
+        req.command === 'account_info' ? { account_data: { Sequence: 7 } } : { node: req.mptoken ? mptoken : issuance },
     }),
   } as unknown as Client
 }

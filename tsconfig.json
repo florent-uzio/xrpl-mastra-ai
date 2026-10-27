@@ -10,8 +10,5 @@
     "noEmit": true,
     "outDir": "dist"
   },
-  "include": [
-    "src/**/*",
-    "evals/**/*"
-  ]
+  "include": ["src/**/*", "evals/**/*"]
 }
