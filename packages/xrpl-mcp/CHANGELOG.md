@@ -1,5 +1,11 @@
 # @florent-uzio/xrpl-mcp
 
+## 1.0.2
+
+### Patch Changes
+
+- 5d45b5a: Add a `getMcpVersionTool` tool so Claude can report which version of the MCP server is running.
+
 ## 1.0.1
 
 ### Patch Changes
