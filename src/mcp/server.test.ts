@@ -41,6 +41,12 @@ describe('xrpl MCP server', () => {
     expect(xrplMcpServer.version).toBe(packageJson.version)
   })
 
+  it('returns the package version from a tool', async () => {
+    const tools = await client.listTools()
+    const result = await tools[`${SERVER}_getMcpVersionTool`].execute?.({}, {} as never)
+    expect(JSON.stringify(result)).toContain(packageJson.version)
+  })
+
   it('lists every tool of the tools barrel', () => {
     const expected = Object.entries(toolsBarrel)
       .filter(([, value]) => typeof value === 'object' && value !== null && 'execute' in value)

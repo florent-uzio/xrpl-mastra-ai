@@ -1,5 +1,7 @@
 import type { ToolsInput } from '@mastra/core/agent'
+import { createTool } from '@mastra/core/tools'
 import { MCPServer } from '@mastra/mcp'
+import { z } from 'zod'
 import packageJson from '../../packages/xrpl-mcp/package.json'
 import { XRPL_INSTRUCTIONS } from '../mastra/instructions'
 import * as toolsBarrel from '../mastra/tools'
@@ -8,7 +10,19 @@ import { confidentialMptWorkflow, iouIssuanceWorkflow, mptIssuanceWorkflow } fro
 // The tools barrel also exports schemas and helper functions: keep only the tools.
 const isTool = (value: unknown) => typeof value === 'object' && value !== null && 'id' in value && 'execute' in value
 
-const tools = Object.fromEntries(Object.entries(toolsBarrel).filter(([, value]) => isTool(value))) as ToolsInput
+// MCP clients do not hand the server version to the model: a tool is the only way to ask for it.
+const getMcpVersionTool = createTool({
+  id: 'get-mcp-version',
+  description: 'Get the version of this XRPL MCP server (the @florent-uzio/xrpl-mcp npm package).',
+  inputSchema: z.object({}),
+  outputSchema: z.object({ name: z.string(), version: z.string() }),
+  execute: async () => ({ name: packageJson.name, version: packageJson.version }),
+})
+
+const tools = {
+  ...Object.fromEntries(Object.entries(toolsBarrel).filter(([, value]) => isTool(value))),
+  getMcpVersionTool,
+} as ToolsInput
 
 // The MCP client has no Mastra working memory, so ledger facts go to flow records instead.
 const MEMORY_INSTRUCTIONS = `
