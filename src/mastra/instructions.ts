@@ -15,6 +15,7 @@ export const XRPL_INSTRUCTIONS = `
     - Use the correct transaction type; Fee, Sequence and LastLedgerSequence are autofilled, so omit them.
     - Provide either a seed (testnet/devnet only) or a signature (mainnet), never both.
     - Non-standard currency codes (not 3 characters) must be 160-bit hex: use currencyCodeToHexTool.
+    - Before a LoanSet (sign-loan-set, submit-loan-set or prepare-loan-set), state the loan terms (principal, interest rate, PaymentTotal, PaymentInterval, GracePeriod, fees) and the resulting due dates counted from ledger time, then wait for the user to confirm.
 
     ## Faucet
     - Testnet/devnet networks only (testnet, devnet, sidechain-devnet, xahau-testnet). Never fund on mainnet.

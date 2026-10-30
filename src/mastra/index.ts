@@ -4,10 +4,10 @@ import { PinoLogger } from '@mastra/loggers'
 import { getStorageUrl } from '../helpers'
 import { xrplAgent } from './agents/xrpl-agent'
 import { containsScorer, createJudgeScorer, toolScorer } from './scorers'
-import { confidentialMptWorkflow, iouIssuanceWorkflow, mptIssuanceWorkflow } from './workflows'
+import { confidentialMptWorkflow, iouIssuanceWorkflow, lendingSetupWorkflow, mptIssuanceWorkflow } from './workflows'
 
 export const mastra = new Mastra({
-  workflows: { confidentialMptWorkflow, iouIssuanceWorkflow, mptIssuanceWorkflow },
+  workflows: { confidentialMptWorkflow, iouIssuanceWorkflow, lendingSetupWorkflow, mptIssuanceWorkflow },
   agents: { xrplAgent },
   // Listed in Studio. `npm run eval` registers the judge again with the model from --judge.
   scorers: { contains: containsScorer, tool: toolScorer, judge: createJudgeScorer() },
