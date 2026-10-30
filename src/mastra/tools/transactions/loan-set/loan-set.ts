@@ -10,7 +10,7 @@ export const submitLoanSetTool = createTransactionTool<LoanSet>({
   toolId: 'submit-loan-set',
   description: `Submit a LoanSet transaction to create a loan between a loan broker and a borrower. Requires the LendingProtocol amendment.
 
-Both the broker owner and the borrower must sign. Either one prepares and signs the terms (setting Counterparty), the other adds the CounterpartySignature and submits. Because of this, pass the fully signed transaction in "signature" rather than a seed, unless CounterpartySignature is already in the transaction.
+Both the broker owner and the borrower must sign, and a seed here only signs as Account (missing CounterpartySignature = temBAD_SIGNER). On testnet/devnet, use sign-loan-set with both seeds instead, then submit its tx_blob with submit-signed-blob. On mainnet, pass the fully signed transaction (with CounterpartySignature) in "signature".
 
 Required: LoanBrokerID and PrincipalRequested (in the vault asset). The other terms are optional:
 - InterestRate, LateInterestRate, CloseInterestRate, OverpaymentInterestRate, OverpaymentFee: 1/10 basis points (1 = 0.001%), 0 to 100000
