@@ -126,6 +126,7 @@ The template includes comprehensive XRPL tools:
 - `LoanPay` - Make a loan payment
 - `LoanSet` - Create a loan
 - `sign-loan-set` - Sign a LoanSet as both the broker owner and the borrower (testnet/devnet), for `submit`
+- `prepare-loan-set` - Autofill an unsigned LoanSet for both parties to sign on their own machines (any network, mainnet included)
 - `NFTokenMint` - Create new NFT tokens
 - `OfferCancel` - Cancel existing offers
 - `OfferCreate` - Create exchange offers

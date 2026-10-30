@@ -49,7 +49,7 @@ Input:
 
 Output: the signed transaction, tx_blob and hash. Submit tx_blob with submit-signed-blob right away: LastLedgerSequence is set about 20 ledgers (~1 minute) ahead, after which the blob expires (tefMAX_LEDGER).
 
-On mainnet, each party signs outside this server and the fully signed blob is submitted with submit-signed-blob.
+On mainnet, use prepare-loan-set: it returns the unsigned LoanSet for each party to sign outside this server, then the fully signed blob is submitted with submit-signed-blob.
 
 The seeds are secrets: never repeat them.`,
   inputSchema: z.object({
