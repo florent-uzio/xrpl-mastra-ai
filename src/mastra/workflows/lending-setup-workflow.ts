@@ -293,6 +293,7 @@ const recordResults = createStep({
 const lendingSetupWorkflow = createWorkflow({
   id: 'lending-setup-workflow',
   description: `Sets up the XRPL Lending Protocol (XLS-66) on devnet, up to the point where a loan can be created: funds a vault owner (also the loan broker owner), a depositor and a borrower, creates a transferable MPT (default) or reuses an existing one given its issuer seed (ask the user which), sends mintAmount of it to each wallet, creates a closed-ended vault (SubscriptionDate and RedemptionDate counted from ledger time), deposits depositAmount, creates a LoanBroker and deposits coverAmount of first-loss capital, then saves a record (wallet addresses and seeds, MPTokenIssuanceID, VaultID, LoanBrokerID, vault dates, tx hashes) retrievable with the get-flow-records tool. Loans can be created with sign-loan-set only after SubscriptionDate and must end at least 60 s before RedemptionDate.
+Before running, show the user the default vault and broker settings (amounts, rates, subscription and investment durations) and ask whether to change any.
 Supported networks: wss://s.devnet.rippletest.net:51233/, wss://clio.devnet.rippletest.net:51233/.`,
   inputSchema: lendingSetupWorkflowSchema,
   outputSchema: lendingSetupResultSchema,
