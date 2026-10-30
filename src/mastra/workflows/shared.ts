@@ -1,5 +1,5 @@
 import { ToolExecutionContext } from '@mastra/core/tools'
-import { TxResponse, Wallet } from 'xrpl'
+import { TransactionMetadata, TxResponse, Wallet } from 'xrpl'
 import z from 'zod'
 import { getXrplClient } from '../../helpers'
 
@@ -47,6 +47,17 @@ export const assertTxnSuccess = (result: TxnResult) => {
     throw new Error(`${result.description} failed with ${result.status} (${result.hash})`)
   }
   return result
+}
+
+/** Reads the ID of the ledger entry of `type` (e.g. "Vault") that a transaction created, from its metadata. */
+export const createdEntryId = (response: TxResponse, type: string): string => {
+  const { AffectedNodes } = response.result.meta as TransactionMetadata
+  for (const node of AffectedNodes) {
+    if ('CreatedNode' in node && node.CreatedNode.LedgerEntryType === type) {
+      return node.CreatedNode.LedgerIndex
+    }
+  }
+  throw new Error(`No ${type} created by ${response.result.hash}`)
 }
 
 /** Funds `count` new wallets from the faucet, in parallel. */

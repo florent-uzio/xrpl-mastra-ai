@@ -5,7 +5,12 @@ import { z } from 'zod'
 import packageJson from '../../packages/xrpl-mcp/package.json'
 import { XRPL_INSTRUCTIONS } from '../mastra/instructions'
 import * as toolsBarrel from '../mastra/tools'
-import { confidentialMptWorkflow, iouIssuanceWorkflow, mptIssuanceWorkflow } from '../mastra/workflows'
+import {
+  confidentialMptWorkflow,
+  iouIssuanceWorkflow,
+  lendingSetupWorkflow,
+  mptIssuanceWorkflow,
+} from '../mastra/workflows'
 
 // The tools barrel also exports schemas and helper functions: keep only the tools.
 const isTool = (value: unknown) => typeof value === 'object' && value !== null && 'id' in value && 'execute' in value
@@ -45,5 +50,6 @@ export const xrplMcpServer = new MCPServer({
     'iou-issuance': iouIssuanceWorkflow,
     'mpt-issuance': mptIssuanceWorkflow,
     'confidential-mpt': confidentialMptWorkflow,
+    'lending-setup': lendingSetupWorkflow,
   },
 })

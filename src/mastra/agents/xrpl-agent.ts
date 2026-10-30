@@ -130,7 +130,7 @@ import { XRPL_INSTRUCTIONS } from '../instructions'
 import { getStorageUrl } from '../../helpers'
 import { workingMemorySchema } from '../memory/working-memory'
 import { stripReasoningProcessor } from '../processors/strip-reasoning'
-import { confidentialMptWorkflow, iouIssuanceWorkflow, mptIssuanceWorkflow } from '../workflows'
+import { confidentialMptWorkflow, iouIssuanceWorkflow, lendingSetupWorkflow, mptIssuanceWorkflow } from '../workflows'
 
 // Always sent to the model: read-only lookups and unit/currency conversions.
 const coreTools = {
@@ -293,6 +293,7 @@ export const xrplAgent = new Agent({
   workflows: {
     confidentialMptWorkflow,
     iouIssuanceWorkflow,
+    lendingSetupWorkflow,
     mptIssuanceWorkflow,
   },
   memory: new Memory({

@@ -9,6 +9,7 @@ This template demonstrates how to build sophisticated XRPL applications using Ma
 - **XRPL Client Management**: Singleton pattern for efficient client connections
 - **Comprehensive XRPL Tools**: Public methods, transactions, and wallet management
 - **IOU Issuance Workflow**: Complete automated IOU (trust line token) creation and distribution
+- **Lending Setup Workflow**: Sets up the Lending Protocol on devnet (MPT, closed-ended vault, deposit, loan broker and cover)
 - **AI Agent Integration**: Intelligent XRPL agent with detailed tool descriptions
 - **Type Safety**: Full TypeScript support with Zod validation
 
@@ -39,7 +40,7 @@ This template demonstrates how to build sophisticated XRPL applications using Ma
 
 ## Use the tools from Claude Code (MCP server)
 
-`npx -y @florent-uzio/xrpl-mcp` starts a local stdio MCP server that exposes every XRPL tool and the three workflows (`iou-issuance`, `mpt-issuance`, `confidential-mpt`). It never exposes the Mastra agent, so Claude Code does the reasoning on your own subscription and no model key is involved. The server's instructions are the same rules the agent follows.
+`npx -y @florent-uzio/xrpl-mcp` starts a local stdio MCP server that exposes every XRPL tool and the four workflows (`iou-issuance`, `mpt-issuance`, `confidential-mpt`, `lending-setup`). It never exposes the Mastra agent, so Claude Code does the reasoning on your own subscription and no model key is involved. The server's instructions are the same rules the agent follows.
 
 Add it to Claude Code from any folder:
 
@@ -325,6 +326,36 @@ The template includes a complete IOU (trust line token) issuance workflow, not a
 | `issuerSettings.domain`    | string   | Issuer domain (optional)            | `'example.com'`                          |
 | `issuerSettings.flags`     | string[] | Account flags (optional)            | `['asfDefaultRipple']`                   |
 | `mintAmount`               | string   | Amount of tokens to mint per holder | `'1000'`                                 |
+
+## Lending Setup Workflow
+
+Sets up the XRPL Lending Protocol (XLS-66) on devnet, up to the point where a loan can be created. Devnet only: the `LendingProtocolV1_1` amendment (closed-ended vaults) is not enabled on testnet yet.
+
+1. **Creates Wallets** - Funds a vault owner (also the loan broker owner), a depositor and a borrower, plus an issuer for a new MPT
+2. **Creates the MPT** - A transferable MPT (vaults require `tfMPTCanTransfer`), or reuses an existing one
+3. **Distributes the MPT** - Each wallet opts in and receives `mintAmount`
+4. **Creates a Closed-Ended Vault** - `SubscriptionDate` and `RedemptionDate` counted from ledger time
+5. **Deposits** - The depositor deposits `depositAmount` during the Subscription phase
+6. **Creates the Loan Broker** - Then deposits `coverAmount` of first-loss capital
+
+The loan itself is left to the agent and the `sign-loan-set`, `LoanPay`, `LoanManage` tools: it can only be created after `SubscriptionDate`, and its last payment must be at least 60 s before `RedemptionDate`.
+
+### Workflow Parameters
+
+Amounts are in the MPT's smallest unit (integer strings). Rates are in 1/10 basis points (10000 = 10%). Every parameter except `network` has a default.
+
+| Parameter              | Type   | Description                                                                               | Default                               |
+| ---------------------- | ------ | ----------------------------------------------------------------------------------------- | ------------------------------------- |
+| `network`              | string | Devnet WebSocket URL                                                                      | -                                     |
+| `issuance`             | object | `{ source: 'create', assetScale }` or `{ source: 'existing', mptIssuanceId, issuerSeed }` | `{ source: 'create', assetScale: 2 }` |
+| `mintAmount`           | string | Sent to the vault owner, depositor and borrower each                                      | `'100000000'` (1,000,000.00)          |
+| `depositAmount`        | string | Deposited into the vault                                                                  | `'50000000'` (500,000.00)             |
+| `coverAmount`          | string | First-loss capital deposited into the loan broker                                         | `'5000000'` (50,000.00)               |
+| `managementFeeRate`    | number | Share of loan interest kept by the broker (max 10000)                                     | `5000` (5%)                           |
+| `coverRateMinimum`     | number | Share of the broker debt the cover must cover                                             | `10000` (10%)                         |
+| `coverRateLiquidation` | number | Share of the minimum cover moved to the vault on a default                                | `50000` (50%)                         |
+| `subscriptionSeconds`  | number | Seconds from now until `SubscriptionDate` (min 60)                                        | `300`                                 |
+| `investmentSeconds`    | number | Seconds between `SubscriptionDate` and `RedemptionDate` (min 180)                         | `3600`                                |
 
 ## Best Practices
 
