@@ -18,9 +18,9 @@ const { metafile } = await build({
   format: 'esm',
   target: 'node22',
   metafile: true,
-  // Bundled CommonJS packages call require(), which ESM output lacks.
+  // Bundled CommonJS packages call require(), __dirname and __filename, which ESM output lacks.
   banner: {
-    js: "#!/usr/bin/env node\nimport { createRequire } from 'node:module'; const require = createRequire(import.meta.url);",
+    js: "#!/usr/bin/env node\nimport { createRequire } from 'node:module'; import { fileURLToPath } from 'node:url'; import { dirname } from 'node:path'; const require = createRequire(import.meta.url); const __filename = fileURLToPath(import.meta.url); const __dirname = dirname(__filename);",
   },
 })
 
@@ -38,6 +38,9 @@ const notices = [...packageDirs].sort().map(dir => {
   return `${name}@${version} (${relative(root, dir)})\n\n${text}`
 })
 writeFileSync(join(pkgDir, 'dist/THIRD_PARTY_LICENSES.txt'), notices.join(`\n\n${'-'.repeat(80)}\n\n`) + '\n')
+
+// The confidential MPT crypto is WebAssembly that its loader reads from next to the bundle.
+copyFileSync(join(root, 'node_modules/@xrplf/mpt-crypto/wasm/mpt_crypto.wasm'), join(pkgDir, 'dist/mpt_crypto.wasm'))
 
 for (const file of ['README.md', 'LICENSE']) {
   copyFileSync(join(root, file), join(pkgDir, file))
