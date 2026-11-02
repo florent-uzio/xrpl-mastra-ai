@@ -1,6 +1,6 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { AccountSet, AccountSetAsfFlags, convertStringToHex, Payment, TrustSet } from 'xrpl'
-import { currencyCodeToHex, getXrplClient, saveFlowRecord, toWalletRecord, supportedNetworksText } from '../../helpers'
+import { currencyCodeToHex, getXrplClient, saveFlowRecord, supportedNetworksText } from '../../helpers'
 import {
   iouIssuanceResultSchema,
   iouIssuanceWorkflowSchema,
@@ -158,8 +158,8 @@ const recordResults = createStep({
         flow: 'iou-issuance',
         network,
         data: {
-          issuer: toWalletRecord(issuer),
-          holders: holders.map(toWalletRecord),
+          issuer,
+          holders,
           currency: trustline.currency,
           trustlineLimit: trustline.trustlineLimit,
           mintAmount,
@@ -168,7 +168,15 @@ const recordResults = createStep({
         },
       })
 
-      return { ...inputData, recordId: record.id, recordPath: path }
+      return {
+        network,
+        currency: trustline.currency,
+        issuer: issuer.address,
+        holders: holders.map(holder => holder.address),
+        txnResults,
+        recordId: record.id,
+        recordPath: path,
+      }
     } catch (error) {
       throw new Error(`Failed to save the record: ${errorMessage(error)}`)
     }

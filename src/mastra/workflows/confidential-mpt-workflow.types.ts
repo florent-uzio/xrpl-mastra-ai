@@ -1,8 +1,8 @@
-import { MPTokenIssuanceCreateFlags, Wallet } from 'xrpl'
+import { MPTokenIssuanceCreateFlags } from 'xrpl'
 import z from 'zod'
 import { mptMetadataSchema } from './mpt-issuance-workflow.types'
 import { workflowNetworkSchema } from '../../helpers'
-import { txnResultSchema } from './shared'
+import { addressSchema, resultShape, txnResultSchema, walletRecordSchema } from './shared'
 
 /**
  * The ConfidentialTransfer amendment is only available on devnet for now.
@@ -110,9 +110,9 @@ const confidentialSeedsSchema = z.object({
 
 /** State passed from step to step. */
 export const confidentialStateSchema = confidentialMptBaseSchema.extend({
-  issuerWallet: z.custom<Wallet>().describe('Issuer wallet'),
-  holderWallet: z.custom<Wallet>().describe('Holder wallet'),
-  destinationWallet: z.custom<Wallet>().optional().describe('Destination wallet, when a send was requested'),
+  issuerWallet: walletRecordSchema.describe('Issuer wallet'),
+  holderWallet: walletRecordSchema.describe('Holder wallet'),
+  destinationWallet: walletRecordSchema.optional().describe('Destination wallet, when a send was requested'),
   confidentialSeeds: confidentialSeedsSchema,
   mptIssuanceId: z.string(),
   txnResults: z.array(txnResultSchema).describe('Transaction results so far'),
@@ -124,8 +124,11 @@ const balancesSchema = z.object({
 })
 
 /** Workflow output: the final state plus the balances read back from the ledger and where the run was recorded. */
-export const confidentialMptResultSchema = confidentialStateSchema.extend({
+export const confidentialMptResultSchema = z.object({
+  ...resultShape,
+  mptIssuanceId: z.string(),
+  issuer: addressSchema,
+  holder: addressSchema,
+  destination: addressSchema.optional(),
   balances: z.object({ holder: balancesSchema, destination: balancesSchema.optional() }),
-  recordId: z.string().describe('Id of the saved record, usable with the get-flow-records tool'),
-  recordPath: z.string().describe('Path of the saved record file'),
 })

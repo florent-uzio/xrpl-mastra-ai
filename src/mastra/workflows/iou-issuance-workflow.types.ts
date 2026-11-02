@@ -1,7 +1,7 @@
-import { AccountSetAsfFlags, Wallet } from 'xrpl'
+import { AccountSetAsfFlags } from 'xrpl'
 import z from 'zod'
 import { workflowNetworkSchema } from '../../helpers'
-import { txnResultSchema } from './shared'
+import { addressSchema, resultShape, txnResultSchema, walletRecordSchema } from './shared'
 
 /**
  * Flag names (e.g. "asfDefaultRipple") from xrpl's AccountSetAsfFlags enum.
@@ -17,7 +17,7 @@ const accountSetAsfFlagNames = Object.keys(AccountSetAsfFlags).filter(k => isNaN
 /**
  * Schema for XRPL wallet objects
  */
-const issuerSchema = z.custom<Wallet>().describe('Issuer wallet')
+const issuerSchema = walletRecordSchema.describe('Issuer wallet')
 
 /**
  * Trust line configuration for IOU issuance
@@ -60,7 +60,7 @@ export const iouIssuanceWorkflowSchema = z.object({
  */
 const issuerAndHoldersSchema = z.object({
   issuer: issuerSchema,
-  holders: z.array(z.custom<Wallet>().describe('Holder wallet')),
+  holders: z.array(walletRecordSchema.describe('Holder wallet')),
 })
 
 /**
@@ -81,10 +81,10 @@ export const settingsSchema = walletsSchema.extend({
   txnResults: z.array(txnResultSchema).describe('Array of transaction results from this step'),
 })
 
-/**
- * Workflow output: the last step's output plus where the run was recorded
- */
-export const iouIssuanceResultSchema = settingsSchema.extend({
-  recordId: z.string().describe('Id of the saved record, usable with the get-flow-records tool'),
-  recordPath: z.string().describe('Path of the saved record file'),
+/** Workflow output: what was issued and to whom, without seeds */
+export const iouIssuanceResultSchema = z.object({
+  ...resultShape,
+  currency: z.string().describe('Currency code, as sent to the ledger (hex for codes longer than 3 characters)'),
+  issuer: addressSchema,
+  holders: z.array(addressSchema),
 })

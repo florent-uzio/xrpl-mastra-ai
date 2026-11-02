@@ -80,7 +80,7 @@ const setupWallets = createStep({
 
       const client = await getXrplClient(network, mastra)
       const loadOrFund = async (account: Account) =>
-        account.source === 'seed' ? Wallet.fromSeed(account.seed) : (await client.fundWallet()).wallet
+        toWalletRecord(account.source === 'seed' ? Wallet.fromSeed(account.seed) : (await client.fundWallet()).wallet)
 
       const [issuerWallet, holderWallet, destinationWallet] = await Promise.all([
         loadOrFund(issuer),
@@ -141,8 +141,8 @@ const setupIssuance = createStep({
       }
 
       const issuance = await fetchMPTokenIssuance(client, mptIssuanceId)
-      if (issuance.Issuer !== issuer.classicAddress) {
-        throw new Error(`Issuance ${mptIssuanceId} was issued by ${issuance.Issuer}, not ${issuer.classicAddress}`)
+      if (issuance.Issuer !== issuer.address) {
+        throw new Error(`Issuance ${mptIssuanceId} was issued by ${issuance.Issuer}, not ${issuer.address}`)
       }
       if (!(issuance.Flags & MPTokenIssuanceCreateFlags.tfMPTCanHoldConfidentialBalance)) {
         throw new Error(
@@ -189,7 +189,7 @@ const optIn = createStep({
       const results: TxnResult[] = []
 
       for (const { wallet, label } of accountsOf(inputData)) {
-        if (await findMPToken(client, wallet.classicAddress, mptIssuanceId)) continue
+        if (await findMPToken(client, wallet.address, mptIssuanceId)) continue
 
         const tx: MPTokenAuthorize = {
           TransactionType: 'MPTokenAuthorize',
@@ -222,7 +222,7 @@ const authorize = createStep({
 
       const results: TxnResult[] = []
       for (const { wallet } of accountsOf(inputData)) {
-        const mptoken = await fetchMPToken(client, wallet.classicAddress, mptIssuanceId)
+        const mptoken = await fetchMPToken(client, wallet.address, mptIssuanceId)
         if (mptoken.Flags & MPTOKEN_AUTHORIZED) continue
 
         const tx: MPTokenAuthorize = {
@@ -252,7 +252,7 @@ const mintToHolder = createStep({
 
     try {
       const client = await getXrplClient(network, mastra)
-      const mptoken = await fetchMPToken(client, holderWallet.classicAddress, mptIssuanceId)
+      const mptoken = await fetchMPToken(client, holderWallet.address, mptIssuanceId)
       const missing = BigInt(convertAmount) - BigInt(mptoken.MPTAmount ?? 0)
       if (missing <= 0n) return inputData
 
@@ -290,7 +290,7 @@ const convert = createStep({
 
       for (const { label, wallet, confidentialSeed } of accountsOf(inputData)) {
         const holderKeypair = deriveConfidentialKeypair(confidentialSeed)
-        const registeredKey = (await fetchMPToken(client, wallet.classicAddress, mptIssuanceId)).HolderEncryptionKey
+        const registeredKey = (await fetchMPToken(client, wallet.address, mptIssuanceId)).HolderEncryptionKey
         if (registeredKey && registeredKey !== holderKeypair.publicKey) {
           throw new Error(`The ${label} ${wallet.address} registered another encryption key: pass its confidentialSeed`)
         }
@@ -298,7 +298,7 @@ const convert = createStep({
         if (label !== 'holder' && registeredKey) continue
 
         const tx = await prepareConfidentialConvert(client, {
-          account: wallet.classicAddress,
+          account: wallet.address,
           mptIssuanceID: mptIssuanceId,
           amount,
           holderKeypair,
@@ -327,7 +327,7 @@ const mergeInbox = createStep({
     try {
       const client = await getXrplClient(network, mastra)
       const tx = await prepareConfidentialMergeInbox(client, {
-        account: holderWallet.classicAddress,
+        account: holderWallet.address,
         mptIssuanceID: mptIssuanceId,
       })
       const { result } = await submitStep(client, tx, holderWallet, 'The holder merged its confidential inbox')
@@ -354,8 +354,8 @@ const send = createStep({
     try {
       const client = await getXrplClient(network, mastra)
       const tx = await prepareConfidentialSend(client, {
-        account: holderWallet.classicAddress,
-        destination: destinationWallet.classicAddress,
+        account: holderWallet.address,
+        destination: destinationWallet.address,
         mptIssuanceID: mptIssuanceId,
         amount: BigInt(request.amount),
         senderKeypair: deriveConfidentialKeypair(confidentialSeeds.holder),
@@ -369,7 +369,7 @@ const send = createStep({
 
       // The amount lands in the destination's inbox: merge it so that it is spendable
       const mergeTx = await prepareConfidentialMergeInbox(client, {
-        account: destinationWallet.classicAddress,
+        account: destinationWallet.address,
         mptIssuanceID: mptIssuanceId,
       })
       const { result: merged } = await submitStep(
@@ -400,7 +400,7 @@ const convertBack = createStep({
     try {
       const client = await getXrplClient(network, mastra)
       const tx = await prepareConfidentialConvertBack(client, {
-        account: holderWallet.classicAddress,
+        account: holderWallet.address,
         mptIssuanceID: mptIssuanceId,
         amount: BigInt(request.amount),
         holderKeypair: deriveConfidentialKeypair(confidentialSeeds.holder),
@@ -436,10 +436,10 @@ const recordResults = createStep({
       const balances: Record<string, { publicBalance: string; confidentialSpendingBalance: string }> = {}
 
       for (const { label, wallet, confidentialSeed } of accountsOf(inputData)) {
-        const mptoken = await fetchMPToken(client, wallet.classicAddress, mptIssuanceId)
+        const mptoken = await fetchMPToken(client, wallet.address, mptIssuanceId)
         const confidential = await getConfidentialBalance(
           client,
-          wallet.classicAddress,
+          wallet.address,
           mptIssuanceId,
           deriveConfidentialKeypair(confidentialSeed).privateKey,
         )
@@ -454,10 +454,10 @@ const recordResults = createStep({
         network,
         data: {
           mptIssuanceId,
-          issuer: toWalletRecord(issuer),
-          holder: { ...toWalletRecord(inputData.holderWallet), confidentialSeed: confidentialSeeds.holder },
+          issuer,
+          holder: { ...inputData.holderWallet, confidentialSeed: confidentialSeeds.holder },
           destination: inputData.destinationWallet && {
-            ...toWalletRecord(inputData.destinationWallet),
+            ...inputData.destinationWallet,
             confidentialSeed: confidentialSeeds.destination,
           },
           // only the keys this run registered: an existing issuance keeps its own
@@ -469,7 +469,12 @@ const recordResults = createStep({
       })
 
       return {
-        ...inputData,
+        network,
+        mptIssuanceId,
+        issuer: issuer.address,
+        holder: inputData.holderWallet.address,
+        destination: inputData.destinationWallet?.address,
+        txnResults,
         balances: balances as { holder: (typeof balances)[string]; destination?: (typeof balances)[string] },
         recordId: record.id,
         recordPath: path,

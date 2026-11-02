@@ -35,7 +35,13 @@ const createWallets = createStep({
       if (issuance.source === 'existing') {
         assertSeedAllowed(network)
         const [vaultOwner, depositor, borrower] = await fundWallets(network, 3, mastra)
-        return { ...inputData, issuer: Wallet.fromSeed(issuance.issuerSeed), vaultOwner, depositor, borrower }
+        return {
+          ...inputData,
+          issuer: toWalletRecord(Wallet.fromSeed(issuance.issuerSeed)),
+          vaultOwner,
+          depositor,
+          borrower,
+        }
       }
 
       const [issuer, vaultOwner, depositor, borrower] = await fundWallets(network, 4, mastra)
@@ -275,15 +281,29 @@ const recordResults = createStep({
           loanBrokerId,
           subscriptionDate: rippleTimeToISOTime(subscriptionDate),
           redemptionDate: rippleTimeToISOTime(redemptionDate),
-          issuer: toWalletRecord(issuer),
-          vaultOwner: toWalletRecord(vaultOwner),
-          depositor: toWalletRecord(depositor),
-          borrower: toWalletRecord(borrower),
+          issuer: issuer,
+          vaultOwner: vaultOwner,
+          depositor: depositor,
+          borrower: borrower,
           txnResults,
         },
       })
 
-      return { ...inputData, loanBrokerId, recordId: record.id, recordPath: path }
+      return {
+        network,
+        mptIssuanceId,
+        vaultId,
+        loanBrokerId,
+        subscriptionDate,
+        redemptionDate,
+        issuer: issuer.address,
+        vaultOwner: vaultOwner.address,
+        depositor: depositor.address,
+        borrower: borrower.address,
+        txnResults,
+        recordId: record.id,
+        recordPath: path,
+      }
     } catch (error) {
       throw new Error(`Failed to save the record: ${errorMessage(error)}`)
     }

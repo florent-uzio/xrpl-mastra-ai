@@ -1,7 +1,6 @@
-import { Wallet } from 'xrpl'
 import z from 'zod'
 import { workflowNetworkSchema } from '../../helpers'
-import { txnResultSchema } from './shared'
+import { addressSchema, resultShape, txnResultSchema, walletRecordSchema } from './shared'
 
 /**
  * LendingProtocolV1_1 (closed-ended vaults) is only enabled on devnet for now.
@@ -115,10 +114,10 @@ export const lendingSetupWorkflowSchema = lendingSetupBaseSchema
   })
 
 const walletsShape = {
-  issuer: z.custom<Wallet>().describe('MPT issuer wallet'),
-  vaultOwner: z.custom<Wallet>().describe('Vault owner, also the loan broker owner'),
-  depositor: z.custom<Wallet>().describe('Depositor wallet'),
-  borrower: z.custom<Wallet>().describe('Borrower wallet, used later for LoanSet and LoanPay'),
+  issuer: walletRecordSchema.describe('MPT issuer wallet'),
+  vaultOwner: walletRecordSchema.describe('Vault owner, also the loan broker owner'),
+  depositor: walletRecordSchema.describe('Depositor wallet'),
+  borrower: walletRecordSchema.describe('Borrower wallet, used later for LoanSet and LoanPay'),
 }
 
 /** Output of the wallet step. */
@@ -141,8 +140,15 @@ export const vaultSchema = issuedSchema.extend({
 /**
  * Workflow output: the last step's output plus where the run was recorded
  */
-export const lendingSetupResultSchema = vaultSchema.extend({
+export const lendingSetupResultSchema = z.object({
+  ...resultShape,
+  mptIssuanceId: z.string().describe('MPTokenIssuanceID of the vault asset'),
+  vaultId: z.string().describe('ID of the closed-ended Vault'),
   loanBrokerId: z.string().describe('ID of the LoanBroker'),
-  recordId: z.string().describe('Id of the saved record, usable with the get-flow-records tool'),
-  recordPath: z.string().describe('Path of the saved record file'),
+  subscriptionDate: z.number().describe('End of Subscription, in seconds since the Ripple Epoch'),
+  redemptionDate: z.number().describe('Start of Redemption, in seconds since the Ripple Epoch'),
+  issuer: addressSchema.describe('MPT issuer'),
+  vaultOwner: addressSchema.describe('Vault owner, also the loan broker owner'),
+  depositor: addressSchema,
+  borrower: addressSchema,
 })

@@ -6,7 +6,7 @@ import {
   MPTokenIssuanceCreateFlags,
   Payment,
 } from 'xrpl'
-import { getXrplClient, saveFlowRecord, toWalletRecord, supportedNetworksText } from '../../helpers'
+import { getXrplClient, saveFlowRecord, supportedNetworksText } from '../../helpers'
 import {
   issuedSchema,
   mptIssuanceResultSchema,
@@ -183,15 +183,23 @@ const recordResults = createStep({
         network,
         data: {
           mptIssuanceId,
-          issuer: toWalletRecord(issuer),
-          holders: holders.map(toWalletRecord),
+          issuer,
+          holders,
           issuance,
           mintAmount,
           txnResults,
         },
       })
 
-      return { ...inputData, recordId: record.id, recordPath: path }
+      return {
+        network,
+        mptIssuanceId,
+        issuer: issuer.address,
+        holders: holders.map(holder => holder.address),
+        txnResults,
+        recordId: record.id,
+        recordPath: path,
+      }
     } catch (error) {
       throw new Error(`Failed to save the record: ${errorMessage(error)}`)
     }

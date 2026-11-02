@@ -62,7 +62,7 @@ Releases of the package follow [RELEASING.md](https://github.com/florent-uzio/xr
 
 ### Custom test networks
 
-Wallet seeds are refused in code on any network that is not a test network, before any connection is made. The known test networks are the testnet, devnet and Xahau testnet URLs (including their Clio, honeycluster and xrpl-labs alternatives). To use a seed on another test network, add its URL to `XRPL_EXTRA_TEST_NETWORKS` (comma-separated) in the environment of the process that runs the tools:
+Wallet seeds are refused in code on any network that is not a test network, before any connection is made. The known test networks are the testnet, devnet and Xahau testnet URLs (including their Clio, honeycluster and xrpl-labs alternatives), listed with every other known network in `src/helpers/networks.ts`. Flow records follow the same rule: `save-flow-record` refuses seeds and private keys unless the network is a test network. To use a seed on another test network, add its URL to `XRPL_EXTRA_TEST_NETWORKS` (comma-separated) in the environment of the process that runs the tools:
 
 ```bash
 claude mcp add xrpl --env XRPL_EXTRA_TEST_NETWORKS=wss://my-testnet.example.com/,ws://localhost:6006 -- npx -y @florent-uzio/xrpl-mcp
