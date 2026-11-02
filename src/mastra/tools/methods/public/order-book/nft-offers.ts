@@ -1,19 +1,15 @@
-import { createTool } from '@mastra/core/tools'
 import { z } from 'zod'
-import { ledgerSpecifierShape, networkSchema, paginationMarkerSchema } from '../../../../../helpers'
-import { executeMethod, xrplMethodResponse } from '../../shared'
+import { ledgerSpecifierShape, paginationMarkerSchema } from '../../../../../helpers'
+import { defineMethodTool } from '../../shared'
 
-const nftOffersInput = z.object({
-  network: networkSchema,
-  request: z.object({
-    nft_id: z.string().length(64).describe('NFTokenID (64 hex characters)'),
-    ...ledgerSpecifierShape,
-    limit: z.number().int().min(50).max(500).optional().describe('Max offers per page (50-500, default 250)'),
-    marker: paginationMarkerSchema,
-  }),
+const nftOffersRequest = z.object({
+  nft_id: z.string().length(64).describe('NFTokenID (64 hex characters)'),
+  ...ledgerSpecifierShape,
+  limit: z.number().int().min(50).max(500).optional().describe('Max offers per page (50-500, default 250)'),
+  marker: paginationMarkerSchema,
 })
 
-const nftOffersOutput = xrplMethodResponse({
+const nftOffersResult = {
   nft_id: z.string().optional(),
   offers: z
     .array(
@@ -26,40 +22,20 @@ const nftOffersOutput = xrplMethodResponse({
       }),
     )
     .optional(),
-})
+}
 
-export const getNftBuyOffersTool = createTool({
+export const getNftBuyOffersTool = defineMethodTool({
   id: 'get-nft-buy-offers',
+  command: 'nft_buy_offers',
   description: `List the open buy offers for an NFT. Each offer's nft_offer_index is the ID to accept with NFTokenAcceptOffer.`,
-  inputSchema: nftOffersInput,
-  outputSchema: nftOffersOutput,
-  outputValidation: 'warn',
-  execute: async (inputData, { mastra }) => {
-    const { network, request } = inputData
-
-    return await executeMethod({
-      network,
-      request: { ...request, command: 'nft_buy_offers' },
-      logMessage: 'NFT buy offers request',
-      mastra,
-    })
-  },
+  request: nftOffersRequest,
+  result: nftOffersResult,
 })
 
-export const getNftSellOffersTool = createTool({
+export const getNftSellOffersTool = defineMethodTool({
   id: 'get-nft-sell-offers',
+  command: 'nft_sell_offers',
   description: `List the open sell offers for an NFT. Each offer's nft_offer_index is the ID to accept with NFTokenAcceptOffer.`,
-  inputSchema: nftOffersInput,
-  outputSchema: nftOffersOutput,
-  outputValidation: 'warn',
-  execute: async (inputData, { mastra }) => {
-    const { network, request } = inputData
-
-    return await executeMethod({
-      network,
-      request: { ...request, command: 'nft_sell_offers' },
-      logMessage: 'NFT sell offers request',
-      mastra,
-    })
-  },
+  request: nftOffersRequest,
+  result: nftOffersResult,
 })
