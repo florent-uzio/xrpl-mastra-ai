@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { xrplAddressSchema } from '../../../../helpers'
-import { xrplCurrencyAmountSchema } from '../shared'
+import { xrplCurrencyAmountSchema, xrplMptAmountSchema } from '../shared'
 import { xrplCommonFieldsSchema } from '../shared/common-fields'
 
 /**
@@ -9,15 +9,17 @@ import { xrplCommonFieldsSchema } from '../shared/common-fields'
  */
 export const xrplClawbackFieldsSchema = z.object({
   // Required field
-  Amount: xrplCurrencyAmountSchema.describe(
-    "The amount being clawed back and the counterparty from which it is being clawed back. The issuer field represents the token holder's account ID, not the issuer's. The value must not be zero.",
-  ),
+  Amount: z
+    .union([xrplCurrencyAmountSchema, xrplMptAmountSchema])
+    .describe(
+      "The amount to claw back. A trust line token is {currency, issuer, value} where issuer is the HOLDER's address, not the issuer's. An MPT is {mpt_issuance_id, value}, with the holder in Holder. The value must be greater than zero.",
+    ),
 
-  // Optional field (requires MPTokensV1 amendment)
+  // Required for an MPT, forbidden for a trust line token (checked in validateTransaction)
   Holder: xrplAddressSchema
     .optional()
     .describe(
-      "Specifies the holder's address from which to claw back. The holder must already own an MPToken object with a non-zero balance. Requires the MPTokensV1 amendment.",
+      "MPT only (required for an MPT, not allowed for a trust line token): the holder's address to claw back from. The holder must own an MPToken with a non-zero balance.",
     ),
 })
 

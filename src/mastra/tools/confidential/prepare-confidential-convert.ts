@@ -1,7 +1,8 @@
 import { createTool } from '@mastra/core/tools'
 import { Client, deriveConfidentialKeypair, fetchMPToken, prepareConfidentialConvert } from 'xrpl'
 import { z } from 'zod'
-import { getXrplClient, networkSchema, xrplAddressSchema } from '../../../helpers'
+import { getXrplClient, networkSchema, withReadableErrors, xrplAddressSchema } from '../../../helpers'
+import { assertKeyMatches } from './shared'
 
 type PrepareParams = {
   holder: string
@@ -19,9 +20,13 @@ export const prepareConvert = async (client: Client, params: PrepareParams) => {
   const holderKeypair = deriveConfidentialKeypair(confidentialSeed)
 
   const registeredKey = (await fetchMPToken(client, holder, mptIssuanceId)).HolderEncryptionKey
-  if (registeredKey && registeredKey !== holderKeypair.publicKey) {
-    throw new Error('The confidentialSeed does not match the holder encryption key registered on the ledger')
-  }
+  assertKeyMatches({
+    publicKey: holderKeypair.publicKey,
+    registeredKey,
+    role: 'holder',
+    required: false,
+    owner: holder,
+  })
 
   return prepareConfidentialConvert(client, {
     account: holder,
@@ -58,7 +63,7 @@ The seed is a secret: never repeat it.`,
   }),
   execute: async (inputData, { mastra }) => {
     const client = await getXrplClient(inputData.network, mastra)
-    const txn = await prepareConvert(client, inputData)
+    const txn = await withReadableErrors(() => prepareConvert(client, inputData))
     return { txn, registersKey: txn.HolderEncryptionKey != null }
   },
 })

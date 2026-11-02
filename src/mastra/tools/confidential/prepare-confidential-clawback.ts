@@ -1,7 +1,8 @@
 import { createTool } from '@mastra/core/tools'
 import { Client, deriveConfidentialKeypair, fetchMPTokenIssuance, prepareConfidentialClawback } from 'xrpl'
 import { z } from 'zod'
-import { getXrplClient, networkSchema, xrplAddressSchema } from '../../../helpers'
+import { getXrplClient, networkSchema, withReadableErrors, xrplAddressSchema } from '../../../helpers'
+import { assertKeyMatches } from './shared'
 
 type PrepareParams = {
   issuer: string
@@ -19,9 +20,13 @@ export const prepareClawback = async (client: Client, params: PrepareParams) => 
   const issuerKeypair = deriveConfidentialKeypair(confidentialSeed)
 
   const issuance = await fetchMPTokenIssuance(client, mptIssuanceId)
-  if (issuance.IssuerEncryptionKey !== issuerKeypair.publicKey) {
-    throw new Error('The confidentialSeed does not match the issuer encryption key registered on the ledger')
-  }
+  assertKeyMatches({
+    publicKey: issuerKeypair.publicKey,
+    registeredKey: issuance.IssuerEncryptionKey,
+    role: 'issuer',
+    required: true,
+    owner: mptIssuanceId,
+  })
 
   return prepareConfidentialClawback(client, { account: issuer, holder, mptIssuanceID: mptIssuanceId, issuerKeypair })
 }
@@ -57,7 +62,7 @@ The seed is a secret: never repeat it.`,
   }),
   execute: async (inputData, { mastra }) => {
     const client = await getXrplClient(inputData.network, mastra)
-    const txn = await prepareClawback(client, inputData)
+    const txn = await withReadableErrors(() => prepareClawback(client, inputData))
     return { txn, amount: txn.MPTAmount }
   },
 })

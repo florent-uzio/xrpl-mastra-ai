@@ -8,7 +8,7 @@ import {
   SubmittableTransaction,
 } from 'xrpl'
 import { z } from 'zod'
-import { getXrplClient, networkSchema, xrplAddressSchema } from '../../../helpers'
+import { getXrplClient, networkSchema, withReadableErrors, xrplAddressSchema } from '../../../helpers'
 
 const mptIssuanceId = z.string().describe('Hex ID of the MPT issuance')
 const amount = z.string().regex(/^\d+$/).describe('Integer string')
@@ -102,15 +102,6 @@ type PrepareParams = {
   signersCount?: number
 }
 
-/** Thrown errors show as [object Object] in Studio, and the crypto layer can throw plain objects */
-export const errorMessage = (error: unknown) => {
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return typeof error === 'string' ? error : (JSON.stringify(error) ?? String(error))
-}
-
 /**
  * Builds an unsigned Batch whose confidential inners carry their ZK proofs and ciphertexts. xrpl.js predicts the
  * confidential balances across the inners and assigns each inner its Sequence, as the proofs are bound to both.
@@ -148,7 +139,7 @@ confidentialSeed is the family seed of the ElGamal key (not the wallet seed); a 
 
 Limits: a mergeInbox or clawback resets balances the client cannot predict, so later operations on the same holder in the same Batch fail with an error: split those across separate Batches. A holder that has no key yet is registered by its convert.
 
-Output: on failure only {error} (a Batch cannot hold a mergeInbox or clawback followed by another operation on the same holder: split it). Otherwise the Batch with Sequence, Fee, LastLedgerSequence and every inner (Sequence, Fee "0", tfInnerBatchTxn) set. Pass it as-is to submit-batch (innerSeeds for inner accounts other than the outer account, on testnet/devnet) and submit it right away.
+Output: the Batch with Sequence, Fee, LastLedgerSequence and every inner (Sequence, Fee "0", tfInnerBatchTxn) set. Pass it as-is to submit-batch (innerSeeds for inner accounts other than the outer account, on testnet/devnet) and submit it right away.
 
 Seeds are secrets: never repeat them.`,
   inputSchema: z.object({
@@ -162,15 +153,10 @@ Seeds are secrets: never repeat them.`,
     signersCount: z.number().int().min(0).optional().describe('Inner accounts other than the outer account'),
   }),
   outputSchema: z.object({
-    txn: z.looseObject({}).optional().describe('Unsigned Batch, ready for submit-batch'),
-    error: z.string().optional().describe('Why the Batch could not be prepared (no txn is returned)'),
+    txn: z.looseObject({}).describe('Unsigned Batch, ready for submit-batch'),
   }),
   execute: async (inputData, { mastra }) => {
     const client = await getXrplClient(inputData.network, mastra)
-    try {
-      return { txn: await prepareBatch(client, inputData) }
-    } catch (error) {
-      return { error: errorMessage(error) }
-    }
+    return { txn: await withReadableErrors(() => prepareBatch(client, inputData)) }
   },
 })

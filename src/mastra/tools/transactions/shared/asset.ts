@@ -17,11 +17,17 @@ export const xrplAssetSchema = z.union([
   z.object({ mpt_issuance_id: mptIssuanceIdSchema }),
 ])
 
+/** An MPT amount: the issuance ID and a quoted integer */
+export const xrplMptAmountSchema = z.object({
+  mpt_issuance_id: mptIssuanceIdSchema,
+  value: z.string().describe('Quoted integer amount'),
+})
+
 /** Asset with an amount: XRP in drops (string), a trust line token or an MPT */
 export const xrplAssetAmountSchema = z.union([
   z.string().describe('XRP amount in drops, e.g. "1000000" = 1 XRP'),
   xrplCurrencyAmountSchema,
-  z.object({ mpt_issuance_id: mptIssuanceIdSchema, value: z.string().describe('Quoted integer amount') }),
+  xrplMptAmountSchema,
 ])
 
 /** Converts the currency code of a token asset or amount to hex. XRP, MPT and drops strings are returned unchanged. */

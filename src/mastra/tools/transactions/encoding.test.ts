@@ -114,7 +114,7 @@ describe('currency codes are hex-encoded by the factory', () => {
     })
 
     expect(tx.PriceDataSeries).toEqual([
-      { PriceData: { BaseAsset: 'XRP', QuoteAsset: RLUSD, AssetPrice: 740, Scale: 3 } },
+      { PriceData: { BaseAsset: 'XRP', QuoteAsset: RLUSD, AssetPrice: '2e4', Scale: 3 } },
     ])
   })
 })
