@@ -2,6 +2,7 @@ import { createStep, createWorkflow } from '@mastra/core/workflows'
 import {
   Client,
   deriveConfidentialKeypair,
+  encodeMPTokenMetadata,
   fetchMPToken,
   fetchMPTokenIssuance,
   getConfidentialBalance,
@@ -133,6 +134,7 @@ const setupIssuance = createStep({
           TransactionType: 'MPTokenIssuanceCreate',
           Account: issuer.address,
           Flags: flags.reduce((acc, flag) => acc | MPTokenIssuanceCreateFlags[flag], 0),
+          MPTokenMetadata: issuanceRequest.metadata ? encodeMPTokenMetadata(issuanceRequest.metadata) : undefined,
         }
         const response = await client.submitAndWait(tx, { autofill: true, wallet: issuer })
         txnResults.push(assertTxnSuccess(toTxnResult('Created MPT issuance', response)))
