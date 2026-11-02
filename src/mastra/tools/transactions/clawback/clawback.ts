@@ -22,9 +22,19 @@ Errors: tecNO_PERMISSION (clawback not enabled), tecNO_LINE (no trust line or ze
       throw new Error('Amount value must be greater than zero')
     }
 
-    // MPT amounts have no currency or issuer
+    // MPT amounts have no currency or issuer: the holder is in Holder
     if (isMPTAmount(params.Amount)) {
+      if (!params.Holder) {
+        throw new Error('Holder is required to claw back an MPT')
+      }
+      if (params.Holder === params.Account) {
+        throw new Error('Cannot claw back from yourself - Holder cannot be the same as the Account')
+      }
       return
+    }
+
+    if (params.Holder) {
+      throw new Error('Holder is only for MPTs: for a trust line token, put the holder in Amount.issuer')
     }
 
     if (params.Amount.currency.toUpperCase() === 'XRP') {

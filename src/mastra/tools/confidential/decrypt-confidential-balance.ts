@@ -2,6 +2,7 @@ import { createTool } from '@mastra/core/tools'
 import { Client, deriveConfidentialKeypair, fetchMPToken, fetchMPTokenIssuance, loadMptCrypto } from 'xrpl'
 import { z } from 'zod'
 import { getXrplClient, networkSchema, xrplAddressSchema } from '../../../helpers'
+import { assertKeyMatches } from './shared'
 
 const roleSchema = z.enum(['holder', 'issuer', 'auditor'])
 type Role = z.infer<typeof roleSchema>
@@ -35,12 +36,13 @@ export const decryptConfidentialBalance = async (client: Client, params: Decrypt
     issuer: issuance.IssuerEncryptionKey,
     auditor: issuance.AuditorEncryptionKey,
   }[role]
-  if (!registeredKey) {
-    throw new Error(`No ${role} encryption key is registered for ${role === 'holder' ? holder : mptIssuanceId}`)
-  }
-  if (registeredKey !== keypair.publicKey) {
-    throw new Error(`The confidentialSeed does not match the ${role} encryption key registered on the ledger`)
-  }
+  assertKeyMatches({
+    publicKey: keypair.publicKey,
+    registeredKey,
+    role,
+    required: true,
+    owner: role === 'holder' ? holder : mptIssuanceId,
+  })
 
   // Brute-forces the discrete log up to this bound: the issuance's total confidential amount is the tightest one
   const bound = BigInt(issuance.ConfidentialOutstandingAmount ?? 0)

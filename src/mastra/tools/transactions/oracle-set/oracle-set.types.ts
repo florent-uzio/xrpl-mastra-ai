@@ -14,10 +14,19 @@ export const xrplPriceDataSchema = z.object({
       .string()
       .describe('The asset in which the price is quoted: a currency code, converted to hex automatically (e.g. "USD")'),
     AssetPrice: z
-      .union([z.number().int().gte(0), z.string()])
+      .union([
+        z.number().int().gte(0).lte(Number.MAX_SAFE_INTEGER),
+        // zod runs the refine even when the regex fails, so it checks the digits again before BigInt
+        z
+          .string()
+          .refine(
+            value => /^\d+$/.test(value) && BigInt(value) < 2n ** 64n,
+            'Must be a decimal integer that fits in 64 bits (not hex)',
+          ),
+      ])
       .optional()
       .describe(
-        'The price of BaseAsset in QuoteAsset, as an unsigned 64-bit integer (a hex string is accepted) scaled by Scale: price = AssetPrice * 10^-Scale. Required when adding a pair; omit when updating an existing pair to delete it from the oracle.',
+        'The price of BaseAsset in QuoteAsset as a DECIMAL unsigned 64-bit integer (a number, or a decimal string above 2^53), scaled by Scale: price = AssetPrice * 10^-Scale. Ledger responses show AssetPrice in hex: convert it to decimal first. Required when adding a pair; omit when updating an existing pair to delete it from the oracle.',
       ),
     Scale: z
       .number()

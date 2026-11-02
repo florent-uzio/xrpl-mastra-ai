@@ -39,7 +39,8 @@ export const walletRecordSchema = z.object({
   seed: z.string().describe('Seed (test networks only)'),
 })
 
-export const errorMessage = (error: unknown) => (error instanceof Error ? error.message : 'Unknown error')
+// Crypto errors in the confidential workflow can be plain objects: show them instead of "Unknown error"
+export { errorMessage } from '../../helpers'
 
 /**
  * Submits a transaction signed by `signer` and throws unless it succeeded: a workflow cannot go on after a failed
