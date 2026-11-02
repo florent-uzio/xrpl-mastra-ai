@@ -1,20 +1,16 @@
-import { createTool } from '@mastra/core/tools'
 import { z } from 'zod'
-import { networkSchema } from '../../../../../helpers'
-import { executeMethod, xrplMethodResponse } from '../../shared'
+import { defineMethodTool } from '../../shared'
 
-export const getServerInfoTool = createTool({
+export const getServerInfoTool = defineMethodTool({
   id: 'get-server-info',
+  command: 'server_info',
   description: `Get rippled server status: build version, server_state, complete_ledgers, load factor, peers, and the latest validated ledger (seq, hash, base fee, reserves in XRP).
 
 A closed_ledger with a short seq (under 8 digits) means the server is still syncing.`,
-  inputSchema: z.object({
-    network: networkSchema,
-    request: z.object({
-      counters: z.boolean().optional().describe('Add job queue and API metrics'),
-    }),
+  request: z.object({
+    counters: z.boolean().optional().describe('Add job queue and API metrics'),
   }),
-  outputSchema: xrplMethodResponse({
+  result: {
     info: z
       .looseObject({
         build_version: z.string(),
@@ -32,18 +28,5 @@ A closed_ledger with a short seq (under 8 digits) means the server is still sync
       })
       .partial()
       .optional(),
-  }),
-  outputValidation: 'warn',
-  execute: async (inputData, { mastra }) => {
-    // Extract network and request from the context
-    const { network, request } = inputData
-
-    // Use the shared utility function to execute the server_info command
-    return await executeMethod({
-      network,
-      request: { ...request, command: 'server_info' },
-      logMessage: 'Server info request',
-      mastra,
-    })
   },
 })
