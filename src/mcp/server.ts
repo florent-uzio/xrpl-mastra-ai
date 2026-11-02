@@ -4,16 +4,7 @@ import { MCPServer } from '@mastra/mcp'
 import { z } from 'zod'
 import packageJson from '../../packages/xrpl-mcp/package.json'
 import { XRPL_INSTRUCTIONS } from '../mastra/instructions'
-import * as toolsBarrel from '../mastra/tools'
-import {
-  confidentialMptWorkflow,
-  iouIssuanceWorkflow,
-  lendingSetupWorkflow,
-  mptIssuanceWorkflow,
-} from '../mastra/workflows'
-
-// The tools barrel also exports schemas and helper functions: keep only the tools.
-const isTool = (value: unknown) => typeof value === 'object' && value !== null && 'id' in value && 'execute' in value
+import { allTools, workflows } from '../mastra/catalog'
 
 // MCP clients do not hand the server version to the model: a tool is the only way to ask for it.
 const getMcpVersionTool = createTool({
@@ -25,7 +16,7 @@ const getMcpVersionTool = createTool({
 })
 
 const tools = {
-  ...Object.fromEntries(Object.entries(toolsBarrel).filter(([, value]) => isTool(value))),
+  ...allTools,
   getMcpVersionTool,
 } as ToolsInput
 
@@ -46,10 +37,5 @@ export const xrplMcpServer = new MCPServer({
   instructions: XRPL_INSTRUCTIONS + MEMORY_INSTRUCTIONS,
   tools,
   // Only tools and workflows: exposing the agent would trigger model calls on the owner's key.
-  workflows: {
-    'iou-issuance': iouIssuanceWorkflow,
-    'mpt-issuance': mptIssuanceWorkflow,
-    'confidential-mpt': confidentialMptWorkflow,
-    'lending-setup': lendingSetupWorkflow,
-  },
+  workflows,
 })
