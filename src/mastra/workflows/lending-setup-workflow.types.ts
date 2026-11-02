@@ -1,16 +1,17 @@
 import { Wallet } from 'xrpl'
 import z from 'zod'
-import { txnResultSchema, workflowNetworkSchema } from './shared'
+import { workflowNetworkSchema } from '../../helpers'
+import { txnResultSchema } from './shared'
 
 /**
  * LendingProtocolV1_1 (closed-ended vaults) is only enabled on devnet for now.
  *
  * @see https://xrpl.org/resources/known-amendments#lendingprotocolv1_1
  */
-export const lendingNetworkSchema = workflowNetworkSchema.extract([
-  'wss://s.devnet.rippletest.net:51233/',
-  'wss://clio.devnet.rippletest.net:51233/',
-])
+export const lendingNetworkSchema = workflowNetworkSchema(
+  ['devnet'],
+  'Network to use. Devnet only until the LendingProtocolV1_1 amendment passes',
+)
 
 const amountSchema = z.string().regex(/^[1-9]\d*$/, 'Must be a positive integer string')
 
@@ -30,7 +31,7 @@ const MAX_INVESTMENT_SECONDS = 946708560
 
 /** Workflow input fields, without the cross-field checks (zod objects with checks cannot be extended). */
 const lendingSetupBaseSchema = z.object({
-  network: lendingNetworkSchema.describe('Network to use. Devnet only until the LendingProtocolV1_1 amendment passes'),
+  network: lendingNetworkSchema,
   issuance: z
     .discriminatedUnion('source', [
       z.object({

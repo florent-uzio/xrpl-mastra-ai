@@ -4,21 +4,6 @@ import z from 'zod'
 import { getXrplClient, LedgerClient, submit } from '../../helpers'
 
 /**
- * Supported network endpoints for the issuance workflows
- *
- * These are the WebSocket URLs for different XRPL networks.
- * The workflows are designed primarily for testnet and devnet networks (faucet funding, seeds saved in records).
- */
-export const workflowNetworkSchema = z.enum([
-  // Testnet networks
-  'wss://s.altnet.rippletest.net:51233/',
-  'wss://testnet.xrpl-labs.com/',
-  // Devnet networks
-  'wss://clio.devnet.rippletest.net:51233/',
-  'wss://s.devnet.rippletest.net:51233/',
-])
-
-/**
  * Transaction result schema
  *
  * Represents the result of a single XRPL transaction with

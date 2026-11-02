@@ -18,7 +18,7 @@ import {
   Wallet,
 } from 'xrpl'
 import type { ECDSA } from 'xrpl'
-import { assertSeedAllowed, getXrplClient, saveFlowRecord, toWalletRecord } from '../../helpers'
+import { assertSeedAllowed, getXrplClient, saveFlowRecord, toWalletRecord, supportedNetworksText } from '../../helpers'
 import {
   confidentialMptResultSchema,
   confidentialMptWorkflowSchema,
@@ -488,7 +488,7 @@ const recordResults = createStep({
 const confidentialMptWorkflow = createWorkflow({
   id: 'confidential-mpt-workflow',
   description: `Gets a confidential MPT balance into a holder account on XRPL devnet (ConfidentialTransfer amendment): creates or reuses an MPT issuance that can hold confidential balances, registers the issuer and optional auditor encryption keys, has the holder opt in, mints public MPT to it, converts it to a confidential balance (ConfidentialMPTConvert) and merges the inbox. Optionally sends part of it confidentially to a second holder (ConfidentialMPTSend) and converts part back to public (ConfidentialMPTConvertBack). Issuer, holder and destination can each be generated and funded (source 'generate') or reused by seed (source 'seed'), and the MPT can be newly issued by the issuer (source 'create') or an existing one reused (source 'existing'); the user must pick for each of them, never assume. Seeds (find them in the records of earlier runs with the get-flow-records tool); an existing account that already registered a confidential key also needs its confidentialSeed. Saves a record with all seeds and tx hashes. ALWAYS confirm every input with the user before running: for the issuer, issuance, holder (and destination): generate/create new or use existing (seed/issuance ID); convertAmount, auditor yes/no, send yes/no (amount, destination), convertBack yes/no (amount).
-Supported networks: wss://s.devnet.rippletest.net:51233/, wss://clio.devnet.rippletest.net:51233/.`,
+${supportedNetworksText(['devnet'])}`,
   inputSchema: confidentialMptWorkflowSchema,
   outputSchema: confidentialMptResultSchema,
 })

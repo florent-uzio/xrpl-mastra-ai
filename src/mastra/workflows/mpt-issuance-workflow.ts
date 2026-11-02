@@ -6,7 +6,7 @@ import {
   MPTokenIssuanceCreateFlags,
   Payment,
 } from 'xrpl'
-import { getXrplClient, saveFlowRecord, toWalletRecord } from '../../helpers'
+import { getXrplClient, saveFlowRecord, toWalletRecord, supportedNetworksText } from '../../helpers'
 import {
   issuedSchema,
   mptIssuanceResultSchema,
@@ -206,7 +206,7 @@ const recordResults = createStep({
 const mptIssuanceWorkflow = createWorkflow({
   id: 'mpt-issuance-workflow',
   description: `Issues an MPT (Multi-Purpose Token) on an XRPL testnet or devnet: creates and funds an issuer and N holder wallets, creates the MPT issuance with the requested flags and properties (e.g. tfMPTRequireAuth, tfMPTCanTransfer, transfer fee, max supply, metadata), has each holder opt in, authorizes holders when tfMPTRequireAuth is set, mints to each holder, then saves a record (wallet addresses and seeds, MPTokenIssuanceID, tx hashes) retrievable with the get-flow-records tool. Not for IOUs (trust line tokens).
-Supported networks: wss://s.altnet.rippletest.net:51233/, wss://testnet.xrpl-labs.com/, wss://s.devnet.rippletest.net:51233/, wss://clio.devnet.rippletest.net:51233/.`,
+${supportedNetworksText(['testnet', 'devnet'])}`,
   inputSchema: mptIssuanceWorkflowSchema,
   outputSchema: mptIssuanceResultSchema,
 })

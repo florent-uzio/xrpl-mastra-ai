@@ -1,17 +1,18 @@
 import { MPTokenIssuanceCreateFlags, Wallet } from 'xrpl'
 import z from 'zod'
 import { mptMetadataSchema } from './mpt-issuance-workflow.types'
-import { txnResultSchema, workflowNetworkSchema } from './shared'
+import { workflowNetworkSchema } from '../../helpers'
+import { txnResultSchema } from './shared'
 
 /**
  * The ConfidentialTransfer amendment is only available on devnet for now.
  *
  * @see https://xrpscan.com/amendment/ConfidentialTransfer
  */
-export const confidentialNetworkSchema = workflowNetworkSchema.extract([
-  'wss://s.devnet.rippletest.net:51233/',
-  'wss://clio.devnet.rippletest.net:51233/',
-])
+export const confidentialNetworkSchema = workflowNetworkSchema(
+  ['devnet'],
+  'Network to use. Devnet only until the ConfidentialTransfer amendment passes',
+)
 
 /** Flag names from xrpl's MPTokenIssuanceCreateFlags enum (numeric keys are the enum's reverse mappings). */
 const issuanceFlagNames = Object.keys(MPTokenIssuanceCreateFlags).filter(k => isNaN(Number(k))) as [
@@ -44,9 +45,7 @@ const accountSchema = z.discriminatedUnion('source', [
 
 /** Workflow input fields, without the cross-field checks (zod objects with checks cannot be extended). */
 const confidentialMptBaseSchema = z.object({
-  network: confidentialNetworkSchema.describe(
-    'Network to use. Devnet only until the ConfidentialTransfer amendment passes',
-  ),
+  network: confidentialNetworkSchema,
   issuer: accountSchema.describe('The issuer account: generate a new one or use an existing one by seed'),
   issuance: z
     .discriminatedUnion('source', [

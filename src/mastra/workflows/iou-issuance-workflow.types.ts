@@ -1,6 +1,7 @@
 import { AccountSetAsfFlags, Wallet } from 'xrpl'
 import z from 'zod'
-import { txnResultSchema, workflowNetworkSchema } from './shared'
+import { workflowNetworkSchema } from '../../helpers'
+import { txnResultSchema } from './shared'
 
 /**
  * Flag names (e.g. "asfDefaultRipple") from xrpl's AccountSetAsfFlags enum.
@@ -12,8 +13,6 @@ const accountSetAsfFlagNames = Object.keys(AccountSetAsfFlags).filter(k => isNaN
   keyof typeof AccountSetAsfFlags,
   ...(keyof typeof AccountSetAsfFlags)[],
 ]
-
-export const iouIssuanceWorkflowNetworkSchema = workflowNetworkSchema
 
 /**
  * Schema for XRPL wallet objects
@@ -49,7 +48,7 @@ const issuerSettingsSchema = z.object({
  * This is what users provide when calling the workflow.
  */
 export const iouIssuanceWorkflowSchema = z.object({
-  network: iouIssuanceWorkflowNetworkSchema.describe('Network to use for the workflow'),
+  network: workflowNetworkSchema(['testnet', 'devnet'], 'Network to use for the workflow'),
   trustline: trustlineSchema.describe('Trust line settings for the token'),
   issuerSettings: issuerSettingsSchema.describe('Settings for the issuer account'),
   holders: z.number().int().positive().describe('Number of holder wallets to create'),
