@@ -1,5 +1,11 @@
 # @florent-uzio/xrpl-mcp
 
+## 1.2.1
+
+### Patch Changes
+
+- dc7e950: Fix the confidential MPT tools in the bundled server: define `__dirname` and ship `mpt_crypto.wasm` next to the bundle. Both were missing, so ConfidentialMPTConvert and the other confidential tools failed with `__dirname is not defined`.
+
 ## 1.2.0
 
 ### Minor Changes
