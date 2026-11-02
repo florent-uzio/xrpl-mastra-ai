@@ -39,4 +39,20 @@ describe('query tools', () => {
   ])('%s rejects invalid input', (name, request) => {
     expect(getTool(name).inputSchema.safeParse({ network, request }).success).toBe(false)
   })
+
+  it('get-ripple-path-find accepts value "-1" for the largest possible amount', () => {
+    const destination = 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe'
+    const request = (value: string) => ({
+      network,
+      request: {
+        source_account: account,
+        destination_account: destination,
+        destination_amount: { currency: 'USD', issuer: destination, value },
+      },
+    })
+    const pathFind = getTool('getRipplePathFindTool')
+
+    expect(pathFind.inputSchema.safeParse(request('-1')).success).toBe(true)
+    expect(pathFind.inputSchema.safeParse(request('-2')).success).toBe(false)
+  })
 })

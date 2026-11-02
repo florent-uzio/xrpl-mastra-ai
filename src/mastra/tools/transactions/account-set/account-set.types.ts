@@ -53,7 +53,7 @@ export const xrplAccountSetFieldsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'The domain that owns this account, as plain lowercase text (hex-encoded automatically). Max 256 bytes. Example: "example.com"',
+      'The domain that owns this account, as plain lowercase text (hex-encoded automatically). Max 256 bytes. Example: "example.com". Empty string ("") clears the domain',
     ),
   EmailHash: z
     .string()

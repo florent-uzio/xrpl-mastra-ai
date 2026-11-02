@@ -118,3 +118,31 @@ describe('currency codes are hex-encoded by the factory', () => {
     ])
   })
 })
+
+describe('AccountSet Domain', () => {
+  it('sends an empty Domain to clear it', async () => {
+    const tx = await submittedBy('submitAccountSetTool', {
+      TransactionType: 'AccountSet',
+      Account: ACCOUNT,
+      Domain: '',
+    })
+
+    expect(tx.Domain).toBe('')
+  })
+
+  it('hex-encodes a Domain and leaves an absent one out', async () => {
+    expect(
+      (
+        await submittedBy('submitAccountSetTool', {
+          TransactionType: 'AccountSet',
+          Account: ACCOUNT,
+          Domain: 'example.com',
+        })
+      ).Domain,
+    ).toBe('6578616D706C652E636F6D')
+    expect(
+      (await submittedBy('submitAccountSetTool', { TransactionType: 'AccountSet', Account: ACCOUNT, SetFlag: 8 }))
+        .Domain,
+    ).toBeUndefined()
+  })
+})
