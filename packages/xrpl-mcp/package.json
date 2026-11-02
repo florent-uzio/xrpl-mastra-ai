@@ -15,6 +15,7 @@
   },
   "files": [
     "dist/xrpl-mcp.js",
+    "dist/mpt_crypto.wasm",
     "dist/THIRD_PARTY_LICENSES.txt",
     "README.md",
     "LICENSE"
