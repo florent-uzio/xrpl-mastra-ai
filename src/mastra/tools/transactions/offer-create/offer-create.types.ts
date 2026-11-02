@@ -3,20 +3,6 @@ import { xrplCurrencyAmountSchema } from '../shared'
 import { xrplCommonFieldsSchema } from '../shared/common-fields'
 
 /**
- * OfferCreate flags that can be used to control offer behavior
- * Reference: https://xrpl.org/docs/references/protocol/transactions/types/offercreate#offercreate-flags
- */
-export const OfferCreateFlagsSchema = z.enum([
-  'tfPassive', // 65536 - Do not consume offers that exactly match, only cross offers
-  'tfImmediateOrCancel', // 131072 - Immediate or Cancel order, don't place in order book
-  'tfFillOrKill', // 262144 - Fill or Kill order, cancel if not fully filled
-  'tfSell', // 524288 - Exchange entire TakerGets amount, even if getting more than TakerPays
-  'tfHybrid', // 1048576 - Hybrid offer using both permissioned and open DEX (requires DomainID)
-])
-
-export type OfferCreateFlags = z.infer<typeof OfferCreateFlagsSchema>
-
-/**
  * OfferCreate-specific fields schema
  * Reference: https://xrpl.org/docs/references/protocol/transactions/types/offercreate#offercreate-fields
  */
@@ -63,17 +49,3 @@ export const xrplOfferCreateSchema = xrplCommonFieldsSchema
 
 export type XrplOfferCreateFields = z.infer<typeof xrplOfferCreateFieldsSchema>
 export type XrplOfferCreate = z.infer<typeof xrplOfferCreateSchema>
-
-/**
- * Helper function to convert OfferCreate flag names to numeric values
- */
-export const getOfferCreateFlagValue = (flagName: OfferCreateFlags): number => {
-  const flagValues: Record<OfferCreateFlags, number> = {
-    tfPassive: 65536,
-    tfImmediateOrCancel: 131072,
-    tfFillOrKill: 262144,
-    tfSell: 524288,
-    tfHybrid: 1048576,
-  }
-  return flagValues[flagName]
-}

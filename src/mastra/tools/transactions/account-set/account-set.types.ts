@@ -3,31 +3,6 @@ import { xrplAddressSchema } from '../../../../helpers'
 import { xrplCommonFieldsSchema } from '../shared/common-fields'
 
 /**
- * AccountSet flags that can be enabled or disabled for an account
- * Reference: https://xrpl.org/docs/references/protocol/transactions/types/accountset#accountset-flags
- */
-export const AccountSetFlagsSchema = z.enum([
-  'asfRequireDest', // 1 - Require a destination tag to send transactions to this account
-  'asfRequireAuth', // 2 - Require authorization for users to hold balances issued by this address
-  'asfDisallowXRP', // 3 - XRP should not be sent to this account (advisory only)
-  'asfDisableMaster', // 4 - Disable the master key pair
-  'asfAccountTxnID', // 5 - Track the ID of this account's most recent transaction
-  'asfNoFreeze', // 6 - Permanently give up the ability to freeze individual trust lines
-  'asfGlobalFreeze', // 7 - Freeze all assets issued by this account
-  'asfDefaultRipple', // 8 - Enable rippling on this account's trust lines by default
-  'asfDepositAuth', // 9 - Require authorization for users to hold balances issued by this address
-  'asfAuthorizedNFTokenMinter', // 10 - Allow another account to mint NFTokens for you
-  'asfDisallowIncomingNFTokenOffer', // 12 - Block incoming NFTokenOffers
-  'asfDisallowIncomingCheck', // 13 - Block incoming Check objects
-  'asfDisallowIncomingPayChan', // 14 - Block incoming Payment Channels
-  'asfDisallowIncomingTrustline', // 15 - Block incoming trust lines
-  'asfAllowTrustLineClawback', // 16 - Allow clawback of issued tokens
-  'asfAllowTrustLineLocking', // 17 - Allow locking of trust lines
-])
-
-export type AccountSetFlags = z.infer<typeof AccountSetFlagsSchema>
-
-/**
  * AccountSet-specific fields schema
  * Reference: https://xrpl.org/docs/references/protocol/transactions/types/accountset#accountset-fields
  */
@@ -39,14 +14,14 @@ export const xrplAccountSetFieldsSchema = z.object({
     .min(1)
     .max(17)
     .optional()
-    .describe('Integer flag to enable for this account. Use AccountSetFlagsSchema for named flags'),
+    .describe('asf* number of the flag to enable (see the tool description)'),
   ClearFlag: z
     .number()
     .int()
     .min(1)
     .max(17)
     .optional()
-    .describe('Unique identifier of a flag to disable for this account. Use AccountSetFlagsSchema for named flags'),
+    .describe('asf* number of the flag to disable (see the tool description)'),
 
   // Domain and Identification
   Domain: z
@@ -97,28 +72,3 @@ export const xrplAccountSetSchema = xrplCommonFieldsSchema
 
 export type XrplAccountSetFields = z.infer<typeof xrplAccountSetFieldsSchema>
 export type XrplAccountSet = z.infer<typeof xrplAccountSetSchema>
-
-/**
- * Helper function to convert AccountSet flag names to numeric values
- */
-export const getAccountSetFlagValue = (flagName: AccountSetFlags): number => {
-  const flagValues: Record<AccountSetFlags, number> = {
-    asfRequireDest: 1,
-    asfRequireAuth: 2,
-    asfDisallowXRP: 3,
-    asfDisableMaster: 4,
-    asfAccountTxnID: 5,
-    asfNoFreeze: 6,
-    asfGlobalFreeze: 7,
-    asfDefaultRipple: 8,
-    asfDepositAuth: 9,
-    asfAuthorizedNFTokenMinter: 10,
-    asfDisallowIncomingNFTokenOffer: 12,
-    asfDisallowIncomingCheck: 13,
-    asfDisallowIncomingPayChan: 14,
-    asfDisallowIncomingTrustline: 15,
-    asfAllowTrustLineClawback: 16,
-    asfAllowTrustLineLocking: 17,
-  }
-  return flagValues[flagName]
-}
