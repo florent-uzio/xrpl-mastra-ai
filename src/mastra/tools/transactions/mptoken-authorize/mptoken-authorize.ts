@@ -15,5 +15,4 @@ export const submitMPTokenAuthorizeTool = createTransactionTool<MPTokenAuthorize
 Flags: 1 (tfMPTUnauthorize) reverses the action. A holder uses it to delete their empty MPToken (balance must be 0). An issuer uses it to revoke a holder's authorization.
 
 Errors: tecNO_PERMISSION means the sender is not allowed (e.g. the issuer sent it without Holder, or Holder was set by a non-issuer). tecNO_ENTRY means the holder has not opted in yet.`,
-  buildTransaction: params => params as MPTokenAuthorize,
 })

@@ -14,7 +14,7 @@ _Avoid_: soft failure, partial success
 
 **Signed blob**:
 A transaction already signed outside this server, as hex, ready to submit as is. The only way to submit on mainnet.
-_Avoid_: signature (the transaction tools' input field uses this name for a signed blob)
+_Avoid_: signature (a signed blob holds the signature, plus every transaction field)
 
 **Test network**:
 An XRPL network where wallet seeds may be used: a known testnet, devnet or Xahau testnet URL, or one listed by the operator. Anything else is treated as mainnet.

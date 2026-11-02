@@ -12,8 +12,8 @@ export type TransactionToolConfig<T extends SubmittableTransaction, S extends Fa
   toolId: string
   /** Detailed description of the transaction and its fields */
   description: string
-  /** Function to build the transaction object from input parameters */
-  buildTransaction: (params: z.infer<S['inputSchema']>) => T
+  /** Maps the input to the transaction. Optional: the input is used as is. Currency codes are hex-encoded afterwards. */
+  buildTransaction?: (params: z.infer<S['inputSchema']>) => T
   /** Optional function to validate transaction before submission */
   validateTransaction?: (txn: T) => void | Promise<void>
   /** Optional async step after validation to complete the transaction before submission (e.g. extra signatures) */
@@ -60,12 +60,10 @@ export const transactionResponseSchema = z.looseObject({
  */
 export const baseTransactionSchema = z.object({
   network: z.string().describe('Network to submit the transaction to, e.g. "wss://s.altnet.rippletest.net:51233"'),
-  seed: z.string().optional().describe('Seed phrase for the account on testnet or devnet, never mainnet'),
-  signature: z
+  seed: z
     .string()
-    .optional()
     .describe(
-      'Signature for the transaction, typically provided for mainnet but can also be used for testnet or devnet',
+      'Seed of the Account, test networks only. On mainnet, sign the transaction elsewhere and use submit-signed-blob',
     ),
 })
 

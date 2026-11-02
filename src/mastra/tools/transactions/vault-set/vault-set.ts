@@ -13,7 +13,4 @@ export const submitVaultSetTool = createTransactionTool<VaultSet>({
 You can change Data, AssetsMaximum and DomainID. Whether the vault is public or private cannot be changed. DomainID only applies to private vaults.
 
 Errors: tecNO_ENTRY (vault not found), tecNO_PERMISSION (not the owner, or DomainID on a public vault), tecLIMIT_EXCEEDED (AssetsMaximum below AssetsTotal), tecOBJECT_NOT_FOUND (DomainID not found).`,
-  buildTransaction: vaultSet => {
-    return vaultSet
-  },
 })

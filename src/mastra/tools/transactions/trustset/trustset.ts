@@ -1,5 +1,4 @@
 import { TrustSet } from 'xrpl'
-import { currencyCodeToHex } from '../../../../helpers'
 import { useTransactionToolFactory } from '../factory'
 import { xrplTrustSetSchema } from './trustset.types'
 
@@ -20,17 +19,6 @@ Flags:
 QualityIn / QualityOut: 0 = face value. Values are in parts per billion, so 1,000,000,000 = 1:1.
 
 Errors: tecNO_PERMISSION means the issuer blocks incoming trust lines or No Ripple cannot be enabled.`,
-  buildTransaction: params => {
-    const { LimitAmount, ...rest } = params
-    return {
-      LimitAmount: {
-        currency: currencyCodeToHex(LimitAmount.currency),
-        value: LimitAmount.value,
-        issuer: LimitAmount.issuer,
-      },
-      ...rest,
-    }
-  },
   validateTransaction: txn => {
     if (txn.LimitAmount.currency === 'XRP') {
       throw new Error('XRP is not allowed for TrustSet')

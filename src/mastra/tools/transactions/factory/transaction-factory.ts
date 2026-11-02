@@ -2,6 +2,7 @@ import { createTool } from '@mastra/core/tools'
 import { SubmittableTransaction, Wallet } from 'xrpl'
 import { z } from 'zod'
 import { assertSeedAllowed, getXrplClient, submit } from '../../../../helpers'
+import { encodeCurrencyCodesDeep } from '../shared/asset'
 import {
   baseTransactionSchema,
   FactorySchema,
@@ -9,17 +10,24 @@ import {
   transactionResponseSchema,
 } from './transaction-factory.types'
 
+/** Creates a complete transaction schema by merging base fields (network, seed) with transaction-specific fields */
+const createCompleteTransactionSchema = <S extends FactorySchema>(params: S) =>
+  baseTransactionSchema.extend({ txn: params.inputSchema })
+
 /**
- * Creates a complete transaction schema by merging base fields with transaction-specific fields
- * and adding validation to ensure either seed or signature is provided
+ * Builds the transaction from the tool input, converts every currency code to hex (at any depth: Amount, SendMax,
+ * Paths, LimitAmount, Asset, ...) and validates it. Everything a tool does before signing, without a network.
  */
-const createCompleteTransactionSchema = <S extends FactorySchema>(params: S) => {
-  return baseTransactionSchema
-    .merge(z.object({ txn: params.inputSchema }))
-    .refine(data => data.seed !== undefined || data.signature !== undefined, {
-      message: 'Either seed or signature must be provided for transaction authentication',
-      path: ['seed', 'signature'],
-    })
+const buildSubmittable = async <T extends SubmittableTransaction, S extends FactorySchema>(
+  config: Pick<TransactionToolConfig<T, S>, 'buildTransaction' | 'validateTransaction'>,
+  txn: z.infer<S['inputSchema']>,
+): Promise<T> => {
+  const built = config.buildTransaction ? config.buildTransaction(txn) : (txn as unknown as T)
+  const encoded = encodeCurrencyCodesDeep(built)
+
+  await config.validateTransaction?.(encoded)
+
+  return encoded
 }
 
 /**
@@ -61,34 +69,22 @@ export const useTransactionToolFactory = <S extends FactorySchema>(params: S) =>
           throw new Error('Input data not found - ensure the tool is called with proper input')
         }
 
-        const { txn, ...rest } = inputData
+        const { txn, network, seed } = inputData
+        const input = txn as z.infer<S['inputSchema']>
 
-        // Build the transaction object from input parameters
-        let builtTxn = config.buildTransaction(txn as z.infer<S['inputSchema']>)
-
-        // Run optional validation if provided
-        if (config.validateTransaction) {
-          await config.validateTransaction(builtTxn)
-        }
+        let builtTxn = await buildSubmittable(config, input)
 
         if (config.prepareTransaction) {
-          builtTxn = await config.prepareTransaction({
-            txn: builtTxn,
-            input: txn as z.infer<S['inputSchema']>,
-            network: rest.network,
-            mastra,
-          })
+          builtTxn = await config.prepareTransaction({ txn: builtTxn, input, network, mastra })
         }
 
-        const { network, seed, signature } = rest
         // Fail before opening a socket: a seed must never reach a node that is not a test network
-        if (seed) assertSeedAllowed(network)
+        assertSeedAllowed(network)
 
         const client = await getXrplClient(network, mastra)
-        const signer = signature ? { signedBlob: signature } : { wallet: Wallet.fromSeed(seed!) }
-        mastra?.getLogger()?.info('Submitting transaction', { network, txn: builtTxn, signed: Boolean(signature) })
+        mastra?.getLogger()?.info('Submitting transaction', { network, txn: builtTxn })
 
-        const { ok, engineResult, response } = await submit(client, builtTxn, signer)
+        const { ok, engineResult, response } = await submit(client, builtTxn, { wallet: Wallet.fromSeed(seed) })
 
         // xrpl's response types have no index signature, so they don't match the loose output schema structurally
         return { ...response, ok, engine_result: engineResult } as unknown as z.infer<typeof transactionResponseSchema>

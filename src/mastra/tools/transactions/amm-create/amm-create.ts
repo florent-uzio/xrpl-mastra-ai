@@ -1,5 +1,4 @@
 import { AMMCreate } from 'xrpl'
-import { currencyCodeToHex, isString } from '../../../../helpers'
 import { useTransactionToolFactory } from '../factory'
 import { xrplAmmCreateSchema } from './amm-create.types'
 
@@ -18,26 +17,6 @@ Fields:
 Rules: at most one asset may be XRP. The assets must differ. Token issuers need DefaultRipple enabled. You cannot use another AMM's LP tokens. Creation costs an elevated fee of about 0.2 XRP (the owner reserve) and adds a trust line for the LP tokens.
 
 Errors: tecDUPLICATE (pool already exists), tecUNFUNDED_AMM, tecNO_LINE, tecFROZEN, terNO_RIPPLE.`,
-  buildTransaction: ammCreate => {
-    const { Amount, Amount2, ...rest } = ammCreate
-
-    // Convert Amount and Amount2 to hex if they are strings
-    return {
-      Amount: isString(Amount)
-        ? Amount
-        : {
-            ...Amount,
-            currency: currencyCodeToHex(Amount.currency),
-          },
-      Amount2: isString(Amount2)
-        ? Amount2
-        : {
-            ...Amount2,
-            currency: currencyCodeToHex(Amount2.currency),
-          },
-      ...rest,
-    }
-  },
 })
 
 /**

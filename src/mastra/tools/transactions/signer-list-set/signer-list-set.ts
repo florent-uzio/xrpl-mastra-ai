@@ -15,7 +15,4 @@ To create or replace: set SignerQuorum (target weight sum, at least 1 and at mos
 To delete: set SignerQuorum to 0 and omit SignerEntries. Make sure the account still has a master key or regular key enabled, or it may become unusable.
 
 The list requires an owner reserve. Common errors: temMALFORMED, temBAD_QUORUM (quorum above total weight), temBAD_SIGNER (duplicate or self), temBAD_WEIGHT, tecINSUFFICIENT_RESERVE, tecNO_ALTERNATIVE_KEY (deleting while the master key is disabled and no regular key is set).`,
-  buildTransaction: params => {
-    return params
-  },
 })

@@ -1,6 +1,5 @@
 import { VaultWithdraw } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplVaultWithdrawSchema } from './vault-withdraw.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -16,7 +15,4 @@ Amount is either the vault's asset (the shares needed are burned) or a share amo
 Destination defaults to the sender. It must be able to hold the asset. On a private vault, withdrawing to another account requires valid credentials for both accounts. Closed-ended vaults cannot be withdrawn from during the investment phase.
 
 Errors: tecINSUFFICIENT_FUNDS (not enough shares or available assets), tecWRONG_ASSET, tecTOO_SOON (closed-ended vault still invested), tecNO_LINE, tecNO_AUTH, tecFROZEN, tecLOCKED, tecEXPIRED, tecPRECISION_LOSS, tecNO_ENTRY.`,
-  buildTransaction: vaultWithdraw => {
-    return { ...vaultWithdraw, Amount: encodeCurrencyCodes(vaultWithdraw.Amount) }
-  },
 })

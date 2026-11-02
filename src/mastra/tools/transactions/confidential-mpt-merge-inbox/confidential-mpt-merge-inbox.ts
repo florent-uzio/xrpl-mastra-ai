@@ -11,5 +11,4 @@ export const submitConfidentialMPTMergeInboxTool = createTransactionTool<Confide
   description: `Submit a ConfidentialMPTMergeInbox transaction: move a holder's confidential inbox balance into the spending balance and reset the inbox. Needed to spend received confidential funds. Holder only, not the issuer. Needs ConfidentialTransfer. No proof needed.
 
 Errors: tecLOCKED, tecNO_AUTH, tecNO_PERMISSION (no CanHoldConfidentialBalance or holder not registered), tecOBJECT_NOT_FOUND, temMALFORMED.`,
-  buildTransaction: params => params as ConfidentialMPTMergeInbox,
 })

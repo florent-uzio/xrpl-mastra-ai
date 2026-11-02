@@ -17,7 +17,4 @@ Fields:
 Rules: the escrow must have a CancelAfter time (seconds since the Ripple Epoch) that has already passed; escrows without CancelAfter can never be cancelled. Find escrows with get-account-objects (type "escrow").
 
 Errors: tecNO_TARGET (escrow not found), tecNO_PERMISSION (no CancelAfter, or not yet reached).`,
-  buildTransaction: escrowCancel => {
-    return escrowCancel
-  },
 })

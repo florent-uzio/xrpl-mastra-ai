@@ -68,7 +68,7 @@ Wallet seeds are refused in code on any network that is not a test network, befo
 claude mcp add xrpl --env XRPL_EXTRA_TEST_NETWORKS=wss://my-testnet.example.com/,ws://localhost:6006 -- npx -y @florent-uzio/xrpl-mcp
 ```
 
-On mainnet, sign the transaction yourself and pass the `signature`: signed transactions are accepted on any network.
+On mainnet, sign the transaction yourself and submit the signed blob with `submit-signed-blob`, which works on any network.
 
 ## Usage
 
@@ -195,13 +195,8 @@ export const submitYourTransactionTool = createTransactionTool({
   - Explain what this transaction does
   - List any special requirements or limitations
   - Include relevant XRPL documentation links`,
-  buildTransaction: params => {
-    const builtTransaction: YourTransactionType = {
-      TransactionType: 'YourTransactionType',
-      ...params,
-    }
-    return builtTransaction
-  },
+  // Optional: only when the input needs reshaping. Currency codes are hex-encoded by the factory afterwards.
+  buildTransaction: params => ({ ...params, TransactionType: 'YourTransactionType' }),
   validateTransaction: params => {
     // Add any custom validation logic
     if (!params.Amount) {
@@ -234,11 +229,8 @@ export const submitPaymentTool = createTransactionTool({
 - Cross-currency payments may involve multiple exchanges atomically
 - Partial payments can exploit integrations that assume exact delivery amounts`,
   buildTransaction: payment => {
-    const builtPayment: Payment = {
-      ...payment,
-      Amount: payment.Amount ?? payment.DeliverMax,
-    }
-    return builtPayment
+    // DeliverMax (API v2) replaces Amount (API v1): never send both
+    return { ...payment, Amount: payment.DeliverMax ? undefined : payment.Amount } as Payment
   },
   validateTransaction: params => {
     if (params.Amount === undefined && params.DeliverMax === undefined) {
@@ -252,8 +244,9 @@ export const submitPaymentTool = createTransactionTool({
 
 The transaction factory provides several benefits:
 
-- **Automatic Authentication**: Handles seed/signature validation automatically
-- **Consistent Schema**: Merges common fields (network, seed, signature) with your transaction fields
+- **Automatic Authentication**: Refuses seeds outside test networks, signs and submits through one Ledger submission module
+- **Consistent Schema**: Merges common fields (network, seed) with your transaction fields
+- **Currency Codes**: Hex-encodes every currency code in the transaction, at any depth (Amount, SendMax, Paths, Asset, ...)
 - **Type Safety**: Full TypeScript support with proper type inference
 - **Error Handling**: Centralized error handling and validation
 - **Reduced Boilerplate**: No need to repeat common transaction submission logic
@@ -263,10 +256,9 @@ The transaction factory provides several benefits:
 All transaction tools automatically include these base fields:
 
 - `network`: WebSocket URL for the XRPL network
-- `seed`: Seed phrase for testnet/devnet accounts (optional)
-- `signature`: Pre-signed transaction signature (optional)
+- `seed`: Seed of the Account (required, test networks only)
 
-Either `seed` or `signature` must be provided for authentication.
+On mainnet, sign the transaction elsewhere and submit it with `submit-signed-blob`.
 
 #### 6. Adding to Your Agent
 

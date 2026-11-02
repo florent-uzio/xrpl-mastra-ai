@@ -13,7 +13,4 @@ export const submitVaultDeleteTool = createTransactionTool<VaultDelete>({
 If shares remain after the assets are gone, the owner can burn them with VaultClawback first.
 
 Errors: tecHAS_OBLIGATIONS (vault still holds assets or shares), tecNO_PERMISSION (not the owner), tecNO_ENTRY.`,
-  buildTransaction: vaultDelete => {
-    return vaultDelete
-  },
 })

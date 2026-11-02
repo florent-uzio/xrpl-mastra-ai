@@ -15,5 +15,4 @@ Flags: 1 Lock, 2 Unlock (need CanLock; send alone, no DomainID; Holder optional)
 Encryption keys (ConfidentialTransfer) are set without Holder or lock flags.
 
 Errors: tecNO_PERMISSION (not CanLock, or field/flag immutable), temMALFORMED (no change, Holder with DomainID/keys, AuditorEncryptionKey without IssuerEncryptionKey), temINVALID_FLAG, temBAD_TRANSFER_FEE, tecNO_DST, tecOBJECT_NOT_FOUND.`,
-  buildTransaction: params => params as MPTokenIssuanceSet,
 })

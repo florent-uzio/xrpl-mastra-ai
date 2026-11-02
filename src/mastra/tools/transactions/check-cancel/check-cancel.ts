@@ -16,7 +16,4 @@ Fields:
 Rules: the Check's sender or destination can cancel it at any time; anyone can cancel it once its Expiration has passed. Cancelling frees the sender's owner reserve.
 
 Errors: tecNO_ENTRY (Check does not exist), tecNO_PERMISSION (not sender/destination and Check not expired).`,
-  buildTransaction: checkCancel => {
-    return checkCancel
-  },
 })

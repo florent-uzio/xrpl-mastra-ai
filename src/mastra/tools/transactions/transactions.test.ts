@@ -21,6 +21,25 @@ describe('transaction tools', () => {
     submitTools.forEach(([name, tool]) => expect(tool.inputSchema.safeParse({}).success, name).toBe(false))
   })
 
+  it('requires a seed: a signed blob goes to submit-signed-blob instead', () => {
+    const txn = { Account: account, TransactionType: 'TicketCreate', TicketCount: 3 }
+    const ticketCreate = tools.submitTicketCreateTool as unknown as (typeof submitTools)[number][1]
+
+    expect(ticketCreate.inputSchema.safeParse({ network: base.network, signature: 'DEADBEEF', txn }).success).toBe(
+      false,
+    )
+    // submit-signed-blob is the one submit-* tool that takes no transaction fields
+    submitTools
+      .filter(([name]) => name !== 'submitSignedBlobTool')
+      .forEach(([name, tool]) =>
+        expect(Object.keys((tool.inputSchema as unknown as { shape: object }).shape), name).toEqual([
+          'network',
+          'seed',
+          'txn',
+        ]),
+      )
+  })
+
   it.each([
     ['submitTicketCreateTool', { Account: account, TransactionType: 'TicketCreate', TicketCount: 3 }],
     ['submitCheckCancelTool', { Account: account, TransactionType: 'CheckCancel', CheckID: 'A'.repeat(64) }],

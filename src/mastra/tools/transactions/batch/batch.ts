@@ -1,7 +1,6 @@
 import { Batch, BatchFlags, combineBatchSigners, decode, GlobalFlags, signMultiBatch, Wallet } from 'xrpl'
 import { assertSeedAllowed, autofill, getXrplClient } from '../../../../helpers'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplBatchSchema } from './batch.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -15,20 +14,6 @@ const MODE_FLAGS = [
   BatchFlags.tfIndependent,
 ]
 
-/** Recursively converts the currency code of every amount/asset object to hex */
-const encodeDeep = (value: unknown): unknown => {
-  if (Array.isArray(value)) {
-    return value.map(encodeDeep)
-  }
-
-  if (typeof value === 'object' && value !== null) {
-    const encoded = Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, encodeDeep(entry)]))
-    return encodeCurrencyCodes(encoded)
-  }
-
-  return value
-}
-
 export const submitBatchTool = createTransactionTool<Batch>({
   toolId: 'submit-batch',
   description: `Submit a Batch transaction: 2-8 inner transactions executed atomically per the chosen mode. Requires the Batch amendment.
@@ -39,7 +24,7 @@ Confidential MPT inners (ConfidentialMPTConvert, ConvertBack, Send, Clawback): t
 
 RawTransactions: inner transactions with their normal fields (currency codes are hex-encoded automatically). tfInnerBatchTxn is added automatically; Fee, signing fields and Sequence are autofilled. Do not set Fee, SigningPubKey, TxnSignature or Signers on inner transactions. Nested Batch is not allowed.
 
-Multi-account: inner accounts other than the outer Account must sign. On testnet/devnet pass their seeds in innerSeeds and the BatchSigners are created automatically. On mainnet BatchSigners must be supplied pre-signed.
+Multi-account: inner accounts other than the outer Account must sign. On testnet/devnet pass their seeds in innerSeeds and the BatchSigners are created automatically. On mainnet, sign the whole Batch elsewhere and submit it with submit-signed-blob.
 
 Errors: temINVALID_FLAG (zero or several modes), temARRAY_EMPTY/temARRAY_TOO_LARGE, temINVALID_INNER_BATCH, tefBAD_AUTH (missing BatchSigners).`,
   buildTransaction: ({ RawTransactions, innerSeeds: _innerSeeds, ...batch }) => {
@@ -47,7 +32,7 @@ Errors: temINVALID_FLAG (zero or several modes), temARRAY_EMPTY/temARRAY_TOO_LAR
       ...batch,
       RawTransactions: RawTransactions.map(({ RawTransaction }) => ({
         RawTransaction: {
-          ...(encodeDeep(RawTransaction) as typeof RawTransaction),
+          ...RawTransaction,
           Flags: ((RawTransaction.Flags as number | undefined) ?? 0) | GlobalFlags.tfInnerBatchTxn,
         },
       })),

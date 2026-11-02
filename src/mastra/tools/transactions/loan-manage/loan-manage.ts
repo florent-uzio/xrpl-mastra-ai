@@ -18,7 +18,4 @@ Set exactly one flag in Flags:
 A loan cannot be defaulted or impaired before its due date and grace period have passed. Defaulted and fully paid loans cannot be changed.
 
 Errors: tecNO_PERMISSION (loan already defaulted or paid, or status unchanged), tecTOO_SOON, tecLIMIT_EXCEEDED (impairment loss exceeds the vault's assets), tecNO_ENTRY, temINVALID_FLAG (more than one flag).`,
-  buildTransaction: loanManage => {
-    return loanManage
-  },
 })

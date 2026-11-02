@@ -1,6 +1,5 @@
 import { AMMBid } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplAmmBidSchema } from './amm-bid.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -19,11 +18,4 @@ Fields:
 Rules: the sender must hold LP tokens of the AMM and must hold at least the bid amount.
 
 Errors: tecAMM_FAILED_BID (bid below price or outside BidMin/BidMax), tecAMM_INVALID_TOKENS, terNO_AMM, tecINSUFFICIENT_FUNDS, temBAD_AMM_TOKENS.`,
-  buildTransaction: ammBid => {
-    return {
-      ...ammBid,
-      Asset: encodeCurrencyCodes(ammBid.Asset),
-      Asset2: encodeCurrencyCodes(ammBid.Asset2),
-    }
-  },
 })

@@ -22,7 +22,4 @@ Flag: tfLoanOverpayment (65536) allows overpayments.
 For closed-ended vaults, loans can only be created in the investment phase and the last payment must be at least 60 seconds before RedemptionDate.
 
 Errors: tecINSUFFICIENT_FUNDS (vault lacks funds or broker cover is too low), tecLIMIT_EXCEEDED (DebtMaximum or AssetsMaximum), tecNO_PERMISSION, tecTOO_SOON, tecEXPIRED, tecPRECISION_LOSS, tecKILLED, temBAD_SIGNER (missing CounterpartySignature), tecNO_ENTRY.`,
-  buildTransaction: loanSet => {
-    return loanSet
-  },
 })

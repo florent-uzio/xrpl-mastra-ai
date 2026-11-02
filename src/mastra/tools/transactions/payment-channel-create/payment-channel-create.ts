@@ -15,7 +15,4 @@ Amount is the XRP in drops locked in the channel (deducted immediately). Destina
 The channel ID is returned in the created PayChannel ledger object. Use PaymentChannelFund to add XRP and PaymentChannelClaim to claim.
 
 Common errors: tecUNFUNDED (not enough XRP above the reserve), tecNO_DST (destination does not exist), tecDST_TAG_NEEDED, tecNO_PERMISSION (destination disallows incoming payment channels or requires deposit auth), temDST_IS_SRC, temBAD_EXPIRATION.`,
-  buildTransaction: params => {
-    return params
-  },
 })

@@ -1,6 +1,5 @@
 import { AMMVote } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplAmmVoteSchema } from './amm-vote.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -18,11 +17,4 @@ Fields:
 Rules: the sender must hold LP tokens of the AMM. Up to 8 votes are kept; a new voter with more LP tokens than the smallest existing vote replaces it.
 
 Errors: terNO_AMM, tecAMM_INVALID_TOKENS (sender holds no LP tokens), tecAMM_FAILED_VOTE (vote not recorded, too small), temBAD_FEE.`,
-  buildTransaction: ammVote => {
-    return {
-      ...ammVote,
-      Asset: encodeCurrencyCodes(ammVote.Asset),
-      Asset2: encodeCurrencyCodes(ammVote.Asset2),
-    }
-  },
 })

@@ -39,7 +39,7 @@ export const assertSeedAllowed = (network: string): void => {
   if (!isTestNetwork(network)) {
     throw new Error(
       `Wallet seeds are refused on ${network} because it is not a known test network. ` +
-        `On mainnet, sign the transaction yourself and submit the signature. ` +
+        `On mainnet, sign the transaction yourself and submit the signed blob with submit-signed-blob. ` +
         `For a custom test network, add its URL to the XRPL_EXTRA_TEST_NETWORKS environment variable (comma-separated).`,
     )
   }

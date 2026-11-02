@@ -15,7 +15,4 @@ Omit LoanBrokerID to create a broker. Set it to update one: only Data and DebtMa
 Rates are in 1/10 basis points (1 = 0.001%, 100000 = 100%). ManagementFeeRate is 0 to 10000. CoverRateMinimum and CoverRateLiquidation must both be zero or both non-zero.
 
 Errors: tecNO_PERMISSION (not the vault or broker owner, VaultID changed, or non-closed-ended vault), tecNO_ENTRY, tecLIMIT_EXCEEDED (DebtMaximum below DebtTotal), tecINSUFFICIENT_RESERVE, tecPRECISION_LOSS, temINVALID.`,
-  buildTransaction: loanBrokerSet => {
-    return loanBrokerSet
-  },
 })
