@@ -1,9 +1,20 @@
 import { createTool } from '@mastra/core/tools'
 import { Request } from 'xrpl'
 import { z } from 'zod'
-import { ledgerSpecifierShape, networkSchema, xrplAddressSchema } from '../../../../../helpers'
-import { encodeCurrencyCodes, xrplAssetAmountSchema, xrplAssetSchema } from '../../../transactions/shared'
+import { ledgerSpecifierShape, networkSchema, xrplAddressSchema, xrplDecimalValueSchema } from '../../../../../helpers'
+import {
+  encodeCurrencyCodes,
+  xrplAssetAmountSchema,
+  xrplAssetSchema,
+  xrplCurrencyAmountSchema,
+} from '../../../transactions/shared'
 import { executeMethod, xrplMethodResponse } from '../../shared'
+
+/** destination_amount also accepts "-1": deliver as much as possible */
+const destinationAmountSchema = z.union([
+  xrplAssetAmountSchema,
+  xrplCurrencyAmountSchema.extend({ value: z.union([xrplDecimalValueSchema, z.literal('-1')]) }),
+])
 
 export const getRipplePathFindTool = createTool({
   id: 'get-ripple-path-find',
@@ -13,7 +24,9 @@ export const getRipplePathFindTool = createTool({
     request: z.object({
       source_account: xrplAddressSchema.describe('Sender'),
       destination_account: xrplAddressSchema.describe('Receiver'),
-      destination_amount: xrplAssetAmountSchema.describe('Amount the receiver should get'),
+      destination_amount: destinationAmountSchema.describe(
+        'Amount the receiver should get, or value "-1" for as much as possible',
+      ),
       send_max: xrplAssetAmountSchema.optional().describe('Maximum the sender is willing to spend'),
       source_currencies: z
         .array(xrplAssetSchema)

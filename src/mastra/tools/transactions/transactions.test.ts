@@ -1,3 +1,4 @@
+import { OfferCreateFlags, TrustSetFlags } from 'xrpl'
 import { describe, expect, it } from 'vitest'
 import * as tools from '../index'
 
@@ -48,5 +49,16 @@ describe('transaction tools', () => {
     const tool = tools[name as keyof typeof tools] as unknown as (typeof submitTools)[number][1]
 
     expect(tool.inputSchema.safeParse({ ...base, txn }).success).toBe(true)
+  })
+
+  it.each([
+    ['submitTrustSetTool', TrustSetFlags],
+    ['submitOfferCreateTool', OfferCreateFlags],
+  ])('%s describes every flag with its xrpl.js value', (name, flags) => {
+    const { description } = tools[name as keyof typeof tools] as unknown as { description: string }
+
+    Object.entries(flags)
+      .filter(([flag]) => isNaN(Number(flag)))
+      .forEach(([flag, value]) => expect(description, flag).toContain(`${flag} ${value}`))
   })
 })

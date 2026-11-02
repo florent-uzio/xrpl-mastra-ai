@@ -18,11 +18,12 @@ Irreversible or risky: NoFreeze (6) and AllowTrustLineClawback (16) cannot be un
 
 Only one asf* flag can be set per transaction. Submit one transaction per flag.
 
-Limits: TransferRate 1000000000-2000000000 (0 clears it). TickSize 3-15 (0 clears it). Domain is hex-encoded automatically.`,
+Limits: TransferRate 1000000000-2000000000 (0 clears it). TickSize 3-15 (0 clears it). Domain is hex-encoded automatically; an empty Domain ("") clears it.`,
   buildTransaction: params => {
     return {
       ...params,
-      Domain: params.Domain ? convertStringToHex(params.Domain) : undefined,
+      // An empty Domain clears it, so only an absent Domain is left out
+      Domain: params.Domain === undefined ? undefined : convertStringToHex(params.Domain),
       TransactionType: 'AccountSet',
     }
   },

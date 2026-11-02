@@ -12,12 +12,12 @@ export const submitOfferCreateTool = createTransactionTool<OfferCreate>({
 
 TakerGets is what you sell. TakerPays is what you buy. XRP is a string in drops. Tokens are {currency, issuer, value}. You cannot trade an asset for itself, and both amounts must be positive.
 
-Flags:
-- tfPassive: do not take exact-rate matches
-- tfImmediateOrCancel: never place the remainder on the book
-- tfFillOrKill: cancel unless fully filled (cannot combine with tfImmediateOrCancel)
-- tfSell: sell all of TakerGets even if you receive more than TakerPays
-- tfHybrid: permissioned and open DEX (requires DomainID)
+Flags is a number: add the values of the flags you want, e.g. tfPassive + tfSell = 589824.
+- tfPassive 65536: do not take exact-rate matches
+- tfImmediateOrCancel 131072: never place the remainder on the book
+- tfFillOrKill 262144: cancel unless fully filled (cannot combine with tfImmediateOrCancel)
+- tfSell 524288: sell all of TakerGets even if you receive more than TakerPays
+- tfHybrid 1048576: permissioned and open DEX (requires DomainID)
 
 Other fields: OfferSequence cancels an earlier offer first. Expiration is in seconds since the Ripple Epoch. DomainID is for permissioned DEX trading.
 
