@@ -1,6 +1,7 @@
-import { encodeMPTokenMetadata, MPTokenIssuanceCreateFlags, validateMPTokenMetadata, Wallet } from 'xrpl'
+import { encodeMPTokenMetadata, MPTokenIssuanceCreateFlags, validateMPTokenMetadata } from 'xrpl'
 import z from 'zod'
-import { txnResultSchema, workflowNetworkSchema } from './shared'
+import { workflowNetworkSchema } from '../../helpers'
+import { addressSchema, resultShape, txnResultSchema, walletRecordSchema } from './shared'
 
 /**
  * Flag names (e.g. "tfMPTCanTransfer") from xrpl's MPTokenIssuanceCreateFlags enum.
@@ -75,7 +76,7 @@ const issuanceSchema = z.object({
  * Zod objects with checks cannot be extended, so the steps build on this one.
  */
 const mptIssuanceBaseSchema = z.object({
-  network: workflowNetworkSchema.describe('Network to use for the workflow'),
+  network: workflowNetworkSchema(['testnet', 'devnet'], 'Network to use for the workflow'),
   issuance: issuanceSchema.describe('MPT issuance properties'),
   holders: z.number().int().positive().describe('Number of holder wallets to create'),
   mintAmount: z
@@ -99,8 +100,8 @@ export const mptIssuanceWorkflowSchema = mptIssuanceBaseSchema
   )
 
 const issuerAndHoldersSchema = z.object({
-  issuer: z.custom<Wallet>().describe('Issuer wallet'),
-  holders: z.array(z.custom<Wallet>().describe('Holder wallet')),
+  issuer: walletRecordSchema.describe('Issuer wallet'),
+  holders: z.array(walletRecordSchema.describe('Holder wallet')),
 })
 
 /** Output of the wallet step. */
@@ -115,7 +116,9 @@ export const issuedSchema = walletsSchema.extend({
 /**
  * Workflow output: the last step's output plus where the run was recorded
  */
-export const mptIssuanceResultSchema = issuedSchema.extend({
-  recordId: z.string().describe('Id of the saved record, usable with the get-flow-records tool'),
-  recordPath: z.string().describe('Path of the saved record file'),
+export const mptIssuanceResultSchema = z.object({
+  ...resultShape,
+  mptIssuanceId: z.string().describe('MPTokenIssuanceID'),
+  issuer: addressSchema,
+  holders: z.array(addressSchema),
 })

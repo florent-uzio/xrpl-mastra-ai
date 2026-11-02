@@ -1,6 +1,6 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { AccountSet, AccountSetAsfFlags, convertStringToHex, Payment, TrustSet } from 'xrpl'
-import { currencyCodeToHex, getXrplClient, saveFlowRecord, toWalletRecord } from '../../helpers'
+import { currencyCodeToHex, getXrplClient, saveFlowRecord, supportedNetworksText } from '../../helpers'
 import {
   iouIssuanceResultSchema,
   iouIssuanceWorkflowSchema,
@@ -158,8 +158,8 @@ const recordResults = createStep({
         flow: 'iou-issuance',
         network,
         data: {
-          issuer: toWalletRecord(issuer),
-          holders: holders.map(toWalletRecord),
+          issuer,
+          holders,
           currency: trustline.currency,
           trustlineLimit: trustline.trustlineLimit,
           mintAmount,
@@ -168,7 +168,15 @@ const recordResults = createStep({
         },
       })
 
-      return { ...inputData, recordId: record.id, recordPath: path }
+      return {
+        network,
+        currency: trustline.currency,
+        issuer: issuer.address,
+        holders: holders.map(holder => holder.address),
+        txnResults,
+        recordId: record.id,
+        recordPath: path,
+      }
     } catch (error) {
       throw new Error(`Failed to save the record: ${errorMessage(error)}`)
     }
@@ -182,7 +190,7 @@ const recordResults = createStep({
 const iouIssuanceWorkflow = createWorkflow({
   id: 'iou-issuance-workflow',
   description: `Issues an IOU (trust line token, e.g. a stablecoin-style currency) on an XRPL testnet or devnet: creates and funds an issuer and N holder wallets, sets issuer flags/domain, creates trust lines, and mints IOUs to each holder, then saves a record (wallet addresses and seeds, currency, tx hashes) retrievable with the get-flow-records tool. Not for MPTs (Multi-Purpose Tokens).
-Supported networks: wss://s.altnet.rippletest.net:51233/, wss://testnet.xrpl-labs.com/, wss://s.devnet.rippletest.net:51233/, wss://clio.devnet.rippletest.net:51233/.`,
+${supportedNetworksText(['testnet', 'devnet'])}`,
   inputSchema: iouIssuanceWorkflowSchema,
   outputSchema: iouIssuanceResultSchema,
 })

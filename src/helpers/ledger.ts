@@ -1,5 +1,5 @@
 import { Client, SubmittableTransaction, TxResponse, Wallet } from 'xrpl'
-import { assertSeedAllowed } from './test-networks'
+import { assertSeedAllowed } from './networks'
 
 /**
  * Ledger submission: the one place that autofills, signs and submits transactions, for tools and workflows alike.

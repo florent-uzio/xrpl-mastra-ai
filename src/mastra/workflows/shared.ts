@@ -1,22 +1,7 @@
 import { ToolExecutionContext } from '@mastra/core/tools'
 import { SubmittableTransaction, TransactionMetadata, TxResponse, Wallet } from 'xrpl'
 import z from 'zod'
-import { getXrplClient, LedgerClient, submit } from '../../helpers'
-
-/**
- * Supported network endpoints for the issuance workflows
- *
- * These are the WebSocket URLs for different XRPL networks.
- * The workflows are designed primarily for testnet and devnet networks (faucet funding, seeds saved in records).
- */
-export const workflowNetworkSchema = z.enum([
-  // Testnet networks
-  'wss://s.altnet.rippletest.net:51233/',
-  'wss://testnet.xrpl-labs.com/',
-  // Devnet networks
-  'wss://clio.devnet.rippletest.net:51233/',
-  'wss://s.devnet.rippletest.net:51233/',
-])
+import { getXrplClient, LedgerClient, submit, toWalletRecord, WalletRecord } from '../../helpers'
 
 /**
  * Transaction result schema
@@ -32,19 +17,41 @@ export const txnResultSchema = z.object({
 
 export type TxnResult = z.infer<typeof txnResultSchema>
 
+/**
+ * A wallet as carried from step to step: plain JSON, because Mastra saves every step's output in a snapshot and a
+ * Wallet instance would come back from it as a plain object. Each step signs with Wallet.fromSeed.
+ */
+/**
+ * Fields every workflow result ends with. Results carry addresses only: seeds stay in the record file
+ * (get-flow-records), so they never reach the model or an MCP client by default.
+ */
+export const resultShape = {
+  network: z.string(),
+  txnResults: z.array(txnResultSchema).describe('Transactions of the run'),
+  recordId: z.string().describe('Id of the saved record, usable with the get-flow-records tool (it holds the seeds)'),
+  recordPath: z.string().describe('Path of the saved record file'),
+}
+
+export const addressSchema = z.string().describe('Classic address')
+
+export const walletRecordSchema = z.object({
+  address: z.string().describe('Classic address'),
+  seed: z.string().describe('Seed (test networks only)'),
+})
+
 export const errorMessage = (error: unknown) => (error instanceof Error ? error.message : 'Unknown error')
 
 /**
- * Submits a transaction signed by `wallet` and throws unless it succeeded: a workflow cannot go on after a failed
+ * Submits a transaction signed by `signer` and throws unless it succeeded: a workflow cannot go on after a failed
  * transaction (a tec result is validated but failed, so later steps would build on something that does not exist).
  */
 export const submitStep = async <T extends SubmittableTransaction>(
   client: LedgerClient,
   tx: T,
-  wallet: Wallet,
+  signer: WalletRecord,
   description: string,
 ): Promise<{ result: TxnResult; response: TxResponse<T> }> => {
-  const { ok, engineResult, hash, response } = await submit(client, tx, { wallet })
+  const { ok, engineResult, hash, response } = await submit(client, tx, { wallet: Wallet.fromSeed(signer.seed) })
   if (!ok) {
     throw new Error(`${description} failed with ${engineResult} (${hash})`)
   }
@@ -67,7 +74,7 @@ export const fundWallets = async (
   network: string,
   count: number,
   mastra: ToolExecutionContext['mastra'],
-): Promise<Wallet[]> => {
+): Promise<WalletRecord[]> => {
   const client = await getXrplClient(network, mastra)
-  return Promise.all(Array.from({ length: count }, async () => (await client.fundWallet()).wallet))
+  return Promise.all(Array.from({ length: count }, async () => toWalletRecord((await client.fundWallet()).wallet)))
 }

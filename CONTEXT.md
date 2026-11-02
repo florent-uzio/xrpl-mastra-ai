@@ -19,3 +19,7 @@ _Avoid_: signature (a signed blob holds the signature, plus every transaction fi
 **Test network**:
 An XRPL network where wallet seeds may be used: a known testnet, devnet or Xahau testnet URL, or one listed by the operator. Anything else is treated as mainnet.
 _Avoid_: sandbox, non-mainnet
+
+**Flow record**:
+A saved summary of what a workflow run or a manual session created on a network: addresses, token and ledger entry IDs, transaction hashes, and on a test network the seeds needed to use the wallets again. Workflow results point to their flow record instead of carrying seeds.
+_Avoid_: run log, wallet store
