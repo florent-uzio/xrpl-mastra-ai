@@ -29,43 +29,6 @@ export const xrplClawbackFieldsSchema = z.object({
 export const xrplClawbackSchema = xrplCommonFieldsSchema
   .merge(xrplClawbackFieldsSchema)
   .extend({ TransactionType: z.literal('Clawback') })
-//   .refine(
-//     data => {
-//       // Validate that the amount value is not zero
-//       const amountValue = parseFloat(data.Amount.value)
-//       return amountValue > 0
-//     },
-//     {
-//       message: 'Amount value must be greater than zero',
-//       path: ['Amount', 'value'],
-//     },
-//   )
-//   .refine(
-//     data => {
-//       // Validate that the currency is not XRP (clawback only works with issued tokens)
-//       if (data.Amount.currency.toUpperCase() === 'XRP') {
-//         return false
-//       }
-//       return true
-//     },
-//     {
-//       message: 'Clawback cannot be used with XRP - only issued tokens can be clawed back',
-//       path: ['Amount', 'currency'],
-//     },
-//   )
-//   .refine(
-//     data => {
-//       // Validate that the issuer (holder) is not the same as the Account (issuer)
-//       if (data.Amount.issuer === data.Account) {
-//         return false
-//       }
-//       return true
-//     },
-//     {
-//       message: 'Cannot claw back from yourself - the holder (issuer field) cannot be the same as the Account',
-//       path: ['Amount', 'issuer'],
-//     },
-//   )
 
 export type XrplClawbackFields = z.infer<typeof xrplClawbackFieldsSchema>
 export type XrplClawback = z.infer<typeof xrplClawbackSchema>
