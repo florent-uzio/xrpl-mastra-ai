@@ -19,7 +19,7 @@ const mptIssuanceFlagNames = Object.keys(MPTokenIssuanceCreateFlags).filter(k =>
  *
  * @see https://xrpl.org/docs/references/protocol/transactions/types/mptokenissuancecreate#mptokenmetadata-field
  */
-const mptMetadataSchema = z
+export const mptMetadataSchema = z
   .object({
     ticker: z.string().describe('Uppercase letters and digits only, max 6 characters, e.g. "TEST"'),
     name: z.string().describe('Token name'),

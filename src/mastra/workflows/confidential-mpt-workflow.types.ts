@@ -1,5 +1,6 @@
 import { MPTokenIssuanceCreateFlags, Wallet } from 'xrpl'
 import z from 'zod'
+import { mptMetadataSchema } from './mpt-issuance-workflow.types'
 import { txnResultSchema, workflowNetworkSchema } from './shared'
 
 /**
@@ -57,6 +58,7 @@ const confidentialMptBaseSchema = z.object({
           .describe(
             'Extra flags, e.g. tfMPTRequireAuth. tfMPTCanTransfer and tfMPTCanHoldConfidentialBalance are always set',
           ),
+        metadata: mptMetadataSchema.optional().describe('Token metadata (XLS-89), encoded to hex automatically'),
       }),
       z.object({
         source: z.literal('existing').describe('Reuse an MPT issued by the issuer account'),
