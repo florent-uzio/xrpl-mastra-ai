@@ -20,7 +20,7 @@ import {
   vaultSchema,
   walletsSchema,
 } from './lending-setup-workflow.types'
-import { assertTxnSuccess, createdEntryId, errorMessage, fundWallets, toTxnResult, TxnResult } from './shared'
+import { createdEntryId, errorMessage, fundWallets, submitStep, TxnResult } from './shared'
 
 /** Step 1: funds the vault owner, depositor and borrower wallets, plus the issuer when a new MPT is created. */
 const createWallets = createStep({
@@ -69,8 +69,7 @@ const createIssuance = createStep({
         AssetScale: issuance.assetScale,
       }
 
-      const response = await client.submitAndWait(tx, { autofill: true, wallet: issuer })
-      const result = assertTxnSuccess(toTxnResult('Created MPT issuance', response))
+      const { result, response } = await submitStep(client, tx, issuer, 'Created MPT issuance')
 
       const { mpt_issuance_id } = response.result.meta as { mpt_issuance_id?: string }
       if (!mpt_issuance_id) {
@@ -105,8 +104,8 @@ const distributeTokens = createStep({
             Account: holder.address,
             MPTokenIssuanceID: mptIssuanceId,
           }
-          const response = await client.submitAndWait(tx, { autofill: true, wallet: holder })
-          return assertTxnSuccess(toTxnResult(`Holder ${holder.address} opted in`, response))
+          const { result } = await submitStep(client, tx, holder, `Holder ${holder.address} opted in`)
+          return result
         }),
       )
 
@@ -119,8 +118,8 @@ const distributeTokens = createStep({
           Destination: holder.address,
           Amount: { mpt_issuance_id: mptIssuanceId, value: mintAmount },
         }
-        const response = await client.submitAndWait(tx, { autofill: true, wallet: issuer })
-        payments.push(assertTxnSuccess(toTxnResult(`Sent ${mintAmount} to ${holder.address}`, response)))
+        const { result } = await submitStep(client, tx, issuer, `Sent ${mintAmount} to ${holder.address}`)
+        payments.push(result)
       }
 
       return { ...inputData, txnResults: [...txnResults, ...optIns, ...payments] }
@@ -158,8 +157,7 @@ const createVault = createStep({
         RedemptionDate: redemptionDate,
       }
 
-      const response = await client.submitAndWait(tx, { autofill: true, wallet: vaultOwner })
-      const result = assertTxnSuccess(toTxnResult('Created closed-ended vault', response))
+      const { result, response } = await submitStep(client, tx, vaultOwner, 'Created closed-ended vault')
 
       return {
         ...inputData,
@@ -193,8 +191,7 @@ const depositIntoVault = createStep({
         Amount: { mpt_issuance_id: mptIssuanceId, value: depositAmount },
       }
 
-      const response = await client.submitAndWait(tx, { autofill: true, wallet: depositor })
-      const result = assertTxnSuccess(toTxnResult(`Deposited ${depositAmount} into the vault`, response))
+      const { result } = await submitStep(client, tx, depositor, `Deposited ${depositAmount} into the vault`)
 
       return { ...inputData, txnResults: [...txnResults, result] }
     } catch (error) {
@@ -225,8 +222,12 @@ const createLoanBroker = createStep({
         CoverRateMinimum: coverRateMinimum,
         CoverRateLiquidation: coverRateLiquidation,
       }
-      const brokerResponse = await client.submitAndWait(brokerTx, { autofill: true, wallet: vaultOwner })
-      const brokerResult = assertTxnSuccess(toTxnResult('Created loan broker', brokerResponse))
+      const { result: brokerResult, response: brokerResponse } = await submitStep(
+        client,
+        brokerTx,
+        vaultOwner,
+        'Created loan broker',
+      )
       const loanBrokerId = createdEntryId(brokerResponse, 'LoanBroker')
 
       const coverTx: LoanBrokerCoverDeposit = {
@@ -235,8 +236,12 @@ const createLoanBroker = createStep({
         LoanBrokerID: loanBrokerId,
         Amount: { mpt_issuance_id: mptIssuanceId, value: coverAmount },
       }
-      const coverResponse = await client.submitAndWait(coverTx, { autofill: true, wallet: vaultOwner })
-      const coverResult = assertTxnSuccess(toTxnResult(`Deposited ${coverAmount} of first-loss cover`, coverResponse))
+      const { result: coverResult } = await submitStep(
+        client,
+        coverTx,
+        vaultOwner,
+        `Deposited ${coverAmount} of first-loss cover`,
+      )
 
       return { ...inputData, loanBrokerId, txnResults: [...txnResults, brokerResult, coverResult] }
     } catch (error) {

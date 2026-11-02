@@ -15,7 +15,6 @@ import {
   prepareConfidentialConvertBack,
   prepareConfidentialMergeInbox,
   prepareConfidentialSend,
-  SubmittableTransaction,
   Wallet,
 } from 'xrpl'
 import type { ECDSA } from 'xrpl'
@@ -25,7 +24,7 @@ import {
   confidentialMptWorkflowSchema,
   confidentialStateSchema,
 } from './confidential-mpt-workflow.types'
-import { assertTxnSuccess, errorMessage, toTxnResult, TxnResult } from './shared'
+import { errorMessage, submitStep, TxnResult } from './shared'
 
 /** Ledger flags equal the creation flags (e.g. lsfMPTRequireAuth = tfMPTRequireAuth). lsfMPTAuthorized: set on an MPToken once the issuer authorized the holder. Not exported by xrpl.js. */
 const MPTOKEN_AUTHORIZED = 0x2
@@ -66,9 +65,6 @@ const findMPToken = async (client: Client, account: string, mptIssuanceId: strin
     throw error
   }
 }
-
-const submit = async (client: Client, tx: SubmittableTransaction, wallet: Wallet, description: string) =>
-  assertTxnSuccess(toTxnResult(description, await client.submitAndWait(tx, { autofill: true, wallet })))
 
 /** Step 1: loads the given accounts from their seeds and creates and funds the missing ones. */
 const setupWallets = createStep({
@@ -136,8 +132,8 @@ const setupIssuance = createStep({
           Flags: flags.reduce((acc, flag) => acc | MPTokenIssuanceCreateFlags[flag], 0),
           MPTokenMetadata: issuanceRequest.metadata ? encodeMPTokenMetadata(issuanceRequest.metadata) : undefined,
         }
-        const response = await client.submitAndWait(tx, { autofill: true, wallet: issuer })
-        txnResults.push(assertTxnSuccess(toTxnResult('Created MPT issuance', response)))
+        const { result, response } = await submitStep(client, tx, issuer, 'Created MPT issuance')
+        txnResults.push(result)
 
         const created = (response.result.meta as { mpt_issuance_id?: string }).mpt_issuance_id
         if (!created) throw new Error(`MPTokenIssuanceID missing from the metadata of ${txnResults[0].hash}`)
@@ -164,7 +160,7 @@ const setupIssuance = createStep({
           ...(issuerSeed && { IssuerEncryptionKey: deriveConfidentialKeypair(issuerSeed).publicKey }),
           ...(auditorSeed && { AuditorEncryptionKey: deriveConfidentialKeypair(auditorSeed).publicKey }),
         }
-        txnResults.push(await submit(client, tx, issuer, 'Registered the issuer/auditor encryption keys'))
+        txnResults.push((await submitStep(client, tx, issuer, 'Registered the issuer/auditor encryption keys')).result)
       }
 
       return {
@@ -200,7 +196,7 @@ const optIn = createStep({
           Account: wallet.address,
           MPTokenIssuanceID: mptIssuanceId,
         }
-        results.push(await submit(client, tx, wallet, `The ${label} ${wallet.address} opted in`))
+        results.push((await submitStep(client, tx, wallet, `The ${label} ${wallet.address} opted in`)).result)
       }
 
       return { ...inputData, txnResults: [...txnResults, ...results] }
@@ -235,7 +231,7 @@ const authorize = createStep({
           MPTokenIssuanceID: mptIssuanceId,
           Holder: wallet.address,
         }
-        results.push(await submit(client, tx, issuer, `Authorized ${wallet.address}`))
+        results.push((await submitStep(client, tx, issuer, `Authorized ${wallet.address}`)).result)
       }
 
       return { ...inputData, txnResults: [...txnResults, ...results] }
@@ -266,7 +262,7 @@ const mintToHolder = createStep({
         Destination: holderWallet.address,
         Amount: { mpt_issuance_id: mptIssuanceId, value: missing.toString() },
       }
-      const result = await submit(client, tx, issuer, `Minted ${missing} to ${holderWallet.address}`)
+      const { result } = await submitStep(client, tx, issuer, `Minted ${missing} to ${holderWallet.address}`)
 
       return { ...inputData, txnResults: [...txnResults, result] }
     } catch (error) {
@@ -307,7 +303,9 @@ const convert = createStep({
           amount,
           holderKeypair,
         })
-        results.push(await submit(client, tx, wallet, `The ${label} converted ${amount} to a confidential balance`))
+        results.push(
+          (await submitStep(client, tx, wallet, `The ${label} converted ${amount} to a confidential balance`)).result,
+        )
       }
 
       return { ...inputData, txnResults: [...txnResults, ...results] }
@@ -332,7 +330,7 @@ const mergeInbox = createStep({
         account: holderWallet.classicAddress,
         mptIssuanceID: mptIssuanceId,
       })
-      const result = await submit(client, tx, holderWallet, 'The holder merged its confidential inbox')
+      const { result } = await submitStep(client, tx, holderWallet, 'The holder merged its confidential inbox')
 
       return { ...inputData, txnResults: [...txnResults, result] }
     } catch (error) {
@@ -362,7 +360,7 @@ const send = createStep({
         amount: BigInt(request.amount),
         senderKeypair: deriveConfidentialKeypair(confidentialSeeds.holder),
       })
-      const sent = await submit(
+      const { result: sent } = await submitStep(
         client,
         tx,
         holderWallet,
@@ -374,7 +372,12 @@ const send = createStep({
         account: destinationWallet.classicAddress,
         mptIssuanceID: mptIssuanceId,
       })
-      const merged = await submit(client, mergeTx, destinationWallet, 'The destination merged its confidential inbox')
+      const { result: merged } = await submitStep(
+        client,
+        mergeTx,
+        destinationWallet,
+        'The destination merged its confidential inbox',
+      )
 
       return { ...inputData, txnResults: [...txnResults, sent, merged] }
     } catch (error) {
@@ -402,7 +405,7 @@ const convertBack = createStep({
         amount: BigInt(request.amount),
         holderKeypair: deriveConfidentialKeypair(confidentialSeeds.holder),
       })
-      const result = await submit(
+      const { result } = await submitStep(
         client,
         tx,
         holderWallet,

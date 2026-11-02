@@ -1,5 +1,5 @@
 import { Batch, BatchFlags, combineBatchSigners, decode, GlobalFlags, signMultiBatch, Wallet } from 'xrpl'
-import { assertSeedAllowed, getXrplClient } from '../../../../helpers'
+import { assertSeedAllowed, autofill, getXrplClient } from '../../../../helpers'
 import { useTransactionToolFactory } from '../factory'
 import { encodeCurrencyCodes } from '../shared'
 import { xrplBatchSchema } from './batch.types'
@@ -78,7 +78,7 @@ Errors: temINVALID_FLAG (zero or several modes), temARRAY_EMPTY/temARRAY_TOO_LAR
 
     // Sequences and fees must be filled before signing because the signature covers the inner transaction hashes
     const client = await getXrplClient(network, mastra)
-    const prepared = await client.autofill(txn, signers.length)
+    const prepared = await autofill(client, txn, signers.length)
 
     const signedCopies = signers.map(wallet => {
       const copy = structuredClone(prepared)

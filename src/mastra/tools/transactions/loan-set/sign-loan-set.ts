@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { Client, LoanSet, signLoanSetByCounterparty, Wallet } from 'xrpl'
 import { z } from 'zod'
-import { assertSeedAllowed, getXrplClient } from '../../../../helpers'
+import { assertSeedAllowed, autofill, getXrplClient } from '../../../../helpers'
 import { xrplLoanSetSchema } from './loan-set.types'
 
 type SignParams = {
@@ -30,7 +30,7 @@ export const signLoanSet = async (client: Client, { txn, seed, counterpartySeed 
     )
   }
 
-  const prepared = await client.autofill(txn as LoanSet)
+  const prepared = await autofill(client, txn as LoanSet)
   const first = wallet.sign(prepared)
   return signLoanSetByCounterparty(counterpartyWallet, first.tx_blob)
 }

@@ -13,7 +13,7 @@ import {
   mptIssuanceWorkflowSchema,
   walletsSchema,
 } from './mpt-issuance-workflow.types'
-import { assertTxnSuccess, errorMessage, fundWallets, toTxnResult, TxnResult } from './shared'
+import { errorMessage, fundWallets, submitStep, TxnResult } from './shared'
 
 /** Step 1: creates and funds the issuer and holder wallets. */
 const createWallets = createStep({
@@ -54,8 +54,7 @@ const createIssuance = createStep({
         MPTokenMetadata: issuance.metadata ? encodeMPTokenMetadata(issuance.metadata) : undefined,
       }
 
-      const response = await client.submitAndWait(tx, { autofill: true, wallet: issuer })
-      const result = assertTxnSuccess(toTxnResult('Created MPT issuance', response))
+      const { result, response } = await submitStep(client, tx, issuer, 'Created MPT issuance')
 
       const { mpt_issuance_id } = response.result.meta as { mpt_issuance_id?: string }
       if (!mpt_issuance_id) {
@@ -89,8 +88,8 @@ const holdersOptIn = createStep({
             Account: holder.address,
             MPTokenIssuanceID: mptIssuanceId,
           }
-          const response = await client.submitAndWait(tx, { autofill: true, wallet: holder })
-          return assertTxnSuccess(toTxnResult(`Holder ${holder.address} opted in`, response))
+          const { result } = await submitStep(client, tx, holder, `Holder ${holder.address} opted in`)
+          return result
         }),
       )
 
@@ -126,8 +125,8 @@ const authorizeHolders = createStep({
           MPTokenIssuanceID: mptIssuanceId,
           Holder: holder.address,
         }
-        const response = await client.submitAndWait(tx, { autofill: true, wallet: issuer })
-        results.push(assertTxnSuccess(toTxnResult(`Authorized holder ${holder.address}`, response)))
+        const { result } = await submitStep(client, tx, issuer, `Authorized holder ${holder.address}`)
+        results.push(result)
       }
 
       return { ...inputData, txnResults: [...txnResults, ...results] }
@@ -158,8 +157,8 @@ const mintTokens = createStep({
           Destination: holder.address,
           Amount: { mpt_issuance_id: mptIssuanceId, value: mintAmount },
         }
-        const response = await client.submitAndWait(tx, { autofill: true, wallet: issuer })
-        results.push(assertTxnSuccess(toTxnResult(`Minted ${mintAmount} to ${holder.address}`, response)))
+        const { result } = await submitStep(client, tx, issuer, `Minted ${mintAmount} to ${holder.address}`)
+        results.push(result)
       }
 
       return { ...inputData, txnResults: [...txnResults, ...results] }

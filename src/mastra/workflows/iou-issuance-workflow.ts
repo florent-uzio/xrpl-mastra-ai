@@ -7,7 +7,7 @@ import {
   settingsSchema,
   walletsSchema,
 } from './iou-issuance-workflow.types'
-import { errorMessage, fundWallets, toTxnResult, TxnResult } from './shared'
+import { errorMessage, fundWallets, submitStep, TxnResult } from './shared'
 
 /** Step 1: creates and funds the issuer and holder wallets. */
 const createWallets = createStep({
@@ -58,8 +58,8 @@ const setupIssuerAccount = createStep({
           SetFlag: flagValue,
         }
 
-        const response = await client.submitAndWait(tx, { autofill: true, wallet: issuer })
-        txnResults.push(toTxnResult(`Set flag ${flag} (${flagValue})`, response))
+        const { result } = await submitStep(client, tx, issuer, `Set flag ${flag} (${flagValue})`)
+        txnResults.push(result)
       }
 
       return { ...inputData, txnResults }
@@ -90,8 +90,8 @@ const createTrustLines = createStep({
             Account: holder.address,
             LimitAmount: { currency: currencyHex, issuer: issuer.address, value: trustline.trustlineLimit },
           }
-          const response = await client.submitAndWait(tx, { autofill: true, wallet: holder })
-          return toTxnResult(`Created trust line for ${holder.address}`, response)
+          const { result } = await submitStep(client, tx, holder, `Created trust line for ${holder.address}`)
+          return result
         }),
       )
 
@@ -128,8 +128,13 @@ const mintTokens = createStep({
           Amount: { currency: trustline.currency, value: mintAmount, issuer: issuer.address },
         }
 
-        const response = await client.submitAndWait(tx, { autofill: true, wallet: issuer })
-        results.push(toTxnResult(`Minted ${mintAmount} ${trustline.currency} to ${holder.address}`, response))
+        const { result } = await submitStep(
+          client,
+          tx,
+          issuer,
+          `Minted ${mintAmount} ${trustline.currency} to ${holder.address}`,
+        )
+        results.push(result)
       }
 
       return { ...inputData, txnResults: [...txnResults, ...results] }

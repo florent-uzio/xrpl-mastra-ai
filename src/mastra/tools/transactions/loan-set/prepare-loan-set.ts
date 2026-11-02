@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
 import { Client, LoanSet } from 'xrpl'
 import { z } from 'zod'
-import { getXrplClient, networkSchema } from '../../../../helpers'
+import { autofill, getXrplClient, networkSchema } from '../../../../helpers'
 import { xrplLoanSetSchema } from './loan-set.types'
 
 const DEFAULT_EXPIRY_LEDGERS = 200
@@ -24,13 +24,11 @@ export const prepareLoanSet = async (client: Client, { txn, expiryLedgers }: Pre
   }
 
   const tx = { ...txn } as LoanSet
-  // autofill sets Sequence even when a Ticket is used, so it must be 0 beforehand
-  if (tx.TicketSequence !== undefined) tx.Sequence = 0
   if (tx.LastLedgerSequence === undefined) {
     tx.LastLedgerSequence = (await client.getLedgerIndex()) + (expiryLedgers ?? DEFAULT_EXPIRY_LEDGERS)
   }
 
-  return client.autofill(tx)
+  return autofill(client, tx)
 }
 
 export const prepareLoanSetTool = createTool({
