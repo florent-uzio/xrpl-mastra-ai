@@ -1,5 +1,12 @@
 # @florent-uzio/xrpl-mcp
 
+## 1.2.0
+
+### Minor Changes
+
+- 81b0f5e: Add a `lending-setup` workflow that sets up the Lending Protocol on devnet: a new or existing MPT, a closed-ended vault with a deposit, and a loan broker with its first-loss cover, ready for a loan. The agent now states the loan terms and due dates and waits for confirmation before a LoanSet.
+- 00195e6: Update xrpl.js to 5.4.0-beta.0. The `confidential-mpt` workflow can now create the MPT with XLS-89 metadata (`issuance.metadata`).
+
 ## 1.1.0
 
 ### Minor Changes
