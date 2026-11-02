@@ -260,22 +260,11 @@ All transaction tools automatically include these base fields:
 
 On mainnet, sign the transaction elsewhere and submit it with `submit-signed-blob`.
 
-#### 6. Adding to Your Agent
+#### 6. Adding to the Agent and the MCP Server
 
-After creating your tool, add it to the agent's tools object:
+Export the tool from its folder's `index.ts`. `src/mastra/catalog.ts` picks up every tool exported by `src/mastra/tools`, so the agent (as a searchable tool) and the MCP server both get it.
 
-```typescript
-// src/mastra/agents/xrpl-agent.ts
-import { submitYourTransactionTool } from '../tools/transactions/your-transaction/your-transaction'
-
-export const xrplAgent = new Agent({
-  // ... other config
-  tools: {
-    // ... existing tools
-    submitYourTransactionTool,
-  },
-})
-```
+To send a tool to the model on every request instead of on demand, add it to `coreTools` in `src/mastra/catalog.ts`. Workflows are registered once, in `workflows` in the same file.
 
 ### Customizing Existing Tools
 

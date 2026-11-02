@@ -3,7 +3,7 @@ import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import packageJson from '../../packages/xrpl-mcp/package.json'
 import { XRPL_INSTRUCTIONS } from '../mastra/instructions'
-import * as toolsBarrel from '../mastra/tools'
+import { allTools } from '../mastra/catalog'
 import { xrplMcpServer } from './server'
 
 const SERVER = 'xrpl'
@@ -47,16 +47,16 @@ describe('xrpl MCP server', () => {
     expect(JSON.stringify(result)).toContain(packageJson.version)
   })
 
-  it('lists every tool of the tools barrel', () => {
-    const expected = Object.entries(toolsBarrel)
-      .filter(([, value]) => typeof value === 'object' && value !== null && 'execute' in value)
-      .map(([name]) => name)
+  it('lists every tool of the catalog', () => {
+    const expected = Object.keys(allTools)
     expect(expected.length).toBeGreaterThan(100)
     expect(toolNames).toEqual(expect.arrayContaining(expected))
   })
 
-  it('lists the three workflows', () => {
-    expect(toolNames).toEqual(expect.arrayContaining(['run_iou-issuance', 'run_mpt-issuance', 'run_confidential-mpt']))
+  it('lists the four workflows', () => {
+    expect(toolNames).toEqual(
+      expect.arrayContaining(['run_iou-issuance', 'run_mpt-issuance', 'run_confidential-mpt', 'run_lending-setup']),
+    )
   })
 
   it('lists no agent tool', () => {
