@@ -1,7 +1,7 @@
 import { ToolExecutionContext } from '@mastra/core/tools'
-import { TransactionMetadata, TxResponse, Wallet } from 'xrpl'
+import { SubmittableTransaction, TransactionMetadata, TxResponse, Wallet } from 'xrpl'
 import z from 'zod'
-import { getXrplClient } from '../../helpers'
+import { getXrplClient, LedgerClient, submit } from '../../helpers'
 
 /**
  * Supported network endpoints for the issuance workflows
@@ -34,19 +34,21 @@ export type TxnResult = z.infer<typeof txnResultSchema>
 
 export const errorMessage = (error: unknown) => (error instanceof Error ? error.message : 'Unknown error')
 
-export const toTxnResult = (description: string, response: TxResponse): TxnResult => ({
-  description,
-  hash: response.result.hash,
-  // @ts-expect-error - TransactionResult is an object here
-  status: response.result.meta.TransactionResult ?? 'N/A',
-})
-
-/** submitAndWait does not throw when a transaction is validated with a tec code, so check it explicitly. */
-export const assertTxnSuccess = (result: TxnResult) => {
-  if (result.status !== 'tesSUCCESS') {
-    throw new Error(`${result.description} failed with ${result.status} (${result.hash})`)
+/**
+ * Submits a transaction signed by `wallet` and throws unless it succeeded: a workflow cannot go on after a failed
+ * transaction (a tec result is validated but failed, so later steps would build on something that does not exist).
+ */
+export const submitStep = async <T extends SubmittableTransaction>(
+  client: LedgerClient,
+  tx: T,
+  wallet: Wallet,
+  description: string,
+): Promise<{ result: TxnResult; response: TxResponse<T> }> => {
+  const { ok, engineResult, hash, response } = await submit(client, tx, { wallet })
+  if (!ok) {
+    throw new Error(`${description} failed with ${engineResult} (${hash})`)
   }
-  return result
+  return { result: { description, hash, status: engineResult }, response }
 }
 
 /** Reads the ID of the ledger entry of `type` (e.g. "Vault") that a transaction created, from its metadata. */

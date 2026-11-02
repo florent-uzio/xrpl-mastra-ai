@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools'
-import { SubmittableTransaction } from 'xrpl'
+import { SubmittableTransaction, Wallet } from 'xrpl'
 import { z } from 'zod'
-import { submitTransaction } from '../shared/transaction'
+import { assertSeedAllowed, getXrplClient, submit } from '../../../../helpers'
 import {
   baseTransactionSchema,
   FactorySchema,
@@ -80,15 +80,18 @@ export const useTransactionToolFactory = <S extends FactorySchema>(params: S) =>
           })
         }
 
-        // Submit the transaction using the appropriate
-        const response = await submitTransaction<T>({
-          mastra,
-          txn: builtTxn,
-          ...rest,
-        })
+        const { network, seed, signature } = rest
+        // Fail before opening a socket: a seed must never reach a node that is not a test network
+        if (seed) assertSeedAllowed(network)
+
+        const client = await getXrplClient(network, mastra)
+        const signer = signature ? { signedBlob: signature } : { wallet: Wallet.fromSeed(seed!) }
+        mastra?.getLogger()?.info('Submitting transaction', { network, txn: builtTxn, signed: Boolean(signature) })
+
+        const { ok, engineResult, response } = await submit(client, builtTxn, signer)
 
         // xrpl's response types have no index signature, so they don't match the loose output schema structurally
-        return response as unknown as z.infer<typeof transactionResponseSchema>
+        return { ...response, ok, engine_result: engineResult } as unknown as z.infer<typeof transactionResponseSchema>
       },
     })
   }

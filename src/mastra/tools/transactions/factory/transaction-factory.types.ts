@@ -30,6 +30,10 @@ export type TransactionToolConfig<T extends SubmittableTransaction, S extends Fa
  * Fields are optional and extra fields are kept, so a valid response is never rejected.
  */
 export const transactionResponseSchema = z.looseObject({
+  ok: z.boolean().describe('true only if the transaction succeeded (tesSUCCESS) in a validated ledger'),
+  engine_result: z
+    .string()
+    .describe('Result code, e.g. tesSUCCESS. tec* = failed but final (fee charged): report it, do not retry'),
   id: z.union([z.string(), z.number()]).optional(),
   type: z.string().optional(),
   result: z.looseObject({
