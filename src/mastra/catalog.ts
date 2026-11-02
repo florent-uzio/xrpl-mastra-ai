@@ -2,12 +2,8 @@ import { Tool } from '@mastra/core/tools'
 import * as toolsBarrel from './tools'
 import {
   currencyCodeToHexTool,
-  decryptConfidentialBalanceTool,
   dropsToXrpTool,
   getAccountInfoTool,
-  getAccountLinesTool,
-  getAccountTxTool,
-  getFeeTool,
   getServerInfoTool,
   hexToCurrencyCodeTool,
   xrpToDropsTool,
@@ -22,12 +18,8 @@ import { confidentialMptWorkflow, iouIssuanceWorkflow, lendingSetupWorkflow, mpt
 // Always sent to the model: read-only lookups and unit/currency conversions.
 export const coreTools = {
   getAccountInfoTool,
-  getAccountLinesTool,
-  getAccountTxTool,
   getServerInfoTool,
-  getFeeTool,
   currencyCodeToHexTool,
-  decryptConfidentialBalanceTool,
   hexToCurrencyCodeTool,
   xrpToDropsTool,
   dropsToXrpTool,
