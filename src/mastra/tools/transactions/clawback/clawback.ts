@@ -17,9 +17,6 @@ Amount is {currency, issuer, value}. The issuer field holds the HOLDER's address
 Holder is only for MPTs. For AMM accounts use AMMClawback.
 
 Errors: tecNO_PERMISSION (clawback not enabled), tecNO_LINE (no trust line or zero balance), tecAMM_ACCOUNT.`,
-  buildTransaction: clawback => {
-    return clawback
-  },
   validateTransaction: params => {
     if (!params.Amount || parseFloat(params.Amount.value) <= 0) {
       throw new Error('Amount value must be greater than zero')

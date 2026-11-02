@@ -1,6 +1,5 @@
 import { LoanBrokerCoverClawback } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplLoanBrokerCoverClawbackSchema } from './loan-broker-cover-clawback.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -16,8 +15,4 @@ Provide LoanBrokerID, Amount or both. LoanBrokerID is required when Amount is an
 The asset must match the vault's asset and support clawback and freezing. XRP is not allowed.
 
 Errors: tecNO_PERMISSION (not the issuer, or clawback not supported), tecWRONG_ASSET, tecINSUFFICIENT_FUNDS (would go below minimum cover), tecNO_ENTRY, temINVALID, temBAD_AMOUNT.`,
-  buildTransaction: loanBrokerCoverClawback => {
-    const { Amount, ...rest } = loanBrokerCoverClawback
-    return Amount === undefined ? rest : { ...rest, Amount: encodeCurrencyCodes(Amount) }
-  },
 })

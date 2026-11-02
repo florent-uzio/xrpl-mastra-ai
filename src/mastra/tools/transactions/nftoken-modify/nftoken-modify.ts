@@ -15,7 +15,4 @@ The NFT must have been minted with tfMutable. Only the issuer or its authorized 
 URI here must already be hex-encoded (max 256 bytes, not empty). Set URI to null to remove it. Omit it to leave it unchanged.
 
 Errors: tecNO_ENTRY (NFT not found), tecNO_PERMISSION (not mutable or sender not issuer/minter).`,
-  buildTransaction: nftokenModify => {
-    return nftokenModify
-  },
 })

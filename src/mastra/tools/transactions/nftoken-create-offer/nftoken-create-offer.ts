@@ -1,6 +1,5 @@
 import { NFTokenCreateOffer } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplNFTokenCreateOfferSchema } from './nftoken-create-offer.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -22,7 +21,4 @@ Rules:
 - Each offer costs an owner reserve.
 
 Errors: tecNO_ENTRY (NFT not found), tecUNFUNDED_OFFER, tecNO_PERMISSION, tecFROZEN, tecINSUFFICIENT_RESERVE, tecEXPIRED.`,
-  buildTransaction: nftokenCreateOffer => {
-    return { ...nftokenCreateOffer, Amount: encodeCurrencyCodes(nftokenCreateOffer.Amount) }
-  },
 })

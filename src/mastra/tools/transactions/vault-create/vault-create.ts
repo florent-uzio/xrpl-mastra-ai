@@ -1,6 +1,5 @@
 import { VaultCreate } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplVaultCreateSchema } from './vault-create.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -20,7 +19,4 @@ Flags (set at creation only):
 VaultKind 0 is open-ended. VaultKind 1 is closed-ended and requires SubscriptionDate and RedemptionDate. Both cannot be changed later. Scale only applies to token assets.
 
 Errors: tecNO_AUTH or tecLOCKED (MPT cannot be transferred or is locked), tecFROZEN, tecINSUFFICIENT_RESERVE, tecWRONG_ASSET, terNO_RIPPLE.`,
-  buildTransaction: vaultCreate => {
-    return { ...vaultCreate, Asset: encodeCurrencyCodes(vaultCreate.Asset) }
-  },
 })

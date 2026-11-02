@@ -13,5 +13,4 @@ export const submitMPTokenIssuanceCreateTool = createTransactionTool<MPTokenIssu
 Flags (sum values; capabilities cannot be changed later unless DynamicMPT): 2 CanLock, 4 RequireAuth, 8 CanEscrow, 16 CanTrade, 32 CanTransfer, 64 CanClawback, 128 CanHoldConfidentialBalance (needs ConfidentialTransfer; no TransferFee).
 
 Errors: temMALFORMED (TransferFee without CanTransfer, DomainID without RequireAuth, bad metadata size or MaximumAmount), temBAD_TRANSFER_FEE, temDISABLED, tecINSUFFICIENT_RESERVE, tecDIR_FULL.`,
-  buildTransaction: params => params as MPTokenIssuanceCreate,
 })

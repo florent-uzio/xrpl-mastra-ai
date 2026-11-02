@@ -1,28 +1,10 @@
-import { Amount, convertStringToHex, NFTokenMint } from 'xrpl'
-import { currencyCodeToHex, isString } from '../../../../helpers'
+import { convertStringToHex, NFTokenMint } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { xrplNFTokenMintSchema } from './nftoken-mint.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
   inputSchema: xrplNFTokenMintSchema,
 })
-
-/**
- * Helper function to process NFTokenMint Amount field
- * Handles string amounts (XRP) and currency objects (tokens)
- */
-const processNFTokenAmount = (amount: Amount): Amount => {
-  // If it's a string (XRP amount in drops), return as is
-  if (isString(amount)) {
-    return amount
-  }
-
-  // If it's a currency object, convert currency to hex and return
-  return {
-    ...amount,
-    currency: currencyCodeToHex(amount.currency),
-  }
-}
 
 export const submitNFTokenMintTool = createTransactionTool<NFTokenMint>({
   toolId: 'submit-nftoken-mint',
@@ -40,7 +22,7 @@ Rules:
     const { Amount, URI, NFTokenTaxon, ...rest } = nftokenMint
 
     return {
-      Amount: Amount && processNFTokenAmount(Amount),
+      Amount,
       URI: URI && convertStringToHex(URI),
       NFTokenTaxon: NFTokenTaxon ?? 0,
       ...rest,

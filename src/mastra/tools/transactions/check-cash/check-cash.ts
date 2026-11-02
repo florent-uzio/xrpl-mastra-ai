@@ -1,6 +1,5 @@
 import { CheckCash } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplCheckCashSchema } from './check-cash.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -20,13 +19,4 @@ Provide exactly one of Amount or DeliverMin.
 Rules: fails if the Check has expired or the sender lacks funds. For tokens, the destination needs a trust line (created automatically only for XRP).
 
 Errors: tecNO_ENTRY, tecNO_PERMISSION (not the destination), tecEXPIRED, tecPATH_PARTIAL (insufficient funds or DeliverMin not met), tecNO_LINE.`,
-  buildTransaction: checkCash => {
-    const { Amount, DeliverMin, ...rest } = checkCash
-
-    return {
-      ...rest,
-      ...(Amount !== undefined && { Amount: encodeCurrencyCodes(Amount) }),
-      ...(DeliverMin !== undefined && { DeliverMin: encodeCurrencyCodes(DeliverMin) }),
-    } as CheckCash
-  },
 })

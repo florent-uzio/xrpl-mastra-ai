@@ -13,7 +13,4 @@ export const submitLoanBrokerDeleteTool = createTransactionTool<LoanBrokerDelete
 The broker must have no active loans, and its pseudo-account must hold no balance and own no entries. Withdraw remaining first-loss capital with LoanBrokerCoverWithdraw first.
 
 Errors: tecHAS_OBLIGATIONS (loans or balance remain), tecNO_PERMISSION (not the owner), tecNO_ENTRY.`,
-  buildTransaction: loanBrokerDelete => {
-    return loanBrokerDelete
-  },
 })

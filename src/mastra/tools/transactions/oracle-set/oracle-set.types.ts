@@ -9,12 +9,10 @@ export const xrplPriceDataSchema = z.object({
   PriceData: z.object({
     BaseAsset: z
       .string()
-      .describe('The asset to be priced: a 3-character ISO code or a 40-character hex currency code (e.g. "XRP")'),
+      .describe('The asset to be priced: a currency code, converted to hex automatically (e.g. "XRP", "RLUSD")'),
     QuoteAsset: z
       .string()
-      .describe(
-        'The asset in which the price is quoted: 3-character ISO code or 40-character hex currency code (e.g. "USD")',
-      ),
+      .describe('The asset in which the price is quoted: a currency code, converted to hex automatically (e.g. "USD")'),
     AssetPrice: z
       .union([z.number().int().gte(0), z.string()])
       .optional()

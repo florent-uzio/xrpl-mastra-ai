@@ -1,6 +1,5 @@
 import { LoanPay } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplLoanPaySchema } from './loan-pay.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -21,7 +20,4 @@ Payment types (set at most one flag in Flags, none for a regular on-time payment
 A payment exactly at the due date counts as on time.
 
 Errors: tecINSUFFICIENT_PAYMENT, tecINSUFFICIENT_FUNDS, tecEXPIRED (late without tfLoanLatePayment), tecNO_PERMISSION (not the borrower, or overpayments not allowed), tecTOO_SOON (loan not started), tecKILLED (already paid), tecWRONG_ASSET, tecFROZEN, tecLOCKED, tecNO_AUTH, tecNO_LINE, tecPRECISION_LOSS, tecNO_ENTRY.`,
-  buildTransaction: loanPay => {
-    return { ...loanPay, Amount: encodeCurrencyCodes(loanPay.Amount) }
-  },
 })

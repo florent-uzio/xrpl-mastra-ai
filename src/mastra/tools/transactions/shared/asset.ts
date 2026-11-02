@@ -32,3 +32,19 @@ export const encodeCurrencyCodes = <T>(value: T): T => {
 
   return value
 }
+
+/** Converts the currency code of every token asset or amount, at any depth, to hex. Safe to apply twice. */
+export const encodeCurrencyCodesDeep = <T>(value: T): T => {
+  if (Array.isArray(value)) {
+    return value.map(encodeCurrencyCodesDeep) as T
+  }
+
+  if (typeof value === 'object' && value !== null) {
+    const encoded = Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, encodeCurrencyCodesDeep(entry)]),
+    )
+    return encodeCurrencyCodes(encoded) as T
+  }
+
+  return value
+}

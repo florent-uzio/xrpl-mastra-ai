@@ -13,8 +13,8 @@ export const XRPL_INSTRUCTIONS = `
 
     ## Transactions
     - Use the correct transaction type; Fee, Sequence and LastLedgerSequence are autofilled, so omit them.
-    - Provide either a seed (testnet/devnet only) or a signature (mainnet), never both.
-    - Non-standard currency codes (not 3 characters) must be 160-bit hex: use currencyCodeToHexTool.
+    - submit-* tools sign with a seed, on test networks only. On mainnet, the user signs elsewhere and you submit the signed blob with submit-signed-blob.
+    - Currency codes in transactions are converted to hex automatically: pass them as text, e.g. "RLUSD".
     - Before a LoanSet (sign-loan-set, submit-loan-set or prepare-loan-set), state the loan terms (principal, interest rate, PaymentTotal, PaymentInterval, GracePeriod, fees) and the resulting due dates counted from ledger time, then wait for the user to confirm.
 
     ## Faucet

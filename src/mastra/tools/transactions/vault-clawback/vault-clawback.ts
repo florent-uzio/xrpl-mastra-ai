@@ -1,6 +1,5 @@
 import { VaultClawback } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplVaultClawbackSchema } from './vault-clawback.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -18,8 +17,4 @@ Who can claw back what:
 Amount 0 claws back everything. If it exceeds AssetsAvailable, only that is recovered. Unrealized losses and rounding apply.
 
 Errors: tecNO_PERMISSION, tecWRONG_ASSET (also when Amount is omitted and the owner is the issuer), tecINSUFFICIENT_FUNDS (holder has no shares), tecLIMIT_EXCEEDED, tecPRECISION_LOSS, tecPSEUDO_ACCOUNT, tecNO_ENTRY.`,
-  buildTransaction: vaultClawback => {
-    const { Amount, ...rest } = vaultClawback
-    return Amount === undefined ? rest : { ...rest, Amount: encodeCurrencyCodes(Amount) }
-  },
 })

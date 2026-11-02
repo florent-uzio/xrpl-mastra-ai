@@ -1,6 +1,5 @@
 import { EscrowCreate } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplEscrowCreateSchema } from './escrow-create.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -22,12 +21,4 @@ Fields:
 Rules: at least one of CancelAfter or FinishAfter is required; a Condition without FinishAfter requires CancelAfter. Times must be in the future. The escrow costs an owner reserve. Note the sequence of this transaction: it is the OfferSequence for EscrowFinish/EscrowCancel.
 
 Errors: temBAD_EXPIRATION, tecNO_DST, tecDST_TAG_NEEDED, tecUNFUNDED, tecINSUFFICIENT_RESERVE, tecNO_PERMISSION (token does not allow escrow).`,
-  buildTransaction: escrowCreate => {
-    const { Amount, ...rest } = escrowCreate
-
-    return {
-      ...rest,
-      Amount: encodeCurrencyCodes(Amount),
-    } as EscrowCreate
-  },
 })

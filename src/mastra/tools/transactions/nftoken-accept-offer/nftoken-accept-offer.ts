@@ -1,6 +1,5 @@
 import { NFTokenAcceptOffer } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplNFTokenAcceptOfferSchema } from './nftoken-accept-offer.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -19,12 +18,4 @@ Modes (at least one offer ID is required):
 NFTokenBrokerFee is only for brokered mode, must be greater than 0 (omit if none) and uses the same currency/issuer as the offers. XRP amounts are drops, tokens are {currency, issuer, value}. Offer IDs are 64 hex characters (get them with get-account-objects or the NFTokenCreateOffer result).
 
 Errors: tecOBJECT_NOT_FOUND (offer missing or expired), tecCANT_ACCEPT_OWN_NFTOKEN_OFFER, tecNFTOKEN_BUY_SELL_MISMATCH, tecINSUFFICIENT_PAYMENT, tecNO_PERMISSION (offer has a different Destination), tecINSUFFICIENT_FUNDS, tecINSUFFICIENT_RESERVE.`,
-  buildTransaction: nftokenAcceptOffer => {
-    const { NFTokenBrokerFee, ...rest } = nftokenAcceptOffer
-
-    return {
-      ...rest,
-      ...(NFTokenBrokerFee !== undefined && { NFTokenBrokerFee: encodeCurrencyCodes(NFTokenBrokerFee) }),
-    }
-  },
 })

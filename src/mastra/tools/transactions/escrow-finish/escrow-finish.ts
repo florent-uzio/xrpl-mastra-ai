@@ -19,7 +19,4 @@ Fields:
 Rules: FinishAfter (seconds since the Ripple Epoch) must have passed, and CancelAfter must not have passed. Fulfillments raise the fee (330 drops + 10 per 16 bytes). Find escrows with get-account-objects (type "escrow").
 
 Errors: tecNO_TARGET (escrow not found), tecNO_PERMISSION (time not reached/expired, or bad fulfillment), tecCRYPTOCONDITION_ERROR, tecBAD_CREDENTIALS.`,
-  buildTransaction: escrowFinish => {
-    return escrowFinish
-  },
 })

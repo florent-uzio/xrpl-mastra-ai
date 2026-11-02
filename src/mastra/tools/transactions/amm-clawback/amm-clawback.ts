@@ -1,6 +1,5 @@
 import { AMMClawback } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplAmmClawbackSchema } from './amm-clawback.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -19,14 +18,4 @@ Fields:
 - Flags (optional): 1 (tfClawTwoAssets) also claws back the equal value of Asset2; only if the sender also issues Asset2. Otherwise the Holder keeps the Asset2 share.
 
 Errors: terNO_AMM, tecNO_PERMISSION (clawback not enabled or issuer mismatch), tecAMM_BALANCE (holder has no balance), temMALFORMED, tecINTERNAL.`,
-  buildTransaction: ammClawback => {
-    const { Amount, ...rest } = ammClawback
-
-    return {
-      ...rest,
-      Asset: encodeCurrencyCodes(ammClawback.Asset),
-      Asset2: encodeCurrencyCodes(ammClawback.Asset2),
-      ...(Amount ? { Amount: encodeCurrencyCodes(Amount) } : {}),
-    }
-  },
 })

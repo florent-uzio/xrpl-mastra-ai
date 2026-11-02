@@ -1,6 +1,5 @@
 import { AMMDeposit } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplAmmDepositSchema } from './amm-deposit.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -26,16 +25,4 @@ Flags (exactly one):
 Single-asset deposits pay the AMM's trading fee. Depositing may add a trust line for the LP tokens (reserve).
 
 Errors: terNO_AMM, tecAMM_FAILED (deposit would be below the limits), tecUNFUNDED_AMM, tecAMM_EMPTY, tecAMM_NOT_EMPTY, tecFROZEN, tecNO_AUTH, tecINSUF_RESERVE_LINE, temBAD_AMM_TOKENS.`,
-  buildTransaction: ammDeposit => {
-    const { Amount, Amount2, EPrice, ...rest } = ammDeposit
-
-    return {
-      ...rest,
-      Asset: encodeCurrencyCodes(ammDeposit.Asset),
-      Asset2: encodeCurrencyCodes(ammDeposit.Asset2),
-      ...(Amount !== undefined ? { Amount: encodeCurrencyCodes(Amount) } : {}),
-      ...(Amount2 !== undefined ? { Amount2: encodeCurrencyCodes(Amount2) } : {}),
-      ...(EPrice !== undefined ? { EPrice: encodeCurrencyCodes(EPrice) } : {}),
-    }
-  },
 })

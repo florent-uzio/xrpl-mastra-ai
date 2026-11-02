@@ -1,6 +1,5 @@
 import { AMMWithdraw } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
-import { encodeCurrencyCodes } from '../shared'
 import { xrplAmmWithdrawSchema } from './amm-withdraw.types'
 
 const { createTransactionTool } = useTransactionToolFactory({
@@ -27,16 +26,4 @@ Flags (exactly one):
 Single-asset withdrawals pay the AMM's trading fee. Withdrawing all LP tokens deletes the AMM if it becomes empty (see AMMDelete if it cannot be fully deleted).
 
 Errors: terNO_AMM, tecAMM_FAILED (withdrawal outside the limits), tecAMM_BALANCE, tecAMM_INVALID_TOKENS, tecFROZEN, tecNO_AUTH, tecINSUF_RESERVE_LINE, tecINCOMPLETE.`,
-  buildTransaction: ammWithdraw => {
-    const { Amount, Amount2, EPrice, ...rest } = ammWithdraw
-
-    return {
-      ...rest,
-      Asset: encodeCurrencyCodes(ammWithdraw.Asset),
-      Asset2: encodeCurrencyCodes(ammWithdraw.Asset2),
-      ...(Amount !== undefined ? { Amount: encodeCurrencyCodes(Amount) } : {}),
-      ...(Amount2 !== undefined ? { Amount2: encodeCurrencyCodes(Amount2) } : {}),
-      ...(EPrice !== undefined ? { EPrice: encodeCurrencyCodes(EPrice) } : {}),
-    }
-  },
 })

@@ -17,7 +17,4 @@ Who can do what: the destination claims funds by sending Balance, Amount, Signat
 Flags: tfRenew (65536) clears the channel Expiration, source only. tfClose (131072) requests closure: the destination closes it right away, the source starts the SettleDelay countdown (or closes immediately if the channel has no XRP left). Pass Flags as a number (65536, 131072, or leave unset).
 
 Common errors: tecNO_ENTRY (channel not found), tecNO_PERMISSION (wrong sender or PublicKey mismatch), temBAD_SIGNATURE, tecUNFUNDED_PAYMENT (Balance above channel Amount), temBAD_AMOUNT.`,
-  buildTransaction: params => {
-    return params
-  },
 })
