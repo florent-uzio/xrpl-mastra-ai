@@ -1,214 +1,85 @@
-# XRPL Mastra AI Template
+# XRPL Mastra AI
 
-A comprehensive Mastra.ai template for building XRP Ledger (XRPL) applications with AI agents, tools, and workflows. This template provides a complete foundation for creating intelligent XRPL applications with automated token issuance, account management, and transaction processing.
+XRP Ledger tools, workflows and an agent built with [Mastra](https://mastra.ai/) and [xrpl.js](https://js.xrpl.org/).
 
-## Overview
+- **122 tools**:
+  - query the ledger (accounts, ledgers, transactions, order books, AMMs, NFTs, vaults, servers, fees)
+  - submit the XRPL transaction types (payments, trust lines, DEX offers, AMMs, NFTs, MPTs, escrows, checks, payment channels, credentials, vaults, lending, oracles, batches, confidential MPTs)
+  - create and fund wallets
+  - convert units and currency codes
+- **4 workflows** for multi-step setups on test networks: IOU issuance, MPT issuance, confidential MPT and lending setup.
+- **An agent** that uses them in Mastra Studio.
+- **An MCP server**, [`@florent-uzio/xrpl-mcp`](https://www.npmjs.com/package/@florent-uzio/xrpl-mcp), that gives the same tools and workflows to Claude Code.
 
-This template demonstrates how to build sophisticated XRPL applications using Mastra.ai's agent, tool, and workflow system. It includes:
+## Use it from Claude Code (MCP server)
 
-- **XRPL Client Management**: Singleton pattern for efficient client connections
-- **Comprehensive XRPL Tools**: Public methods, transactions, and wallet management
-- **IOU Issuance Workflow**: Complete automated IOU (trust line token) creation and distribution
-- **Lending Setup Workflow**: Sets up the Lending Protocol on devnet (MPT, closed-ended vault, deposit, loan broker and cover)
-- **AI Agent Integration**: Intelligent XRPL agent with detailed tool descriptions
-- **Type Safety**: Full TypeScript support with Zod validation
-
-## Setup
-
-1. **Copy environment variables**:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-2. **Install dependencies**:
-
-   ```bash
-   npm install
-   ```
-
-3. **Configure your API keys** in `.env` (see Environment Variables section)
-
-4. **Start development server**:
-   ```bash
-   npm run dev
-   ```
-
-## Environment Variables
-
-- `OPENAI_API_KEY`: Your OpenAI API key. Get one at [OpenAI Platform](https://platform.openai.com/api-keys)
-
-## Use the tools from Claude Code (MCP server)
-
-`npx -y @florent-uzio/xrpl-mcp` starts a local stdio MCP server that exposes every XRPL tool and the four workflows (`iou-issuance`, `mpt-issuance`, `confidential-mpt`, `lending-setup`). It never exposes the Mastra agent, so Claude Code does the reasoning on your own subscription and no model key is involved. The server's instructions are the same rules the agent follows.
-
-Add it to Claude Code from any folder:
+You only need Node.js 22.13 or later. No model API key is required: the server exposes the tools and workflows, not the agent, so Claude Code does the reasoning.
 
 ```bash
 claude mcp add xrpl -- npx -y @florent-uzio/xrpl-mcp
 ```
 
-Flow records (wallets, MPT IDs, keys, hashes) are stored in `~/.xrpl-mastra-ai/records` by default. Set `XRPL_RECORDS_DIR` to use another folder (`--env XRPL_RECORDS_DIR=...`), and set `XRPL_RECORDS_DIR=~/.xrpl-mastra-ai/records` in this repo's `.env` so Mastra Studio reads and writes the same records.
+Then ask Claude things like "What is the balance of rXXX on mainnet?" or "Issue an MPT on testnet with 2 holders".
 
-To run the server from a clone of the repo instead, use `npm run mcp` (`claude mcp add xrpl -- npm --prefix "$(pwd)" run --silent mcp`).
+<details>
+<summary>The new version isn't picked up</summary>
 
-`npx` picks up a new release the next time Claude Code starts the server: start a new session, or reconnect `xrpl` from `/mcp`. If you still get the old version, or `npx` reports `No matching version found`, your npm cache holds outdated package data. Refresh it once (the server then waits for input: stop it with Ctrl+C), then reconnect:
+`npx` loads a new release the next time Claude Code starts the server: start a new session, or reconnect `xrpl` from `/mcp`.
+
+If you still get the old version, or `No matching version found`, your npm cache is outdated. Refresh it once (the server then waits for input, stop it with Ctrl+C), then reconnect:
 
 ```bash
 npx -y --prefer-online @florent-uzio/xrpl-mcp
 ```
 
-Releases of the package follow [RELEASING.md](https://github.com/florent-uzio/xrpl-mastra-ai/blob/main/RELEASING.md).
+</details>
 
-### Custom test networks
-
-Wallet seeds are refused in code on any network that is not a test network, before any connection is made. The known test networks are the testnet, devnet and Xahau testnet URLs (including their Clio, honeycluster and xrpl-labs alternatives), listed with every other known network in `src/helpers/networks.ts`. Flow records follow the same rule: `save-flow-record` refuses seeds and private keys unless the network is a test network. To use a seed on another test network, add its URL to `XRPL_EXTRA_TEST_NETWORKS` (comma-separated) in the environment of the process that runs the tools:
+To run the server from a clone of this repo instead:
 
 ```bash
-claude mcp add xrpl --env XRPL_EXTRA_TEST_NETWORKS=wss://my-testnet.example.com/,ws://localhost:6006 -- npx -y @florent-uzio/xrpl-mcp
+claude mcp add xrpl -- npm --prefix "$(pwd)" run --silent mcp
 ```
 
-On mainnet, sign the transaction yourself and submit the signed blob with `submit-signed-blob`, which works on any network.
+## Use the agent in Mastra Studio
 
-## Usage
-
-You can use the XRPL Agent to do several things that the XRP Ledger and xrpl.js SDK allows. For example:
-
-- Creating accounts on mainnet, testnet and devnet
-- Funding those accounts using the faucet on test networks
-- Quering the XRP Ledger to retrieve any kind of data
-- Submitting transactions such as a Payment or minting an NFT
-
-### Available Tools
-
-The template includes comprehensive XRPL tools:
-
-#### Public Methods
-
-- `account_info` - Get account information and balances
-- `account_lines` - Retrieve trust lines for an account
-- `account_nfts` - Get NFT tokens owned by an account
-- `account_objects` - Retrieve account-specific ledger objects
-- `account_offers` - Get open offers for an account
-- `account_tx` - Get transaction history for an account
-- `account_channels` - Retrieve payment channels for an account
-- `account_currencies` - Get currencies an account can send or receive
-- `gateway_balances` - Get balances held by gateways
-- `server_info` - Get server information and status
-- `fee` - Get current transaction fees
-- `feature` - Get the status of protocol amendments
-- `manifest` - Look up a validator's public manifest
-- `server_definitions` - Get serialization definitions, formats and flags
-- `server_state` - Get machine-readable server status
-- `version` - Get the supported API version range
-- `noripple_check` - Check DefaultRipple/NoRipple flag settings
-- `ledger`, `ledger_closed`, `ledger_current`, `ledger_data`, `ledger_entry` - Read ledgers and raw ledger entries
-- `tx`, `transaction_entry` - Look up a transaction by hash
-- `submit` - Submit a pre-signed transaction blob
-- `amm_info`, `book_offers`, `deposit_authorized`, `ripple_path_find` - AMM pools, order books, deposit authorization and payment paths
-- `nft_buy_offers`, `nft_sell_offers` - Open offers for an NFT
-- `nft_info`, `nft_history`, `nfts_by_issuer` - NFT details and history (Clio servers only)
-- `channel_verify` - Verify a payment channel claim signature
-- `vault_info` - Get a single-asset vault and its shares
-- `ping`, `random` - Server liveness and random bytes
-
-#### Transactions
-
-- `AccountSet` - Configure account settings and flags
-- `AMMCreate` - Create Automated Market Makers
-- `Clawback` - Recover issued currencies
-- `LoanBrokerCoverClawback` - Claw back first-loss capital from a loan broker
-- `LoanBrokerCoverDeposit` - Deposit first-loss capital into a loan broker
-- `LoanBrokerCoverWithdraw` - Withdraw first-loss capital from a loan broker
-- `LoanBrokerDelete` - Delete a loan broker
-- `LoanBrokerSet` - Create or update a loan broker
-- `LoanDelete` - Delete a loan
-- `LoanManage` - Default, impair or unimpair a loan
-- `LoanPay` - Make a loan payment
-- `LoanSet` - Create a loan
-- `sign-loan-set` - Sign a LoanSet as both the broker owner and the borrower (testnet/devnet), for `submit`
-- `prepare-loan-set` - Autofill an unsigned LoanSet for both parties to sign on their own machines (any network, mainnet included)
-- `NFTokenMint` - Create new NFT tokens
-- `OfferCancel` - Cancel existing offers
-- `OfferCreate` - Create exchange offers
-- `Payment` - Send XRP or issued currencies
-- `TrustSet` - Create or modify trust lines
-- `VaultClawback` - Claw back assets or shares from a vault
-- `VaultCreate` - Create a single-asset vault
-- `VaultDelete` - Delete an empty vault
-- `VaultDeposit` - Deposit assets into a vault for shares
-- `VaultSet` - Update a vault
-- `VaultWithdraw` - Redeem vault shares for assets
-
-#### Utilities
-
-- `createWallet` - Generate new XRPL wallets
-- `fundWalletWithFaucet` - Fund wallets using testnet faucets
-- `currencyCodeToHex` - Convert currency codes to hex format
-
-## Customization
-
-### Adding New Transaction Tools
-
-The template provides a factory pattern for creating new XRPL transaction tools with minimal boilerplate. Here's how to add a new transaction tool:
-
-#### 1. Create Transaction Schema
-
-First, define the Zod schema for your transaction fields:
-
-```typescript
-// src/mastra/tools/transactions/your-transaction/your-transaction.types.ts
-import { z } from 'zod'
-import { xrplCommonFieldsSchema } from '../shared/common-fields'
-
-export const xrplYourTransactionFieldsSchema = z.object({
-  // Define your transaction-specific fields here
-  Amount: z.string().describe('Amount to transfer'),
-  Destination: z.string().describe('Destination account'),
-  // ... other fields
-})
-
-export const xrplYourTransactionSchema = xrplCommonFieldsSchema
-  .merge(xrplYourTransactionFieldsSchema)
-  .extend({ TransactionType: z.literal('YourTransactionType') })
+```bash
+cp .env.example .env   # set ANTHROPIC_API_KEY
+npm install
+npm run dev            # opens Mastra Studio
 ```
 
-#### 2. Create the Transaction Tool
+The agent uses `anthropic/claude-haiku-5-5` by default (`DEFAULT_MODEL` in `src/mastra/agents/xrpl-agent.ts`).
 
-Use the factory to create your transaction tool:
+The agent always has 6 core tools: account info, server info, and the XRP and currency code conversions. It finds and loads the other tools on demand, with Mastra's `ToolSearchProcessor`.
 
-```typescript
-// src/mastra/tools/transactions/your-transaction/your-transaction.ts
-import { YourTransactionType } from 'xrpl'
-import { useTransactionToolFactory } from '../factory'
-import { xrplYourTransactionSchema } from './your-transaction.types'
+## Networks and secrets
 
-const { createTransactionTool } = useTransactionToolFactory({
-  inputSchema: xrplYourTransactionSchema,
-})
+- Mainnet is the default. Say "testnet" or "devnet", or give a `wss://` URL, to use another network. Every known network is listed in `src/helpers/networks.ts`.
+- **Seeds are refused outside test networks**, before any connection is made. On mainnet, sign the transaction yourself and submit the blob with `submit-signed-blob`.
+- **Flow records** keep what a session creates (wallets, MPT IDs, keys, hashes), so a later session can reuse it. `save-flow-record` refuses seeds and private keys on mainnet.
 
-export const submitYourTransactionTool = createTransactionTool({
-  toolId: 'submit-your-transaction',
-  description: `Submit a YourTransactionType transaction to the XRPL network. 
-  
-  ## Important Notes:
-  - Explain what this transaction does
-  - List any special requirements or limitations
-  - Include relevant XRPL documentation links`,
-  // Optional: only when the input needs reshaping. Currency codes are hex-encoded by the factory afterwards.
-  buildTransaction: params => ({ ...params, TransactionType: 'YourTransactionType' }),
-  validateTransaction: params => {
-    // Add any custom validation logic
-    if (!params.Amount) {
-      throw new Error('Amount is required')
-    }
-  },
-})
-```
+| Variable                   | Purpose                                                                                                                                                                                                                           |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_API_KEY`        | Model key for the agent and the evals. `OPENAI_API_KEY` and `GROQ_API_KEY` are only needed to try other models.                                                                                                                   |
+| `XRPL_RECORDS_DIR`         | Folder for flow records. The MCP server defaults to `~/.xrpl-mastra-ai/records`. Set the same folder in `.env` so Studio shares the records.                                                                                      |
+| `XRPL_EXTRA_TEST_NETWORKS` | Comma-separated URLs of other test networks where seeds are allowed, e.g. a local node. Pass it to the MCP server with `claude mcp add xrpl --env XRPL_EXTRA_TEST_NETWORKS=ws://localhost:6006 -- npx -y @florent-uzio/xrpl-mcp`. |
 
-#### 3. Example: Payment Transaction
+## Workflows
 
-Here's a real example from the template:
+The MCP server exposes each workflow as `run_<name>`. The agent sees it as `workflow-<name>`.
+
+| Workflow           | Network         | What it does                                                                                                                                                     |
+| ------------------ | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `iou-issuance`     | testnet, devnet | Funds an issuer and holders, configures the issuer, creates the trust lines and sends the token to each holder.                                                  |
+| `mpt-issuance`     | testnet, devnet | Funds an issuer and holders, creates the MPT issuance (flags, scale, metadata), opts the holders in and sends them the token.                                    |
+| `confidential-mpt` | devnet          | Creates or reuses a confidential MPT, registers the ElGamal keys, converts a holder balance to confidential, then optionally sends and converts back.            |
+| `lending-setup`    | devnet          | Creates a transferable MPT, a closed-ended vault, a deposit, a loan broker and its first-loss cover. The loan itself is created afterwards with `sign-loan-set`. |
+
+The input of each workflow is described in its schema, in `src/mastra/workflows/*.types.ts`.
+
+## Add a tool
+
+Transaction tools use the factory. It adds `network` and `seed`, refuses seeds outside test networks, hex-encodes every currency code, then autofills, signs and submits the transaction:
 
 ```typescript
 // src/mastra/tools/transactions/payment/payment.ts
@@ -216,22 +87,14 @@ import { Payment } from 'xrpl'
 import { useTransactionToolFactory } from '../factory'
 import { xrplPaymentSchema } from './payment.types'
 
-const { createTransactionTool } = useTransactionToolFactory({
-  inputSchema: xrplPaymentSchema,
-})
+const { createTransactionTool } = useTransactionToolFactory({ inputSchema: xrplPaymentSchema })
 
-export const submitPaymentTool = createTransactionTool({
+export const submitPaymentTool = createTransactionTool<Payment>({
   toolId: 'submit-payment',
-  description: `Submit a Payment transaction to the XRPL network. A Payment transaction represents a transfer of value from one account to another. This is the only transaction type that can create new accounts by sending enough XRP to an unfunded address.
-
-## Important Notes:
-- Payment is the only transaction type that can create accounts
-- Cross-currency payments may involve multiple exchanges atomically
-- Partial payments can exploit integrations that assume exact delivery amounts`,
-  buildTransaction: payment => {
-    // DeliverMax (API v2) replaces Amount (API v1): never send both
-    return { ...payment, Amount: payment.DeliverMax ? undefined : payment.Amount } as Payment
-  },
+  description: 'Submit a Payment transaction to send XRP, tokens or MPTs. ...',
+  // Optional: reshape the input into the transaction
+  buildTransaction: payment => ({ ...payment, Amount: payment.DeliverMax ? undefined : payment.Amount }) as Payment,
+  // Optional: throw to refuse the transaction before it is signed
   validateTransaction: params => {
     if (params.Amount === undefined && params.DeliverMax === undefined) {
       throw new Error('Provide Amount (API v1) or DeliverMax (API v2)')
@@ -240,116 +103,17 @@ export const submitPaymentTool = createTransactionTool({
 })
 ```
 
-#### 4. Factory Benefits
+Query tools use `defineMethodTool` (`src/mastra/tools/methods/shared/method-tool.ts`), with the method name and the request and result schemas.
 
-The transaction factory provides several benefits:
+Export the new tool from its folder's `index.ts`. `src/mastra/catalog.ts` picks up every tool exported from `src/mastra/tools`, so the agent and the MCP server both get it. To send a tool to the agent on every request instead of on demand, add it to `coreTools` in the same file.
 
-- **Automatic Authentication**: Refuses seeds outside test networks, signs and submits through one Ledger submission module
-- **Consistent Schema**: Merges common fields (network, seed) with your transaction fields
-- **Currency Codes**: Hex-encodes every currency code in the transaction, at any depth (Amount, SendMax, Paths, Asset, ...)
-- **Type Safety**: Full TypeScript support with proper type inference
-- **Error Handling**: Centralized error handling and validation
-- **Reduced Boilerplate**: No need to repeat common transaction submission logic
+## Development
 
-#### 5. Available Common Fields
+```bash
+npm test               # unit tests
+npm run format         # prettier
+npm run eval           # accuracy, cost and latency of the agent (see evals/README.md)
+npm run build:mcp      # build the MCP package
+```
 
-All transaction tools automatically include these base fields:
-
-- `network`: WebSocket URL for the XRPL network
-- `seed`: Seed of the Account (required, test networks only)
-
-On mainnet, sign the transaction elsewhere and submit it with `submit-signed-blob`.
-
-#### 6. Adding to the Agent and the MCP Server
-
-Export the tool from its folder's `index.ts`. `src/mastra/catalog.ts` picks up every tool exported by `src/mastra/tools`, so the agent (as a searchable tool) and the MCP server both get it.
-
-To send a tool to the model on every request instead of on demand, add it to `coreTools` in `src/mastra/catalog.ts`. Workflows are registered once, in `workflows` in the same file.
-
-### Customizing Existing Tools
-
-You can customize existing tools by:
-
-1. **Modifying Descriptions**: Update tool descriptions to better match your use case
-2. **Adding Validation**: Enhance validation logic for your specific requirements
-3. **Extending Schemas**: Add additional fields or constraints to existing schemas
-4. **Custom Error Handling**: Implement custom error messages and handling
-
-### Best Practices for Customization
-
-- **Follow Naming Conventions**: Use consistent naming for files and exports
-- **Add Comprehensive Documentation**: Include detailed descriptions and examples
-- **Validate Inputs**: Always validate transaction parameters before submission
-- **Handle Errors Gracefully**: Provide clear error messages for debugging
-- **Test Thoroughly**: Test your custom tools on testnet before mainnet use
-
-## Supported Networks
-
-By default, mainnet will be used, if you need to use another network, simply mention "testnet" or "devnet" in your prompt.
-
-## IOU Issuance Workflow
-
-The template includes a complete IOU (trust line token) issuance workflow, not applicable to MPTs, that:
-
-1. **Creates Wallets** - Generates and funds issuer and holder wallets
-2. **Configures Issuer** - Sets account flags and domain (optional)
-3. **Establishes Trust Lines** - Creates trust lines for token acceptance
-4. **Mints Tokens** - Distributes tokens to all holders
-
-### Workflow Parameters
-
-| Parameter                  | Type     | Description                         | Example                                  |
-| -------------------------- | -------- | ----------------------------------- | ---------------------------------------- |
-| `network`                  | string   | WebSocket URL for XRPL network      | `'wss://s.altnet.rippletest.net:51233/'` |
-| `holders`                  | number   | Number of holder wallets to create  | `3`                                      |
-| `trustline.currency`       | string   | Currency code for the token         | `'REWARDS'`                              |
-| `trustline.trustlineLimit` | string   | Trust line limit for each holder    | `'10000'`                                |
-| `issuerSettings.domain`    | string   | Issuer domain (optional)            | `'example.com'`                          |
-| `issuerSettings.flags`     | string[] | Account flags (optional)            | `['asfDefaultRipple']`                   |
-| `mintAmount`               | string   | Amount of tokens to mint per holder | `'1000'`                                 |
-
-## Lending Setup Workflow
-
-Sets up the XRPL Lending Protocol (XLS-66) on devnet, up to the point where a loan can be created. Devnet only: the `LendingProtocolV1_1` amendment (closed-ended vaults) is not enabled on testnet yet.
-
-1. **Creates Wallets** - Funds a vault owner (also the loan broker owner), a depositor and a borrower, plus an issuer for a new MPT
-2. **Creates the MPT** - A transferable MPT (vaults require `tfMPTCanTransfer`), or reuses an existing one
-3. **Distributes the MPT** - Each wallet opts in and receives `mintAmount`
-4. **Creates a Closed-Ended Vault** - `SubscriptionDate` and `RedemptionDate` counted from ledger time
-5. **Deposits** - The depositor deposits `depositAmount` during the Subscription phase
-6. **Creates the Loan Broker** - Then deposits `coverAmount` of first-loss capital
-
-The loan itself is left to the agent and the `sign-loan-set`, `LoanPay`, `LoanManage` tools: it can only be created after `SubscriptionDate`, and its last payment must be at least 60 s before `RedemptionDate`.
-
-### Workflow Parameters
-
-Amounts are in the MPT's smallest unit (integer strings). Rates are in 1/10 basis points (10000 = 10%). Every parameter except `network` has a default.
-
-| Parameter              | Type   | Description                                                                               | Default                               |
-| ---------------------- | ------ | ----------------------------------------------------------------------------------------- | ------------------------------------- |
-| `network`              | string | Devnet WebSocket URL                                                                      | -                                     |
-| `issuance`             | object | `{ source: 'create', assetScale }` or `{ source: 'existing', mptIssuanceId, issuerSeed }` | `{ source: 'create', assetScale: 2 }` |
-| `mintAmount`           | string | Sent to the vault owner, depositor and borrower each                                      | `'100000000'` (1,000,000.00)          |
-| `depositAmount`        | string | Deposited into the vault                                                                  | `'50000000'` (500,000.00)             |
-| `coverAmount`          | string | First-loss capital deposited into the loan broker                                         | `'5000000'` (50,000.00)               |
-| `managementFeeRate`    | number | Share of loan interest kept by the broker (max 10000)                                     | `5000` (5%)                           |
-| `coverRateMinimum`     | number | Share of the broker debt the cover must cover                                             | `10000` (10%)                         |
-| `coverRateLiquidation` | number | Share of the minimum cover moved to the vault on a default                                | `50000` (50%)                         |
-| `subscriptionSeconds`  | number | Seconds from now until `SubscriptionDate` (min 60)                                        | `300`                                 |
-| `investmentSeconds`    | number | Seconds between `SubscriptionDate` and `RedemptionDate` (min 180)                         | `3600`                                |
-
-## Best Practices
-
-### Security
-
-- Always use testnet/devnet for development and testing
-- Store wallet seeds securely in production
-- Validate all inputs before processing
-- Use appropriate account flags for your use case
-
-### Code Quality
-
-- Follow TypeScript best practices
-- Use Zod for input validation
-- Add comprehensive error handling
-- Include detailed documentation and comments
+Domain terms are in [CONTEXT.md](https://github.com/florent-uzio/xrpl-mastra-ai/blob/main/CONTEXT.md). Releases of the MCP package follow [RELEASING.md](https://github.com/florent-uzio/xrpl-mastra-ai/blob/main/RELEASING.md).
